@@ -136,7 +136,7 @@ function AutoCategorizationRules({ rules, categories, onUpdateRules }) {
                       onChange={(e) => setNewRule({ ...newRule, category: e.target.value })}
                     >
                       <option value="">Select category...</option>
-                      {categories.map(cat => (
+                      {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
                         <option key={cat.id} value={cat.name}>{cat.name}</option>
                       ))}
                     </select>

@@ -4,19 +4,25 @@ import { getCategoryColor } from '../utils/categories'
 
 function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
   const [editingIndex, setEditingIndex] = useState(null)
+  const [filterCategory, setFilterCategory] = useState('all')
+
+  const filteredTransactions = useMemo(() => {
+    if (filterCategory === 'all') return transactions
+    return transactions.filter(t => t.category === filterCategory)
+  }, [transactions, filterCategory])
 
   const summary = useMemo(() => {
-    const income = transactions
+    const income = filteredTransactions
       .filter(t => t.amount > 0)
       .reduce((sum, t) => sum + t.amount, 0)
-    
-    const expenses = transactions
+
+    const expenses = filteredTransactions
       .filter(t => t.amount < 0)
       .reduce((sum, t) => sum + Math.abs(t.amount), 0)
-    
+
     const balance = income - expenses
 
-    const categoryBreakdown = transactions.reduce((acc, t) => {
+    const categoryBreakdown = filteredTransactions.reduce((acc, t) => {
       const category = t.category || 'Uncategorized'
       if (!acc[category]) {
         acc[category] = 0
@@ -26,7 +32,7 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
     }, {})
 
     return { income, expenses, balance, categoryBreakdown }
-  }, [transactions])
+  }, [filteredTransactions])
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -63,33 +69,52 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
       <div className="categories-section">
         <h2>Categories</h2>
         <div className="categories-list">
-          {Object.entries(summary.categoryBreakdown).map(([category, amount]) => {
-            const color = getCategoryColor(category, categories)
-            return (
-              <div
-                key={category}
-                className={'category-item ' + (amount < 0 ? 'expense' : 'income')}
-                style={{ borderLeftColor: color }}
-              >
-                <div className="category-color-dot" style={{ backgroundColor: color }}></div>
-                <span className="category-name">{category}</span>
-                <span className="category-amount">{formatCurrency(amount)}</span>
-              </div>
-            )
-          })}
+          {Object.entries(summary.categoryBreakdown)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([category, amount]) => {
+              const color = getCategoryColor(category, categories)
+              return (
+                <div
+                  key={category}
+                  className={'category-item ' + (amount < 0 ? 'expense' : 'income')}
+                  style={{ borderLeftColor: color }}
+                >
+                  <div className="category-color-dot" style={{ backgroundColor: color }}></div>
+                  <span className="category-name">{category}</span>
+                  <span className="category-amount">{formatCurrency(amount)}</span>
+                </div>
+              )
+            })}
         </div>
       </div>
 
       <div className="transactions-section">
-        <h2>Transactions</h2>
+        <div className="transactions-header">
+          <h2>Transactions</h2>
+          <div className="category-filter">
+            <label htmlFor="category-filter">Filter by Category:</label>
+            <select
+              id="category-filter"
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="filter-select"
+            >
+              <option value="all">All Categories</option>
+              {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
+                <option key={cat.id} value={cat.name}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
         <div className="transactions-list">
-          {transactions.map((transaction, index) => {
+          {filteredTransactions.map((transaction, filteredIndex) => {
+            const originalIndex = transactions.findIndex(t => t === transaction)
             const color = getCategoryColor(transaction.category, categories)
-            const isEditing = editingIndex === index
+            const isEditing = editingIndex === originalIndex
 
             return (
               <div
-                key={index}
+                key={originalIndex}
                 className={'transaction-item ' + (transaction.amount < 0 ? 'expense' : 'income')}
                 style={{ borderLeftColor: color }}
               >
@@ -102,20 +127,20 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
                         className="category-select"
                         value={transaction.category}
                         onChange={(e) => {
-                          onUpdateTransaction(index, { ...transaction, category: e.target.value })
+                          onUpdateTransaction(originalIndex, { ...transaction, category: e.target.value })
                           setEditingIndex(null)
                         }}
                         onBlur={() => setTimeout(() => setEditingIndex(null), 200)}
                         autoFocus
                       >
-                        {categories.map(cat => (
+                        {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
                           <option key={cat.id} value={cat.name}>{cat.name}</option>
                         ))}
                       </select>
                     ) : (
                       <span
                         className="transaction-category editable"
-                        onClick={() => setEditingIndex(index)}
+                        onClick={() => setEditingIndex(originalIndex)}
                         style={{ color }}
                       >
                         <span className="category-dot" style={{ backgroundColor: color }}></span>

@@ -76,7 +76,7 @@ function CategoryManager({ categories, onUpdateCategories }) {
               <div className="categories-list-section">
                 <h3>Existing Categories</h3>
                 <div className="categories-grid">
-                  {categories.map(category => (
+                  {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(category => (
                     <div key={category.id} className="category-card">
                       <div className="category-card-header">
                         <div className="category-color" style={{ backgroundColor: category.color }}></div>
