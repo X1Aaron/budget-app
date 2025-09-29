@@ -1,0 +1,110 @@
+.csv-import {
+  margin-bottom: 2rem;
+}
+
+.import-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.import-card h2 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.import-description {
+  color: #666;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.file-input-wrapper {
+  margin-bottom: 1rem;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-label {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.file-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: inline-block;
+}
+
+.file-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+}
+
+.file-button:active {
+  transform: translateY(0);
+}
+
+.file-name {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #c33;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.example-format {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1.5rem;
+}
+
+.example-format strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.example-format pre {
+  background: #fff;
+  padding: 0.75rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  color: #555;
+  border: 1px solid #e5e7eb;
+}
+
+@media (max-width: 768px) {
+  .file-label {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .file-button {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .example-format pre {
+    font-size: 0.75rem;
+  }
+}
