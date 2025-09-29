@@ -3,6 +3,7 @@ import './App.css'
 import BudgetDashboard from './components/BudgetDashboard'
 import CSVImport from './components/CSVImport'
 import CategoryManager from './components/CategoryManager'
+import AutoCategorizationRules from './components/AutoCategorizationRules'
 import { DEFAULT_CATEGORIES, autoCategorize } from './utils/categories'
 
 function App() {
@@ -11,10 +12,18 @@ function App() {
     const saved = localStorage.getItem('categories')
     return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES
   })
+  const [rules, setRules] = useState(() => {
+    const saved = localStorage.getItem('categorizationRules')
+    return saved ? JSON.parse(saved) : []
+  })
 
   useEffect(() => {
     localStorage.setItem('categories', JSON.stringify(categories))
   }, [categories])
+
+  useEffect(() => {
+    localStorage.setItem('categorizationRules', JSON.stringify(rules))
+  }, [rules])
 
   useEffect(() => {
     const saved = localStorage.getItem('transactions')
@@ -32,7 +41,7 @@ function App() {
   const handleImport = (importedTransactions) => {
     const categorizedTransactions = importedTransactions.map(t => ({
       ...t,
-      category: autoCategorize(t.description, t.amount, t.category)
+      category: autoCategorize(t.description, t.amount, t.category, rules)
     }))
     setTransactions(categorizedTransactions)
   }
@@ -50,7 +59,10 @@ function App() {
       </header>
       <main className="app-main">
         <CSVImport onImport={handleImport} />
-        <CategoryManager categories={categories} onUpdateCategories={setCategories} />
+        <div className="settings-buttons">
+          <CategoryManager categories={categories} onUpdateCategories={setCategories} />
+          <AutoCategorizationRules rules={rules} categories={categories} onUpdateRules={setRules} />
+        </div>
         <BudgetDashboard
           transactions={transactions}
           categories={categories}

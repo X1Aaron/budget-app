@@ -12,16 +12,43 @@ export const DEFAULT_CATEGORIES = [
   { id: 'uncategorized', name: 'Uncategorized', color: '#6b7280', type: 'both', keywords: [] }
 ]
 
-export const autoCategorize = (description, amount, existingCategory) => {
+const matchesRule = (description, rule) => {
+  const desc = rule.caseSensitive ? description : description.toLowerCase()
+  const pattern = rule.caseSensitive ? rule.pattern : rule.pattern.toLowerCase()
+
+  switch (rule.matchType) {
+    case 'contains':
+      return desc.includes(pattern)
+    case 'starts':
+      return desc.startsWith(pattern)
+    case 'ends':
+      return desc.endsWith(pattern)
+    case 'exact':
+      return desc === pattern
+    default:
+      return false
+  }
+}
+
+export const autoCategorize = (description, amount, existingCategory, customRules = []) => {
   if (existingCategory && existingCategory !== 'Uncategorized') {
     return existingCategory
   }
 
+  // First check custom rules (sorted by priority)
+  const sortedRules = [...customRules].sort((a, b) => a.priority - b.priority)
+  for (const rule of sortedRules) {
+    if (matchesRule(description, rule)) {
+      return rule.category
+    }
+  }
+
+  // Fall back to keyword matching
   const desc = description.toLowerCase()
-  
+
   for (const category of DEFAULT_CATEGORIES) {
     if (category.id === 'uncategorized') continue
-    
+
     if (category.type === 'income' && amount > 0) {
       for (const keyword of category.keywords) {
         if (desc.includes(keyword)) {
@@ -36,7 +63,7 @@ export const autoCategorize = (description, amount, existingCategory) => {
       }
     }
   }
-  
+
   return 'Uncategorized'
 }
 
