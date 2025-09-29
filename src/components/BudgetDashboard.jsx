@@ -105,7 +105,7 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
                           onUpdateTransaction(index, { ...transaction, category: e.target.value })
                           setEditingIndex(null)
                         }}
-                        onBlur={() => setEditingIndex(null)}
+                        onBlur={() => setTimeout(() => setEditingIndex(null), 200)}
                         autoFocus
                       >
                         {categories.map(cat => (
