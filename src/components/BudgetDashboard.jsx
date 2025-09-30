@@ -107,7 +107,7 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
         </div>
       </div>
 
-      <CategoryPieChart categoryBreakdown={summary.categoryBreakdown} categories={categories} />
+      <CategoryPieChart transactions={transactions} categories={categories} />
 
       <div className="categories-section">
         <h2>Categories</h2>

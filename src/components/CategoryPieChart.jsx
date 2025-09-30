@@ -2,7 +2,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 import { getCategoryColor } from '../utils/categories'
 import './CategoryPieChart.css'
 
-function CategoryPieChart({ categoryBreakdown, categories }) {
+function CategoryPieChart({ transactions, categories }) {
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -12,12 +12,23 @@ function CategoryPieChart({ categoryBreakdown, categories }) {
     }).format(value)
   }
 
-  // Prepare data for pie chart (only show expenses for clarity)
-  const chartData = Object.entries(categoryBreakdown)
-    .filter(([_, amount]) => amount < 0)
+  // Calculate expense breakdown from only expense transactions
+  const expenseBreakdown = transactions
+    .filter(t => t.amount < 0)
+    .reduce((acc, t) => {
+      const category = t.category || 'Uncategorized'
+      if (!acc[category]) {
+        acc[category] = 0
+      }
+      acc[category] += Math.abs(t.amount)
+      return acc
+    }, {})
+
+  // Prepare data for pie chart
+  const chartData = Object.entries(expenseBreakdown)
     .map(([category, amount]) => ({
       name: category,
-      value: Math.abs(amount),
+      value: amount,
       color: getCategoryColor(category, categories)
     }))
     .sort((a, b) => b.value - a.value)
