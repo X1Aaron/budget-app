@@ -4,8 +4,7 @@ import Overview from './components/Overview'
 import Spending from './components/Spending'
 import Bills from './components/Bills'
 import CSVImport from './components/CSVImport'
-import CategoryManager from './components/CategoryManager'
-import AutoCategorizationRules from './components/AutoCategorizationRules'
+import CategorySettings from './components/CategorySettings'
 import ExportButton from './components/ExportButton'
 import ImportButton from './components/ImportButton'
 import { DEFAULT_CATEGORIES, autoCategorize } from './utils/categories'
@@ -122,8 +121,12 @@ function App() {
       <main className="app-main">
         <CSVImport onImport={handleImport} />
         <div className="settings-buttons">
-          <CategoryManager categories={categories} onUpdateCategories={setCategories} />
-          <AutoCategorizationRules rules={rules} categories={categories} onUpdateRules={setRules} />
+          <CategorySettings
+            categories={categories}
+            rules={rules}
+            onUpdateCategories={setCategories}
+            onUpdateRules={setRules}
+          />
           <ImportButton
             onImportTransactions={handleImportTransactions}
             onImportCategories={handleImportCategories}
