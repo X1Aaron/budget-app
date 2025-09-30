@@ -37,7 +37,25 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
       needWant: newCategory.needWant
     }
 
-    onUpdateCategories([...categories, category])
+    const updatedCategories = [...categories, category]
+    onUpdateCategories(updatedCategories)
+
+    // Automatically recategorize transactions with the new category
+    if (transactions && onUpdateTransactions && category.keywords.length > 0) {
+      const updatedTransactions = transactions.map(t => {
+        if (t.autoCategorized || !t.category || t.category === 'Uncategorized') {
+          const result = autoCategorize(t.description, t.amount, 'Uncategorized', updatedCategories)
+          return {
+            ...t,
+            category: result.category,
+            autoCategorized: result.wasAutoCategorized
+          }
+        }
+        return t
+      })
+      onUpdateTransactions(updatedTransactions)
+    }
+
     setNewCategory({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0, needWant: 'need' })
   }
 
