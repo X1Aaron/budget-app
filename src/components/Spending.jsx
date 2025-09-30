@@ -9,11 +9,14 @@ function Spending({
   selectedMonth,
   monthlyStartingBalances,
   onDateChange,
-  onUpdateTransaction
+  onUpdateTransaction,
+  onUpdateStartingBalance
 }) {
   const [editingIndex, setEditingIndex] = useState(null)
   const [filterCategory, setFilterCategory] = useState('all')
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
+  const [isEditingStartingBalance, setIsEditingStartingBalance] = useState(false)
+  const [startingBalanceInput, setStartingBalanceInput] = useState('')
 
   const handleSort = (key) => {
     let direction = 'asc'
@@ -119,6 +122,19 @@ function Spending({
     }).format(amount)
   }
 
+  const handleSaveStartingBalance = () => {
+    const balance = parseFloat(startingBalanceInput)
+    if (!isNaN(balance)) {
+      onUpdateStartingBalance(selectedYear, selectedMonth, balance)
+      setIsEditingStartingBalance(false)
+    }
+  }
+
+  const handleEditStartingBalance = () => {
+    setStartingBalanceInput(currentStartingBalance.toString())
+    setIsEditingStartingBalance(true)
+  }
+
   return (
     <div className="spending">
       <div className="month-selector">
@@ -135,7 +151,22 @@ function Spending({
 
       <div className="starting-balance-display">
         <span className="balance-label">Starting Balance:</span>
-        <span className="balance-amount">{formatCurrency(currentStartingBalance)}</span>
+        {isEditingStartingBalance ? (
+          <div className="balance-edit">
+            <input
+              type="number"
+              value={startingBalanceInput}
+              onChange={(e) => setStartingBalanceInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSaveStartingBalance()}
+              onBlur={handleSaveStartingBalance}
+              autoFocus
+            />
+          </div>
+        ) : (
+          <span className="balance-amount editable" onClick={handleEditStartingBalance}>
+            {formatCurrency(currentStartingBalance)}
+          </span>
+        )}
       </div>
 
       {monthlyTransactions.length === 0 ? (

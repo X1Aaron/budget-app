@@ -184,6 +184,7 @@ function App() {
             monthlyStartingBalances={monthlyStartingBalances}
             onDateChange={handleDateChange}
             onUpdateTransaction={handleUpdateTransaction}
+            onUpdateStartingBalance={handleUpdateStartingBalance}
           />
         ) : activeSection === 'bills' ? (
           <Bills

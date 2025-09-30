@@ -337,57 +337,6 @@ function Overview({
         </button>
       </div>
 
-      <div className="budget-section">
-        <div className="budget-card">
-          <h3>Starting Balance</h3>
-          {isEditingStartingBalance ? (
-            <div className="budget-edit">
-              <input
-                type="number"
-                value={startingBalanceInput}
-                onChange={(e) => setStartingBalanceInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSaveStartingBalance()}
-                autoFocus
-              />
-              <button onClick={handleSaveStartingBalance}>Save</button>
-              <button onClick={() => setIsEditingStartingBalance(false)}>Cancel</button>
-            </div>
-          ) : (
-            <div className="budget-display" onClick={handleEditStartingBalance}>
-              <p className="amount">{formatCurrency(currentStartingBalance)}</p>
-              <span className="edit-hint">Click to edit</span>
-            </div>
-          )}
-        </div>
-        <div className="budget-card">
-          <h3>Monthly Budget</h3>
-          {isEditingBudget ? (
-            <div className="budget-edit">
-              <input
-                type="number"
-                value={budgetInput}
-                onChange={(e) => setBudgetInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSaveBudget()}
-                autoFocus
-              />
-              <button onClick={handleSaveBudget}>Save</button>
-              <button onClick={() => setIsEditingBudget(false)}>Cancel</button>
-            </div>
-          ) : (
-            <div className="budget-display" onClick={handleEditBudget}>
-              <p className="amount">{formatCurrency(currentBudget)}</p>
-              <span className="edit-hint">Click to edit</span>
-            </div>
-          )}
-        </div>
-        {currentBudget > 0 && (
-          <div className={'budget-card ' + (remaining >= 0 ? 'positive' : 'negative')}>
-            <h3>Remaining</h3>
-            <p className="amount">{formatCurrency(remaining)}</p>
-          </div>
-        )}
-      </div>
-
       <div className="summary-cards">
         <div className="summary-card income">
           <h3>Income</h3>

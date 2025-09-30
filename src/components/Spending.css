@@ -71,6 +71,37 @@
   color: #3b82f6;
 }
 
+.balance-amount.editable {
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.balance-amount.editable:hover {
+  background: #dbeafe;
+}
+
+.balance-edit {
+  display: flex;
+  align-items: center;
+}
+
+.balance-edit input {
+  padding: 0.5rem;
+  font-size: 1.1rem;
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  width: 150px;
+  text-align: right;
+  font-weight: 600;
+}
+
+.balance-edit input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
 .spending-filters {
   display: flex;
   align-items: center;
