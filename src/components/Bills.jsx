@@ -20,6 +20,18 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
 
   const cashRegisterSound = useMemo(() => new Audio('/cash-register.mp3'), [])
 
+  const handleOpenAddForm = () => {
+    setFormData({
+      name: '',
+      amount: '',
+      dueDate: getDefaultDueDate(),
+      frequency: 'monthly',
+      category: '',
+      paidDates: []
+    })
+    setIsAdding(true)
+  }
+
   const handleAddBill = () => {
     if (!formData.name || !formData.amount || !formData.dueDate) {
       alert('Please fill in all required fields')
@@ -266,7 +278,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
         <div className="bills-header">
           <h2>Bills</h2>
           {!isAdding && (
-            <button className="add-bill-btn" onClick={() => setIsAdding(true)}>
+            <button className="add-bill-btn" onClick={handleOpenAddForm}>
               + Add Bill
             </button>
           )}
