@@ -81,38 +81,25 @@
   gap: 1rem;
 }
 
-.category-filter {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.category-filter label {
-  font-size: 0.9rem;
-  color: #666;
-  font-weight: 500;
-}
-
-.filter-select {
+.clear-filter-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
   padding: 0.5rem 1rem;
-  border: 2px solid #667eea;
   border-radius: 6px;
-  font-size: 0.9rem;
-  background: white;
-  color: #333;
+  font-weight: 500;
   cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  min-width: 180px;
+  transition: background 0.2s, transform 0.2s;
+  font-size: 0.9rem;
 }
 
-.filter-select:hover {
-  border-color: #764ba2;
+.clear-filter-btn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
 }
 
-.filter-select:focus {
-  outline: none;
-  border-color: #764ba2;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+.clear-filter-btn:active {
+  transform: translateY(0);
 }
 
 .categories-list {
@@ -130,6 +117,20 @@
   background: #f9fafb;
   border-radius: 8px;
   border-left: 4px solid;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.category-item:hover {
+  background: #f3f4f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.category-item.active {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  transform: translateY(-2px);
 }
 
 .category-item.expense {
@@ -268,13 +269,7 @@
     margin-bottom: 0;
   }
 
-  .category-filter {
-    width: 100%;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .filter-select {
+  .clear-filter-btn {
     width: 100%;
   }
 

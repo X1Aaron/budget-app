@@ -73,11 +73,13 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([category, amount]) => {
               const color = getCategoryColor(category, categories)
+              const isActive = filterCategory === category
               return (
                 <div
                   key={category}
-                  className={'category-item ' + (amount < 0 ? 'expense' : 'income')}
+                  className={'category-item ' + (amount < 0 ? 'expense' : 'income') + (isActive ? ' active' : '')}
                   style={{ borderLeftColor: color }}
+                  onClick={() => setFilterCategory(filterCategory === category ? 'all' : category)}
                 >
                   <div className="category-color-dot" style={{ backgroundColor: color }}></div>
                   <span className="category-name">{category}</span>
@@ -90,21 +92,12 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
 
       <div className="transactions-section">
         <div className="transactions-header">
-          <h2>Transactions</h2>
-          <div className="category-filter">
-            <label htmlFor="category-filter">Filter by Category:</label>
-            <select
-              id="category-filter"
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">All Categories</option>
-              {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
-                <option key={cat.id} value={cat.name}>{cat.name}</option>
-              ))}
-            </select>
-          </div>
+          <h2>Transactions{filterCategory !== 'all' && ` - ${filterCategory}`}</h2>
+          {filterCategory !== 'all' && (
+            <button className="clear-filter-btn" onClick={() => setFilterCategory('all')}>
+              Clear Filter
+            </button>
+          )}
         </div>
         <div className="transactions-list">
           {filteredTransactions.map((transaction, filteredIndex) => {
