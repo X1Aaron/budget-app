@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react'
 import './Bills.css'
 
-function Bills({ bills, onUpdateBills, selectedYear, onYearChange }) {
+function Bills({ bills, onUpdateBills, selectedYear, onYearChange, categories }) {
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState(null)
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
   const [formData, setFormData] = useState({
     name: '',
     amount: '',
@@ -224,13 +225,20 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange }) {
       })
   }, [generateRecurringBills, selectedYear])
 
+  const currentMonthBills = useMemo(() => {
+    return sortedBills.filter(bill => {
+      const billDate = new Date(bill.occurrenceDate)
+      return billDate.getMonth() === selectedMonth && billDate.getFullYear() === selectedYear
+    })
+  }, [sortedBills, selectedMonth, selectedYear])
+
   const totalAmount = useMemo(() => {
-    return sortedBills.reduce((sum, bill) => sum + bill.amount, 0)
-  }, [sortedBills])
+    return currentMonthBills.reduce((sum, bill) => sum + bill.amount, 0)
+  }, [currentMonthBills])
 
   const unpaidAmount = useMemo(() => {
-    return sortedBills.filter(b => !b.isPaid).reduce((sum, bill) => sum + bill.amount, 0)
-  }, [sortedBills])
+    return currentMonthBills.filter(b => !b.isPaid).reduce((sum, bill) => sum + bill.amount, 0)
+  }, [currentMonthBills])
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -277,7 +285,9 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange }) {
           {monthlyBillTotals.map((monthData) => (
             <div
               key={monthData.month}
-              className={'month-card' + (monthData.total > 0 ? ' has-bills' : '')}
+              className={'month-card' + (monthData.total > 0 ? ' has-bills' : '') + (monthData.month === selectedMonth ? ' selected' : '')}
+              onClick={() => setSelectedMonth(monthData.month)}
+              style={{ cursor: 'pointer' }}
             >
               <h3>{monthNames[monthData.month]}</h3>
               <p className="month-total">{formatCurrency(monthData.total)}</p>
@@ -291,11 +301,11 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange }) {
 
       <div className="bills-summary">
         <div className="summary-card total-bills">
-          <h3>Total Bills</h3>
+          <h3>Total Bills - {monthNames[selectedMonth]}</h3>
           <p className="amount">{formatCurrency(totalAmount)}</p>
         </div>
         <div className="summary-card unpaid-bills">
-          <h3>Unpaid Bills</h3>
+          <h3>Unpaid Bills - {monthNames[selectedMonth]}</h3>
           <p className="amount">{formatCurrency(unpaidAmount)}</p>
         </div>
       </div>
@@ -356,12 +366,19 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange }) {
               </div>
               <div className="form-group">
                 <label>Category</label>
-                <input
-                  type="text"
-                  placeholder="e.g., Utilities"
+                <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                />
+                >
+                  <option value="">Select a category</option>
+                  {categories && categories
+                    .filter(cat => cat.type === 'expense' || cat.type === 'both')
+                    .map(cat => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.name}
+                      </option>
+                    ))}
+                </select>
               </div>
             </div>
             <div className="form-actions">

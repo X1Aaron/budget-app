@@ -97,9 +97,20 @@
   border-color: #3b82f6;
 }
 
-.month-card.has-bills:hover {
+.month-card:hover {
   box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
   transform: translateY(-2px);
+}
+
+.month-card.selected {
+  background: #3b82f6;
+  border-color: #2563eb;
+}
+
+.month-card.selected h3,
+.month-card.selected .month-total,
+.month-card.selected .bill-count {
+  color: white;
 }
 
 .month-card h3 {

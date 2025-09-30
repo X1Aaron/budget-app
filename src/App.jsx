@@ -174,6 +174,7 @@ function App() {
             onUpdateBills={setBills}
             selectedYear={selectedYear}
             onYearChange={setSelectedYear}
+            categories={categories}
           />
         ) : (
           <div className="settings-section">
