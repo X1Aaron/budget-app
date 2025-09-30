@@ -3,13 +3,11 @@ import {
   importTransactionsFromCSV,
   importTransactionsFromJSON,
   importCategoriesFromCSV,
-  importCategoriesFromJSON,
-  importRulesFromCSV,
-  importRulesFromJSON
+  importCategoriesFromJSON
 } from '../utils/import'
 import './ImportButton.css'
 
-function ImportButton({ onImportTransactions, onImportCategories, onImportRules }) {
+function ImportButton({ onImportTransactions, onImportCategories }) {
   const [isOpen, setIsOpen] = useState(false)
   const [activeSubmenu, setActiveSubmenu] = useState(null)
   const [error, setError] = useState(null)
@@ -17,9 +15,7 @@ function ImportButton({ onImportTransactions, onImportCategories, onImportRules 
     transactionsCSV: useRef(null),
     transactionsJSON: useRef(null),
     categoriesCSV: useRef(null),
-    categoriesJSON: useRef(null),
-    rulesCSV: useRef(null),
-    rulesJSON: useRef(null)
+    categoriesJSON: useRef(null)
   }
 
   const handleFileSelect = async (type, format, event) => {
@@ -40,11 +36,6 @@ function ImportButton({ onImportTransactions, onImportCategories, onImportRules 
           ? await importCategoriesFromCSV(file)
           : await importCategoriesFromJSON(file)
         onImportCategories(data)
-      } else if (type === 'rules') {
-        data = format === 'csv'
-          ? await importRulesFromCSV(file)
-          : await importRulesFromJSON(file)
-        onImportRules(data)
       }
       setIsOpen(false)
       setActiveSubmenu(null)
@@ -135,36 +126,6 @@ function ImportButton({ onImportTransactions, onImportCategories, onImportRules 
                 </div>
               )}
             </div>
-
-            <div className="import-menu-group">
-              <div
-                className={'import-menu-item parent-item ' + (activeSubmenu === 'rules' ? 'active' : '')}
-                onMouseEnter={() => setActiveSubmenu('rules')}
-              >
-                <span className="menu-icon">⚙️</span>
-                <div className="menu-text">
-                  <div className="menu-title">Auto-Categorization Rules</div>
-                  <div className="menu-subtitle">Choose format</div>
-                </div>
-                <span className="submenu-arrow">›</span>
-              </div>
-              {activeSubmenu === 'rules' && (
-                <div className="import-submenu">
-                  <button
-                    className="import-submenu-item"
-                    onClick={() => triggerFileInput('rulesCSV')}
-                  >
-                    CSV
-                  </button>
-                  <button
-                    className="import-submenu-item"
-                    onClick={() => triggerFileInput('rulesJSON')}
-                  >
-                    JSON
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
         </>
       )}
@@ -196,20 +157,6 @@ function ImportButton({ onImportTransactions, onImportCategories, onImportRules 
         type="file"
         accept=".json"
         onChange={(e) => handleFileSelect('categories', 'json', e)}
-        style={{ display: 'none' }}
-      />
-      <input
-        ref={fileInputRefs.rulesCSV}
-        type="file"
-        accept=".csv"
-        onChange={(e) => handleFileSelect('rules', 'csv', e)}
-        style={{ display: 'none' }}
-      />
-      <input
-        ref={fileInputRefs.rulesJSON}
-        type="file"
-        accept=".json"
-        onChange={(e) => handleFileSelect('rules', 'json', e)}
         style={{ display: 'none' }}
       />
     </div>

@@ -3,13 +3,11 @@ import {
   exportTransactionsToCSV,
   exportTransactionsToJSON,
   exportCategoriesToJSON,
-  exportCategoriesToCSV,
-  exportRulesToJSON,
-  exportRulesToCSV
+  exportCategoriesToCSV
 } from '../utils/export'
 import './ExportButton.css'
 
-function ExportButton({ transactions, categories, rules }) {
+function ExportButton({ transactions, categories }) {
   const [isOpen, setIsOpen] = useState(false)
   const [activeSubmenu, setActiveSubmenu] = useState(null)
 
@@ -18,8 +16,6 @@ function ExportButton({ transactions, categories, rules }) {
       format === 'csv' ? exportTransactionsToCSV(transactions) : exportTransactionsToJSON(transactions)
     } else if (type === 'categories') {
       format === 'csv' ? exportCategoriesToCSV(categories) : exportCategoriesToJSON(categories)
-    } else if (type === 'rules') {
-      format === 'csv' ? exportRulesToCSV(rules) : exportRulesToJSON(rules)
     }
     setIsOpen(false)
     setActiveSubmenu(null)
@@ -91,38 +87,6 @@ function ExportButton({ transactions, categories, rules }) {
                   <button
                     className="export-submenu-item"
                     onClick={() => handleExport('categories', 'json')}
-                  >
-                    JSON
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="export-menu-group">
-              <div
-                className={'export-menu-item parent-item ' + (activeSubmenu === 'rules' ? 'active' : '')}
-                onMouseEnter={() => setActiveSubmenu('rules')}
-              >
-                <span className="menu-icon">⚙️</span>
-                <div className="menu-text">
-                  <div className="menu-title">Auto-Categorization Rules</div>
-                  <div className="menu-subtitle">Choose format</div>
-                </div>
-                <span className="submenu-arrow">›</span>
-              </div>
-              {activeSubmenu === 'rules' && (
-                <div className="export-submenu">
-                  <button
-                    className="export-submenu-item"
-                    onClick={() => handleExport('rules', 'csv')}
-                    disabled={rules.length === 0}
-                  >
-                    CSV
-                  </button>
-                  <button
-                    className="export-submenu-item"
-                    onClick={() => handleExport('rules', 'json')}
-                    disabled={rules.length === 0}
                   >
                     JSON
                   </button>

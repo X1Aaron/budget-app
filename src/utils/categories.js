@@ -12,53 +12,33 @@ export const DEFAULT_CATEGORIES = [
   { id: 'uncategorized', name: 'Uncategorized', color: '#6b7280', type: 'both', keywords: [], budgeted: 0, needWant: null }
 ]
 
-const matchesRule = (description, rule) => {
-  const desc = rule.caseSensitive ? description : description.toLowerCase()
-  const pattern = rule.caseSensitive ? rule.pattern : rule.pattern.toLowerCase()
-
-  switch (rule.matchType) {
-    case 'contains':
-      return desc.includes(pattern)
-    case 'starts':
-      return desc.startsWith(pattern)
-    case 'ends':
-      return desc.endsWith(pattern)
-    case 'exact':
-      return desc === pattern
-    default:
-      return false
-  }
-}
-
-export const autoCategorize = (description, amount, existingCategory, customRules = []) => {
+export const autoCategorize = (description, amount, existingCategory, categories = DEFAULT_CATEGORIES) => {
   // If already has a valid category, keep it and mark as not auto-categorized
   if (existingCategory && existingCategory !== 'Uncategorized') {
     return { category: existingCategory, wasAutoCategorized: false }
   }
 
-  // First check custom rules (sorted by priority)
-  const sortedRules = [...customRules].sort((a, b) => a.priority - b.priority)
-  for (const rule of sortedRules) {
-    if (matchesRule(description, rule)) {
-      return { category: rule.category, wasAutoCategorized: true }
-    }
-  }
-
-  // Fall back to keyword matching
+  // Check keyword matching
   const desc = description.toLowerCase()
 
-  for (const category of DEFAULT_CATEGORIES) {
+  for (const category of categories) {
     if (category.id === 'uncategorized') continue
 
     if (category.type === 'income' && amount > 0) {
-      for (const keyword of category.keywords) {
-        if (desc.includes(keyword)) {
+      for (const keyword of category.keywords || []) {
+        if (desc.includes(keyword.toLowerCase())) {
           return { category: category.name, wasAutoCategorized: true }
         }
       }
     } else if (category.type === 'expense' && amount < 0) {
-      for (const keyword of category.keywords) {
-        if (desc.includes(keyword)) {
+      for (const keyword of category.keywords || []) {
+        if (desc.includes(keyword.toLowerCase())) {
+          return { category: category.name, wasAutoCategorized: true }
+        }
+      }
+    } else if (category.type === 'both') {
+      for (const keyword of category.keywords || []) {
+        if (desc.includes(keyword.toLowerCase())) {
           return { category: category.name, wasAutoCategorized: true }
         }
       }

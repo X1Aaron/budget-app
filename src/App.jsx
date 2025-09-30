@@ -30,10 +30,6 @@ function App() {
     const saved = localStorage.getItem('categories')
     return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES
   })
-  const [rules, setRules] = useState(() => {
-    const saved = localStorage.getItem('categorizationRules')
-    return saved ? JSON.parse(saved) : []
-  })
   const [currentBalance, setCurrentBalance] = useState(() => {
     const saved = localStorage.getItem('currentBalance')
     return saved ? parseFloat(saved) : 0
@@ -42,10 +38,6 @@ function App() {
   useEffect(() => {
     localStorage.setItem('categories', JSON.stringify(categories))
   }, [categories])
-
-  useEffect(() => {
-    localStorage.setItem('categorizationRules', JSON.stringify(rules))
-  }, [rules])
 
   useEffect(() => {
     localStorage.setItem('bills', JSON.stringify(bills))
@@ -78,7 +70,7 @@ function App() {
 
   const handleImport = (importedTransactions) => {
     const categorizedTransactions = importedTransactions.map(t => {
-      const result = autoCategorize(t.description, t.amount, t.category, rules)
+      const result = autoCategorize(t.description, t.amount, t.category, categories)
       return {
         ...t,
         category: result.category,
@@ -96,7 +88,7 @@ function App() {
 
   const handleImportTransactions = (importedTransactions) => {
     const categorizedTransactions = importedTransactions.map(t => {
-      const result = autoCategorize(t.description, t.amount, t.category, rules)
+      const result = autoCategorize(t.description, t.amount, t.category, categories)
       return {
         ...t,
         category: result.category,
@@ -115,9 +107,6 @@ function App() {
     setCategories([...categories, ...newCategories])
   }
 
-  const handleImportRules = (importedRules) => {
-    setRules(importedRules)
-  }
 
   const handleDateChange = (year, month) => {
     setSelectedYear(year)
@@ -227,18 +216,15 @@ function App() {
                 <ImportButton
                   onImportTransactions={handleImportTransactions}
                   onImportCategories={handleImportCategories}
-                  onImportRules={handleImportRules}
                 />
-                <ExportButton transactions={transactions} categories={categories} rules={rules} />
+                <ExportButton transactions={transactions} categories={categories} />
               </div>
             </div>
             <div className="settings-group">
-              <h3>Categories & Rules</h3>
+              <h3>Categories</h3>
               <CategorySettings
                 categories={categories}
-                rules={rules}
                 onUpdateCategories={setCategories}
-                onUpdateRules={setRules}
                 transactions={transactions}
                 onUpdateTransactions={setTransactions}
               />
