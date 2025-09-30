@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import './CategorySettings.css'
 import { autoCategorize } from '../utils/categories'
 
-function CategorySettings({ categories, onUpdateCategories, transactions, onUpdateTransactions }) {
+function CategorySettings({ categories, onUpdateCategories, transactions, onUpdateTransactions, selectedYear, selectedMonth }) {
   const [isAdding, setIsAdding] = useState(false)
   const [newCategory, setNewCategory] = useState({
     name: '',
@@ -28,6 +28,57 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
   const [inlineEditingId, setInlineEditingId] = useState(null)
   const [inlineEditField, setInlineEditField] = useState(null)
   const [inlineEditValue, setInlineEditValue] = useState('')
+
+  const threeMonthAverages = useMemo(() => {
+    if (!transactions || !selectedYear || selectedMonth === undefined) return {}
+
+    const averages = {}
+
+    // Get the last 3 months including current month
+    const months = []
+    for (let i = 0; i < 3; i++) {
+      let month = selectedMonth - i
+      let year = selectedYear
+      if (month < 0) {
+        month += 12
+        year -= 1
+      }
+      months.push({ year, month })
+    }
+
+    // Calculate spending for each category over the last 3 months
+    const categoryTotals = {}
+    months.forEach(({ year, month }) => {
+      const monthTransactions = transactions.filter(t => {
+        const date = new Date(t.date)
+        return date.getFullYear() === year && date.getMonth() === month
+      })
+
+      monthTransactions.forEach(t => {
+        if (t.amount < 0) {
+          const category = t.category || 'Uncategorized'
+          if (!categoryTotals[category]) {
+            categoryTotals[category] = 0
+          }
+          categoryTotals[category] += Math.abs(t.amount)
+        }
+      })
+    })
+
+    // Calculate averages
+    Object.entries(categoryTotals).forEach(([category, total]) => {
+      averages[category] = total / 3
+    })
+
+    return averages
+  }, [transactions, selectedYear, selectedMonth])
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount)
+  }
 
   const handleAddKeyword = (e, isEdit = false) => {
     if (e.key === 'Enter' || e.key === ',') {
@@ -445,6 +496,7 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
                             <th>Type</th>
                             <th>Need/Want</th>
                             <th>Budget</th>
+                            <th>3-Month Avg</th>
                             <th>Keywords</th>
                             <th></th>
                           </tr>
@@ -585,6 +637,13 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
                                   </div>
                                 )}
                               </td>
+                              <td className="average-cell">
+                                {threeMonthAverages[category.name] ? (
+                                  formatCurrency(threeMonthAverages[category.name])
+                                ) : (
+                                  <span className="no-data">—</span>
+                                )}
+                              </td>
                               <td className="keywords-cell">
                                 {category.keywords && category.keywords.length > 0 ? (
                                   <span
@@ -621,17 +680,6 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
                       </table>
                     </div>
                   </div>
-
-                  {transactions && onUpdateTransactions && (
-                    <div className="reapply-section">
-                      <button className="reapply-btn" onClick={handleReapplyKeywords}>
-                        🔄 Reapply Keywords to All Transactions
-                      </button>
-                      <p className="reapply-note">
-                        This will recategorize transactions that were auto-categorized or uncategorized. Manually categorized transactions will not be changed.
-                      </p>
-                    </div>
-                  )}
       </div>
     </div>
   )

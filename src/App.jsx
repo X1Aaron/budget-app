@@ -260,6 +260,8 @@ function App() {
               onUpdateCategories={setCategories}
               transactions={transactions}
               onUpdateTransactions={setTransactions}
+              selectedYear={selectedYear}
+              selectedMonth={selectedMonth}
             />
           </div>
         ) : (
