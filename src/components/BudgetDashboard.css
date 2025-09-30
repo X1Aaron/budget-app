@@ -305,6 +305,56 @@
   min-width: 150px;
 }
 
+.transaction-need-want {
+  padding: 0.5rem 1rem;
+}
+
+.need-want-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.need-btn,
+.want-btn {
+  padding: 0.375rem 0.75rem;
+  border: 2px solid;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+}
+
+.need-btn {
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.need-btn:hover {
+  background: #d1fae5;
+}
+
+.need-btn.active {
+  background: #10b981;
+  color: white;
+}
+
+.want-btn {
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.want-btn:hover {
+  background: #fef3c7;
+}
+
+.want-btn.active {
+  background: #f59e0b;
+  color: white;
+}
+
 .transactions-total {
   display: flex;
   justify-content: space-between;
@@ -379,5 +429,16 @@
 
   .transaction-category-cell {
     min-width: 100px;
+  }
+
+  .need-want-buttons {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .need-btn,
+  .want-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
   }
 }

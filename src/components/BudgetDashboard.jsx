@@ -170,6 +170,7 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
                     {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
                   </span>
                 </th>
+                <th>Need/Want</th>
               </tr>
             </thead>
             <tbody>
@@ -222,6 +223,24 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
                     </td>
                     <td className={'transaction-amount ' + (transaction.amount < 0 ? 'negative' : 'positive')}>
                       {formatCurrency(transaction.amount)}
+                    </td>
+                    <td className="transaction-need-want">
+                      <div className="need-want-buttons">
+                        <button
+                          className={'need-btn' + (transaction.needWant === 'need' ? ' active' : '')}
+                          onClick={() => onUpdateTransaction(originalIndex, { ...transaction, needWant: 'need' })}
+                          title="Mark as Need"
+                        >
+                          Need
+                        </button>
+                        <button
+                          className={'want-btn' + (transaction.needWant === 'want' ? ' active' : '')}
+                          onClick={() => onUpdateTransaction(originalIndex, { ...transaction, needWant: 'want' })}
+                          title="Mark as Want"
+                        >
+                          Want
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )
