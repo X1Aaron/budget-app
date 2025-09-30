@@ -1,4 +1,6 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
+import { exportBillsToCSV, exportBillsToJSON } from '../utils/export'
+import { importBillsFromCSV, importBillsFromJSON } from '../utils/import'
 import './Bills.css'
 
 function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange, categories }) {
@@ -13,6 +15,11 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
     memo: '',
     paidDates: []
   })
+  const [isExportOpen, setIsExportOpen] = useState(false)
+  const [isImportOpen, setIsImportOpen] = useState(false)
+  const [importError, setImportError] = useState(null)
+  const csvFileInputRef = useRef(null)
+  const jsonFileInputRef = useRef(null)
 
   const cashRegisterSound = useMemo(() => new Audio('/cash-register.mp3'), [])
 
@@ -126,6 +133,52 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
       memo: '',
       paidDates: []
     })
+  }
+
+  const handleExport = (format) => {
+    if (format === 'csv') {
+      exportBillsToCSV(bills)
+    } else {
+      exportBillsToJSON(bills)
+    }
+    setIsExportOpen(false)
+  }
+
+  const handleImportFile = async (format, event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    setImportError(null)
+
+    try {
+      let importedBills
+      if (format === 'csv') {
+        importedBills = await importBillsFromCSV(file)
+      } else {
+        importedBills = await importBillsFromJSON(file)
+      }
+
+      // Merge imported bills with existing ones, avoiding duplicates
+      const existingNames = new Set(bills.map(b => b.name.toLowerCase()))
+      const newBills = importedBills.filter(
+        b => !existingNames.has(b.name.toLowerCase())
+      )
+
+      if (newBills.length === 0) {
+        alert('No new bills to import (all bills already exist)')
+      } else {
+        onUpdateBills([...bills, ...newBills])
+        alert(`Successfully imported ${newBills.length} bill(s)`)
+      }
+
+      setIsImportOpen(false)
+    } catch (err) {
+      setImportError(err.message)
+      setTimeout(() => setImportError(null), 5000)
+    }
+
+    // Reset file input
+    event.target.value = null
   }
 
   const generateRecurringBills = useMemo(() => {
@@ -282,11 +335,90 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
       <div className="bills-section">
         <div className="bills-header">
           <h2>Bills</h2>
-          {!isAdding && (
-            <button className="add-bill-btn" onClick={() => setIsAdding(true)}>
-              + Add Bill
-            </button>
-          )}
+          <div className="bills-header-actions">
+            {/* Export Button */}
+            <div className="export-button-container" style={{ position: 'relative' }}>
+              <button className="export-btn" onClick={() => setIsExportOpen(!isExportOpen)}>
+                Export
+                <span className="dropdown-arrow">{isExportOpen ? '▲' : '▼'}</span>
+              </button>
+              {isExportOpen && (
+                <>
+                  <div className="export-backdrop" onClick={() => setIsExportOpen(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'transparent', zIndex: 999 }}></div>
+                  <div className="export-menu" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', background: 'white', border: '1px solid #ddd', borderRadius: '4px', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', minWidth: '120px', zIndex: 1000 }}>
+                    <button
+                      className="export-submenu-item"
+                      onClick={() => handleExport('csv')}
+                      disabled={bills.length === 0}
+                      style={{ display: 'block', width: '100%', padding: '8px 12px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer' }}
+                    >
+                      CSV
+                    </button>
+                    <button
+                      className="export-submenu-item"
+                      onClick={() => handleExport('json')}
+                      disabled={bills.length === 0}
+                      style={{ display: 'block', width: '100%', padding: '8px 12px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer' }}
+                    >
+                      JSON
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Import Button */}
+            <div className="import-button-container" style={{ position: 'relative' }}>
+              <button className="import-btn" onClick={() => setIsImportOpen(!isImportOpen)}>
+                Import
+                <span className="dropdown-arrow">{isImportOpen ? '▲' : '▼'}</span>
+              </button>
+              {importError && (
+                <div className="import-error" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', padding: '8px', background: '#fee', border: '1px solid #fcc', borderRadius: '4px', fontSize: '12px', whiteSpace: 'nowrap', zIndex: 1001 }}>{importError}</div>
+              )}
+              {isImportOpen && (
+                <>
+                  <div className="import-backdrop" onClick={() => setIsImportOpen(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'transparent', zIndex: 999 }}></div>
+                  <div className="import-menu" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', background: 'white', border: '1px solid #ddd', borderRadius: '4px', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', minWidth: '120px', zIndex: 1000 }}>
+                    <button
+                      className="import-submenu-item"
+                      onClick={() => csvFileInputRef.current?.click()}
+                      style={{ display: 'block', width: '100%', padding: '8px 12px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer' }}
+                    >
+                      CSV
+                    </button>
+                    <button
+                      className="import-submenu-item"
+                      onClick={() => jsonFileInputRef.current?.click()}
+                      style={{ display: 'block', width: '100%', padding: '8px 12px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer' }}
+                    >
+                      JSON
+                    </button>
+                  </div>
+                </>
+              )}
+              <input
+                ref={csvFileInputRef}
+                type="file"
+                accept=".csv"
+                onChange={(e) => handleImportFile('csv', e)}
+                style={{ display: 'none' }}
+              />
+              <input
+                ref={jsonFileInputRef}
+                type="file"
+                accept=".json"
+                onChange={(e) => handleImportFile('json', e)}
+                style={{ display: 'none' }}
+              />
+            </div>
+
+            {!isAdding && (
+              <button className="add-bill-btn" onClick={() => setIsAdding(true)}>
+                + Add Bill
+              </button>
+            )}
+          </div>
         </div>
 
         {isAdding && (

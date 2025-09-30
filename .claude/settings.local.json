@@ -24,7 +24,8 @@
       "Bash(chmod:*)",
       "Bash(./push.sh:*)",
       "Bash(curl:*)",
-      "Bash(echo \"Test script to check localStorage - needs to run in browser console:\nlocalStorage.getItem(''bills'')\")"
+      "Bash(echo \"Test script to check localStorage - needs to run in browser console:\nlocalStorage.getItem(''bills'')\")",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

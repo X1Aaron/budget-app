@@ -59,6 +59,27 @@ export const exportRulesToCSV = (rules) => {
   downloadFile(csvContent, 'categorization-rules.csv', 'text/csv')
 }
 
+// Export bills to JSON
+export const exportBillsToJSON = (bills) => {
+  const jsonContent = JSON.stringify(bills, null, 2)
+  downloadFile(jsonContent, 'bills.json', 'application/json')
+}
+
+// Export bills to CSV
+export const exportBillsToCSV = (bills) => {
+  if (bills.length === 0) return
+
+  const headers = ['id', 'name', 'amount', 'dueDate', 'frequency', 'category', 'memo', 'paidDates']
+  const csvContent = [
+    headers.join(','),
+    ...bills.map(bill =>
+      [bill.id, `"${bill.name}"`, bill.amount, bill.dueDate, bill.frequency, `"${bill.category || ''}"`, `"${(bill.memo || '').replace(/"/g, '""')}"`, `"${(bill.paidDates || []).join(';')}"`].join(',')
+    )
+  ].join('\n')
+
+  downloadFile(csvContent, 'bills.csv', 'text/csv')
+}
+
 // Helper function to trigger download
 const downloadFile = (content, filename, mimeType) => {
   const blob = new Blob([content], { type: mimeType })

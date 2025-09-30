@@ -148,3 +148,41 @@ export const importRulesFromJSON = async (file) => {
     priority: rule.priority || index + 1
   }))
 }
+
+// Import bills from CSV
+export const importBillsFromCSV = async (file) => {
+  const text = await file.text()
+  const data = parseCSV(text, ['name', 'amount', 'dueDate'])
+
+  return data.map(row => ({
+    id: row.id || Date.now() + Math.random(),
+    name: row.name,
+    amount: parseFloat(row.amount),
+    dueDate: row.dueDate,
+    frequency: row.frequency || 'monthly',
+    category: row.category || '',
+    memo: row.memo || '',
+    paidDates: row.paidDates ? row.paidDates.split(';').filter(d => d) : []
+  }))
+}
+
+// Import bills from JSON
+export const importBillsFromJSON = async (file) => {
+  const text = await file.text()
+  const data = JSON.parse(text)
+
+  if (!Array.isArray(data)) {
+    throw new Error('Invalid JSON format: expected an array of bills')
+  }
+
+  return data.map(bill => ({
+    id: bill.id || Date.now() + Math.random(),
+    name: bill.name,
+    amount: parseFloat(bill.amount),
+    dueDate: bill.dueDate,
+    frequency: bill.frequency || 'monthly',
+    category: bill.category || '',
+    memo: bill.memo || '',
+    paidDates: bill.paidDates || []
+  }))
+}

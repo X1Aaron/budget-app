@@ -196,6 +196,69 @@
   color: #333;
 }
 
+.bills-header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.export-btn,
+.import-btn {
+  padding: 0.5rem 1rem;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.export-btn:hover,
+.import-btn:hover {
+  background: #4f46e5;
+}
+
+.export-btn:disabled,
+.import-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.dropdown-arrow {
+  font-size: 0.7rem;
+}
+
+.export-submenu-item,
+.import-submenu-item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.export-submenu-item:hover,
+.import-submenu-item:hover {
+  background: #f3f4f6;
+}
+
+.export-submenu-item:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.export-submenu-item:disabled:hover {
+  background: none;
+}
+
 .add-bill-btn {
   padding: 0.6rem 1.2rem;
   background: #10b981;
