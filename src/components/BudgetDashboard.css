@@ -251,6 +251,36 @@
   margin-left: 1rem;
 }
 
+.transactions-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  margin-top: 1rem;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border-radius: 8px;
+  border-top: 3px solid #667eea;
+  font-weight: 600;
+}
+
+.total-label {
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.total-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.total-amount.positive {
+  color: #10b981;
+}
+
+.total-amount.negative {
+  color: #ef4444;
+}
+
 @media (max-width: 768px) {
   .summary-cards {
     grid-template-columns: 1fr;

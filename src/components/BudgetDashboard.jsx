@@ -11,12 +11,17 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
     return transactions.filter(t => t.category === filterCategory)
   }, [transactions, filterCategory])
 
+  const filteredTotal = useMemo(() => {
+    return filteredTransactions.reduce((sum, t) => sum + t.amount, 0)
+  }, [filteredTransactions])
+
   const summary = useMemo(() => {
-    const income = filteredTransactions
+    // Calculate totals from all transactions, not filtered
+    const income = transactions
       .filter(t => t.amount > 0)
       .reduce((sum, t) => sum + t.amount, 0)
 
-    const expenses = filteredTransactions
+    const expenses = transactions
       .filter(t => t.amount < 0)
       .reduce((sum, t) => sum + Math.abs(t.amount), 0)
 
@@ -33,7 +38,7 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
     }, {})
 
     return { income, expenses, balance, categoryBreakdown }
-  }, [filteredTransactions, transactions])
+  }, [transactions])
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -150,6 +155,14 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
             )
           })}
         </div>
+        {filterCategory !== 'all' && (
+          <div className="transactions-total">
+            <span className="total-label">Total for {filterCategory}:</span>
+            <span className={'total-amount ' + (filteredTotal < 0 ? 'negative' : 'positive')}>
+              {formatCurrency(filteredTotal)}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   )
