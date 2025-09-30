@@ -301,18 +301,18 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange, categories })
 
       <div className="bills-summary">
         <div className="summary-card total-bills">
-          <h3>Total Bills - {monthNames[selectedMonth]}</h3>
+          <h3>Total Bills</h3>
           <p className="amount">{formatCurrency(totalAmount)}</p>
         </div>
         <div className="summary-card unpaid-bills">
-          <h3>Unpaid Bills - {monthNames[selectedMonth]}</h3>
+          <h3>Unpaid Bills</h3>
           <p className="amount">{formatCurrency(unpaidAmount)}</p>
         </div>
       </div>
 
       <div className="bills-section">
         <div className="bills-header">
-          <h2>Bills for {selectedYear}</h2>
+          <h2>Bills for {monthNames[selectedMonth]}</h2>
           {!isAdding && (
             <button className="add-bill-btn" onClick={() => setIsAdding(true)}>
               + Add Bill
@@ -395,13 +395,13 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange, categories })
           </div>
         )}
 
-        {sortedBills.length === 0 ? (
+        {currentMonthBills.length === 0 ? (
           <div className="bills-empty">
             <p>No bills yet. Click "Add Bill" to get started.</p>
           </div>
         ) : (
           <div className="bills-list">
-            {sortedBills.map((bill) => (
+            {currentMonthBills.map((bill) => (
               <div
                 key={`${bill.id}-${bill.occurrenceDate}`}
                 className={'bill-item' + (bill.isPaid ? ' paid' : '')}

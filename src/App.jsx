@@ -30,6 +30,10 @@ function App() {
     const saved = localStorage.getItem('categorizationRules')
     return saved ? JSON.parse(saved) : []
   })
+  const [currentBalance, setCurrentBalance] = useState(() => {
+    const saved = localStorage.getItem('currentBalance')
+    return saved ? parseFloat(saved) : 0
+  })
 
   useEffect(() => {
     localStorage.setItem('categories', JSON.stringify(categories))
@@ -46,6 +50,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('monthlyBudgets', JSON.stringify(monthlyBudgets))
   }, [monthlyBudgets])
+
+  useEffect(() => {
+    localStorage.setItem('currentBalance', currentBalance.toString())
+  }, [currentBalance])
 
   useEffect(() => {
     const saved = localStorage.getItem('transactions')
@@ -179,6 +187,19 @@ function App() {
         ) : (
           <div className="settings-section">
             <h2>Settings</h2>
+            <div className="settings-group">
+              <h3>Current Balance</h3>
+              <div className="balance-input">
+                <label>Balance: </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={currentBalance}
+                  onChange={(e) => setCurrentBalance(parseFloat(e.target.value) || 0)}
+                  style={{ padding: '8px', fontSize: '16px', width: '200px' }}
+                />
+              </div>
+            </div>
             <div className="settings-group">
               <h3>Import/Export Data</h3>
               <div className="settings-buttons">

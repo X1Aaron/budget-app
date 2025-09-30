@@ -185,14 +185,14 @@ function Overview({
           <p className="amount">{formatCurrency(summary.expenses)}</p>
         </div>
         <div className="summary-card balance">
-          <h3>Balance</h3>
+          <h3>Difference</h3>
           <p className="amount">{formatCurrency(summary.balance)}</p>
         </div>
       </div>
 
       {upcomingBills.length > 0 && (
         <div className="upcoming-bills-section">
-          <h2>Bills Due This Week</h2>
+          <h2>Bills in the Next 7 Days</h2>
           <div className="upcoming-bills-list">
             {upcomingBills.map((bill) => (
               <div key={bill.id} className="upcoming-bill-item">
