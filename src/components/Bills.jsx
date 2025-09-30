@@ -222,6 +222,20 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
     return currentMonthBills.filter(b => !b.isPaid).reduce((sum, bill) => sum + bill.amount, 0)
   }, [currentMonthBills])
 
+  const categoryTotals = useMemo(() => {
+    const totals = {}
+    currentMonthBills.forEach(bill => {
+      const category = bill.category || 'Uncategorized'
+      if (!totals[category]) {
+        totals[category] = 0
+      }
+      totals[category] += bill.amount
+    })
+    return Object.entries(totals)
+      .map(([category, amount]) => ({ category, amount }))
+      .sort((a, b) => b.amount - a.amount)
+  }, [currentMonthBills])
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -316,10 +330,11 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
               </div>
             </div>
             <div className="form-actions">
-              <button className="cancel-btn" onClick={handleCancelEdit}>
+              <button type="button" className="cancel-btn" onClick={handleCancelEdit}>
                 Cancel
               </button>
               <button
+                type="button"
                 className="save-btn"
                 onClick={editingId ? handleUpdateBill : handleAddBill}
               >
@@ -334,47 +349,63 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
             <p>No bills yet. Click "Add Bill" to get started.</p>
           </div>
         ) : (
-          <div className="bills-list">
-            {currentMonthBills.map((bill) => (
-              <div
-                key={`${bill.id}-${bill.occurrenceDate}`}
-                className={'bill-item' + (bill.isPaid ? ' paid' : '')}
-              >
-                <div className="bill-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={bill.isPaid}
-                    onChange={() => handleTogglePaid(bill.id, bill.occurrenceDate)}
-                  />
-                </div>
-                <div className="bill-info">
-                  <div className="bill-name">{bill.name}</div>
-                  <div className="bill-meta">
-                    <span className="bill-date">Due: {formatDate(bill.occurrenceDate)}</span>
-                    <span className="bill-frequency">{bill.frequency}</span>
-                    {bill.category && <span className="bill-category">{bill.category}</span>}
+          <>
+            <div className="bills-list">
+              {currentMonthBills.map((bill) => (
+                <div
+                  key={`${bill.id}-${bill.occurrenceDate}`}
+                  className={'bill-item' + (bill.isPaid ? ' paid' : '')}
+                >
+                  <div className="bill-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={bill.isPaid}
+                      onChange={() => handleTogglePaid(bill.id, bill.occurrenceDate)}
+                    />
+                  </div>
+                  <div className="bill-info">
+                    <div className="bill-name">{bill.name}</div>
+                    <div className="bill-meta">
+                      <span className="bill-date">Due: {formatDate(bill.occurrenceDate)}</span>
+                      <span className="bill-frequency">{bill.frequency}</span>
+                      {bill.category && <span className="bill-category">{bill.category}</span>}
+                    </div>
+                  </div>
+                  <div className="bill-amount">{formatCurrency(bill.amount)}</div>
+                  <div className="bill-actions">
+                    <button
+                      className="edit-btn"
+                      onClick={() => handleEditBill(bill)}
+                      title="Edit"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleDeleteBill(bill.id)}
+                      title="Delete"
+                    >
+                      🗑️
+                    </button>
                   </div>
                 </div>
-                <div className="bill-amount">{formatCurrency(bill.amount)}</div>
-                <div className="bill-actions">
-                  <button
-                    className="edit-btn"
-                    onClick={() => handleEditBill(bill)}
-                    title="Edit"
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    className="delete-btn"
-                    onClick={() => handleDeleteBill(bill.id)}
-                    title="Delete"
-                  >
-                    🗑️
-                  </button>
+              ))}
+            </div>
+
+            {categoryTotals.length > 0 && (
+              <div className="category-totals">
+                <h3>Total by Category</h3>
+                <div className="category-list">
+                  {categoryTotals.map(({ category, amount }) => (
+                    <div key={category} className="category-item">
+                      <span className="category-label">{category}</span>
+                      <span className="category-amount">{formatCurrency(amount)}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
     </div>
