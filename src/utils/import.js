@@ -46,19 +46,66 @@ const parseCSV = (csvText, expectedHeaders) => {
 // Import transactions from CSV
 export const importTransactionsFromCSV = async (file) => {
   const text = await file.text()
-  const data = parseCSV(text, ['date', 'description', 'amount'])
+  const lines = text.trim().split('\n')
 
-  return data.map(row => ({
-    id: Date.now() + Math.random(),
-    date: row.date,
-    description: row.description,
-    amount: parseFloat(row.amount),
-    category: row.category || 'Uncategorized',
-    needWant: row.needWant || undefined,
-    autoCategorized: row.autoCategorized === 'true' || row.autoCategorized === true || false,
-    merchantName: row.merchantName || row.friendlyName || row.description,
-    memo: row.memo || ''
-  }))
+  if (lines.length < 2) {
+    throw new Error('CSV file must have at least a header row and one data row')
+  }
+
+  const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/^"|"$/g, ''))
+
+  const dateIndex = headers.findIndex(h => h.includes('date'))
+  const descIndex = headers.findIndex(h => h.includes('desc'))
+  const amountIndex = headers.findIndex(h => h.includes('amount'))
+  const categoryIndex = headers.findIndex(h => h.includes('category') || h.includes('cat'))
+  const needWantIndex = headers.findIndex(h => h.includes('need') || h.includes('want'))
+  const autoCategorizedIndex = headers.findIndex(h => h.includes('auto'))
+  const merchantNameIndex = headers.findIndex(h => h.includes('merchant'))
+  const friendlyNameIndex = headers.findIndex(h => h.includes('friendly') || (h.includes('name') && !h.includes('merchant')))
+  const memoIndex = headers.findIndex(h => h.includes('memo') || h.includes('note'))
+
+  if (dateIndex === -1 || descIndex === -1 || amountIndex === -1) {
+    throw new Error('CSV must have columns for: date, description, and amount')
+  }
+
+  const transactions = []
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim() === '') continue
+
+    const values = []
+    let currentValue = ''
+    let insideQuotes = false
+
+    for (let char of lines[i]) {
+      if (char === '"') {
+        insideQuotes = !insideQuotes
+      } else if (char === ',' && !insideQuotes) {
+        values.push(currentValue.trim())
+        currentValue = ''
+      } else {
+        currentValue += char
+      }
+    }
+    values.push(currentValue.trim())
+
+    const transaction = {
+      id: Date.now() + Math.random(),
+      date: values[dateIndex],
+      description: values[descIndex],
+      amount: parseFloat(values[amountIndex]),
+      category: categoryIndex !== -1 ? values[categoryIndex] : 'Uncategorized',
+      needWant: needWantIndex !== -1 ? values[needWantIndex] : undefined,
+      autoCategorized: autoCategorizedIndex !== -1 ? (values[autoCategorizedIndex] === 'true') : false,
+      merchantName: merchantNameIndex !== -1 ? values[merchantNameIndex] : (friendlyNameIndex !== -1 ? values[friendlyNameIndex] : values[descIndex]),
+      memo: memoIndex !== -1 ? values[memoIndex] : ''
+    }
+
+    if (!isNaN(transaction.amount)) {
+      transactions.push(transaction)
+    }
+  }
+
+  return transactions
 }
 
 // Import transactions from JSON
