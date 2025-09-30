@@ -102,9 +102,23 @@ function App() {
     setTransactions(categorizedTransactions)
   }
 
-  const handleUpdateTransaction = (index, updatedTransaction) => {
+  const handleUpdateTransaction = (index, updatedTransaction, updateAllMatching = false) => {
     const newTransactions = [...transactions]
-    newTransactions[index] = updatedTransaction
+
+    // If updateAllMatching is true and merchantName was changed, update all transactions with same description
+    if (updateAllMatching && updatedTransaction.merchantName !== transactions[index].merchantName) {
+      const originalDescription = transactions[index].description
+      const newMerchantName = updatedTransaction.merchantName
+
+      for (let i = 0; i < newTransactions.length; i++) {
+        if (newTransactions[i].description === originalDescription) {
+          newTransactions[i] = { ...newTransactions[i], merchantName: newMerchantName }
+        }
+      }
+    } else {
+      newTransactions[index] = updatedTransaction
+    }
+
     setTransactions(newTransactions)
   }
 

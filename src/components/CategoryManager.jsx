@@ -25,6 +25,15 @@ function CategoryManager({ categories, onUpdateCategories }) {
     onUpdateCategories(categories.filter(cat => cat.id !== categoryId))
   }
 
+  const handleUpdateKeywords = (categoryId, newKeywords) => {
+    const updatedCategories = categories.map(cat =>
+      cat.id === categoryId
+        ? { ...cat, keywords: newKeywords.split(',').map(k => k.trim()).filter(k => k) }
+        : cat
+    )
+    onUpdateCategories(updatedCategories)
+  }
+
   return (
     <div className="category-manager">
       <button className="manage-categories-btn" onClick={() => setIsOpen(!isOpen)}>
@@ -92,9 +101,13 @@ function CategoryManager({ categories, onUpdateCategories }) {
                       </div>
                       <div className="category-card-info">
                         <span className="category-type">{category.type}</span>
-                        {category.keywords.length > 0 && (
-                          <span className="category-keywords">{category.keywords.join(', ')}</span>
-                        )}
+                        <input
+                          type="text"
+                          placeholder="Keywords (comma separated)"
+                          value={category.keywords.join(', ')}
+                          onChange={(e) => handleUpdateKeywords(category.id, e.target.value)}
+                          className="keywords-input inline-keywords"
+                        />
                       </div>
                     </div>
                   ))}

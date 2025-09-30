@@ -325,6 +325,8 @@
 .categories-table td {
   padding: 1rem 1.25rem;
   vertical-align: middle;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .color-cell {
@@ -360,6 +362,9 @@
   color: #6b7280;
   font-size: 0.85rem;
   max-width: 300px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .no-keywords {

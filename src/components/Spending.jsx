@@ -249,7 +249,7 @@ function Spending({
                               onUpdateTransaction(originalIndex, {
                                 ...transaction,
                                 merchantName: e.target.value
-                              })
+                              }, true) // Pass true to update all matching transactions
                               setEditingMerchantIndex(null)
                             }}
                             onKeyDown={(e) => {
@@ -265,7 +265,7 @@ function Spending({
                           <span
                             className="transaction-merchant editable"
                             onClick={() => setEditingMerchantIndex(originalIndex)}
-                            title="Click to edit merchant name"
+                            title="Click to edit merchant name (updates all with same description)"
                           >
                             {transaction.merchantName || transaction.description}
                           </span>
