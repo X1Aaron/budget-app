@@ -275,16 +275,7 @@
 
 .transaction-amount {
   font-size: 1rem;
-  font-weight: 700;
   text-align: right;
-}
-
-.transaction-amount.positive {
-  color: #10b981;
-}
-
-.transaction-amount.negative {
-  color: #ef4444;
 }
 
 .transaction-category-cell {
