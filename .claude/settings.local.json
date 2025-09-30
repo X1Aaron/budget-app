@@ -23,7 +23,8 @@
       "Bash(npm install:*)",
       "Bash(chmod:*)",
       "Bash(./push.sh:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(echo \"Test script to check localStorage - needs to run in browser console:\nlocalStorage.getItem(''bills'')\")"
     ],
     "deny": [],
     "ask": []

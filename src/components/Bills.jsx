@@ -33,6 +33,8 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
   }
 
   const handleAddBill = () => {
+    console.log('handleAddBill called with formData:', formData)
+
     if (!formData.name || !formData.amount || !formData.dueDate) {
       alert('Please fill in all required fields')
       return
@@ -41,14 +43,18 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
     const newBill = {
       id: Date.now(),
       ...formData,
-      amount: parseFloat(formData.amount)
+      amount: parseFloat(formData.amount),
+      paidDates: []
     }
 
     console.log('Adding new bill:', newBill)
     console.log('Current bills:', bills)
     const updatedBills = [...bills, newBill]
     console.log('Updated bills:', updatedBills)
+    console.log('Calling onUpdateBills with:', updatedBills)
     onUpdateBills(updatedBills)
+    console.log('onUpdateBills called successfully')
+
     setFormData({
       name: '',
       amount: '',
@@ -58,6 +64,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
       paidDates: []
     })
     setIsAdding(false)
+    console.log('Form reset and closed')
   }
 
   const handleEditBill = (bill) => {
