@@ -260,6 +260,7 @@ function Spending({
             </span>
           </div>
         )}
+      </div>
         </>
       )}
     </div>
