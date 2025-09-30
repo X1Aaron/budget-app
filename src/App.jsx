@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import Overview from './components/Overview'
 import Spending from './components/Spending'
+import Bills from './components/Bills'
 import CSVImport from './components/CSVImport'
 import CategoryManager from './components/CategoryManager'
 import AutoCategorizationRules from './components/AutoCategorizationRules'
@@ -12,6 +13,10 @@ import { DEFAULT_CATEGORIES, autoCategorize } from './utils/categories'
 function App() {
   const [activeSection, setActiveSection] = useState('overview')
   const [transactions, setTransactions] = useState([])
+  const [bills, setBills] = useState(() => {
+    const saved = localStorage.getItem('bills')
+    return saved ? JSON.parse(saved) : []
+  })
   const [categories, setCategories] = useState(() => {
     const saved = localStorage.getItem('categories')
     return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES
@@ -28,6 +33,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('categorizationRules', JSON.stringify(rules))
   }, [rules])
+
+  useEffect(() => {
+    localStorage.setItem('bills', JSON.stringify(bills))
+  }, [bills])
 
   useEffect(() => {
     const saved = localStorage.getItem('transactions')
@@ -102,6 +111,12 @@ function App() {
           >
             Spending
           </button>
+          <button
+            className={'nav-btn' + (activeSection === 'bills' ? ' active' : '')}
+            onClick={() => setActiveSection('bills')}
+          >
+            Bills
+          </button>
         </nav>
       </header>
       <main className="app-main">
@@ -117,13 +132,15 @@ function App() {
           <ExportButton transactions={transactions} categories={categories} rules={rules} />
         </div>
         {activeSection === 'overview' ? (
-          <Overview transactions={transactions} categories={categories} />
-        ) : (
+          <Overview transactions={transactions} categories={categories} bills={bills} />
+        ) : activeSection === 'spending' ? (
           <Spending
             transactions={transactions}
             categories={categories}
             onUpdateTransaction={handleUpdateTransaction}
           />
+        ) : (
+          <Bills bills={bills} onUpdateBills={setBills} />
         )}
       </main>
     </div>
