@@ -11,6 +11,7 @@ function Overview({
   selectedYear,
   selectedMonth,
   monthlyBudgets,
+  startingBalances = {},
   onDateChange,
   onUpdateBudget
 }) {
@@ -89,6 +90,10 @@ function Overview({
   const cashFlowData = useMemo(() => {
     const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate()
     const data = []
+
+    // Get starting balance for this month
+    const key = `${selectedYear}-${selectedMonth}`
+    const startingBalance = startingBalances[key] || 0
 
     // Generate all recurring bills for the selected month
     const monthlyBills = []
@@ -182,8 +187,8 @@ function Overview({
       dailyTransactions[day] += t.amount
     })
 
-    // Calculate cumulative cash flow for each day
-    let balance = 0
+    // Calculate cumulative cash flow for each day, starting with the starting balance
+    let balance = startingBalance
     for (let day = 1; day <= daysInMonth; day++) {
       // Add transactions for this day (income is positive, expenses are negative)
       const transactionsAmount = dailyTransactions[day] || 0
@@ -202,7 +207,7 @@ function Overview({
     }
 
     return data
-  }, [bills, selectedYear, selectedMonth, monthlyTransactions])
+  }, [bills, selectedYear, selectedMonth, monthlyTransactions, startingBalances])
 
   const categorySpendingData = useMemo(() => {
     // Group transactions by day and category

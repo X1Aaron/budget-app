@@ -169,6 +169,7 @@ function App() {
             selectedYear={selectedYear}
             selectedMonth={selectedMonth}
             monthlyBudgets={monthlyBudgets}
+            startingBalances={startingBalances}
             onDateChange={handleDateChange}
             onUpdateBudget={handleUpdateBudget}
           />
