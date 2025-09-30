@@ -300,15 +300,12 @@ function Overview({
           <h3>Difference</h3>
           <p className="amount">{formatCurrency(summary.balance)}</p>
         </div>
-      </div>
-
-      <div className="summary-cards">
         <div className="summary-card necessary">
-          <h3>Necessary Spending</h3>
+          <h3>Necessary</h3>
           <p className="amount">{formatCurrency(summary.necessarySpending)}</p>
         </div>
         <div className="summary-card discretionary">
-          <h3>Discretionary Spending</h3>
+          <h3>Discretionary</h3>
           <p className="amount">{formatCurrency(summary.discretionarySpending)}</p>
         </div>
       </div>
@@ -329,6 +326,70 @@ function Overview({
           </div>
         </div>
       )}
+
+      <div className="categories-section">
+        <h2>Categories</h2>
+        <div className="categories-list">
+          {Object.entries(summary.categoryBreakdown)
+            .filter(([category, amount]) => amount < 0)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([category, amount]) => {
+              const color = getCategoryColor(category, categories)
+              const categoryObj = categories.find(cat => cat.name === category)
+              const budgeted = categoryObj?.budgeted || 0
+              const spent = Math.abs(amount)
+              const difference = budgeted - spent
+              const isOverBudget = difference < 0
+
+              return (
+                <div
+                  key={category}
+                  className={'category-card ' + (amount < 0 ? 'expense' : 'income')}
+                >
+                  <div className="category-header">
+                    <div className="category-color-dot" style={{ backgroundColor: color }}></div>
+                    <span className="category-name">{category}</span>
+                  </div>
+                  <div className="category-details">
+                    <div className="category-amounts">
+                      <div className="category-stat">
+                        <span className="stat-label">Spent</span>
+                        <span className="stat-value">{formatCurrency(spent)}</span>
+                      </div>
+                      <div className="category-stat">
+                        <span className="stat-label">Budget</span>
+                        <span className="stat-value">{budgeted === 0 ? 'None' : formatCurrency(budgeted)}</span>
+                      </div>
+                      <div className="category-stat">
+                        <span className="stat-label">Remaining</span>
+                        {budgeted === 0 ? (
+                          <span className="stat-value no-budget">—</span>
+                        ) : (
+                          <span className={'stat-value ' + (isOverBudget ? 'over-budget' : 'under-budget')}>
+                            {formatCurrency(Math.abs(difference))}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {budgeted > 0 && (
+                      <div className="category-progress">
+                        <div className="progress-bar">
+                          <div
+                            className={'progress-fill ' + (isOverBudget ? 'over-budget' : '')}
+                            style={{ width: `${Math.min((spent / budgeted) * 100, 100)}%` }}
+                          ></div>
+                        </div>
+                        <span className="progress-text">
+                          {Math.round((spent / budgeted) * 100)}% used
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+        </div>
+      </div>
 
       <div className="cash-flow-section">
         <h2>Cash Flow for {monthNames[selectedMonth]}</h2>
@@ -394,55 +455,6 @@ function Overview({
       </div>
 
       <CategoryPieChart transactions={monthlyTransactions} categories={categories} />
-
-      <div className="categories-section">
-        <h2>Categories</h2>
-        <div className="categories-list">
-          {Object.entries(summary.categoryBreakdown)
-            .filter(([category, amount]) => amount < 0)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([category, amount]) => {
-              const color = getCategoryColor(category, categories)
-              const categoryObj = categories.find(cat => cat.name === category)
-              const budgeted = categoryObj?.budgeted || 0
-              const spent = Math.abs(amount)
-              const difference = budgeted - spent
-              const isOverBudget = difference < 0
-
-              return (
-                <div
-                  key={category}
-                  className={'category-card ' + (amount < 0 ? 'expense' : 'income')}
-                >
-                  <div className="category-column">
-                    <div className="category-header">
-                      <div className="category-color-dot" style={{ backgroundColor: color }}></div>
-                      <span className="category-name">{category}</span>
-                    </div>
-                  </div>
-                  <div className="category-column">
-                    <span className="detail-label">Spent</span>
-                    <span className="detail-value">{formatCurrency(spent)}</span>
-                  </div>
-                  <div className="category-column">
-                    <span className="detail-label">Budget</span>
-                    <span className="detail-value">{formatCurrency(budgeted)}</span>
-                  </div>
-                  <div className="category-column">
-                    <span className="detail-label">Difference</span>
-                    {budgeted === 0 ? (
-                      <span className="detail-value">No Budget</span>
-                    ) : (
-                      <span className={'detail-value ' + (isOverBudget ? 'over-budget' : 'under-budget')}>
-                        {formatCurrency(Math.abs(difference))} {isOverBudget ? 'over' : 'left'}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-        </div>
-      </div>
     </div>
   )
 }
