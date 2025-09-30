@@ -7,6 +7,7 @@ function Spending({
   categories,
   selectedYear,
   selectedMonth,
+  monthlyStartingBalances,
   onDateChange,
   onUpdateTransaction
 }) {
@@ -44,23 +45,42 @@ function Spending({
   ]
 
   const monthlyTransactions = useMemo(() => {
-    return transactions.filter(t => {
+    const filtered = transactions.filter(t => {
       const date = new Date(t.date)
       return date.getFullYear() === selectedYear && date.getMonth() === selectedMonth
     })
+    // Sort by date ascending for running balance calculation
+    return filtered.sort((a, b) => new Date(a.date) - new Date(b.date))
   }, [transactions, selectedYear, selectedMonth])
+
+  const currentStartingBalance = useMemo(() => {
+    const key = `${selectedYear}-${selectedMonth}`
+    return monthlyStartingBalances[key] || 0
+  }, [monthlyStartingBalances, selectedYear, selectedMonth])
+
+  // Calculate running balance for each transaction
+  const transactionsWithBalance = useMemo(() => {
+    let runningBalance = currentStartingBalance
+    return monthlyTransactions.map(t => {
+      runningBalance += t.amount
+      return {
+        ...t,
+        runningBalance: runningBalance
+      }
+    })
+  }, [monthlyTransactions, currentStartingBalance])
 
   const filteredTransactions = useMemo(() => {
     let filtered = filterCategory === 'all'
-      ? [...monthlyTransactions]
-      : monthlyTransactions.filter(t => t.category === filterCategory)
+      ? [...transactionsWithBalance]
+      : transactionsWithBalance.filter(t => t.category === filterCategory)
 
     if (sortConfig.key) {
       filtered.sort((a, b) => {
         let aVal = a[sortConfig.key]
         let bVal = b[sortConfig.key]
 
-        if (sortConfig.key === 'amount') {
+        if (sortConfig.key === 'amount' || sortConfig.key === 'runningBalance') {
           aVal = parseFloat(aVal)
           bVal = parseFloat(bVal)
         } else if (sortConfig.key === 'date') {
@@ -78,7 +98,7 @@ function Spending({
     }
 
     return filtered
-  }, [transactions, filterCategory, sortConfig])
+  }, [transactionsWithBalance, filterCategory, sortConfig])
 
   const filteredTotal = useMemo(() => {
     return filteredTransactions.reduce((sum, t) => sum + t.amount, 0)
@@ -174,6 +194,12 @@ function Spending({
                     {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
                   </span>
                 </th>
+                <th onClick={() => handleSort('runningBalance')} className="sortable">
+                  Balance
+                  <span className="sort-arrow">
+                    {sortConfig.key === 'runningBalance' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
+                  </span>
+                </th>
                 <th>Need/Want</th>
               </tr>
             </thead>
@@ -227,6 +253,9 @@ function Spending({
                     </td>
                     <td className={'transaction-amount ' + (transaction.amount < 0 ? 'negative' : 'positive')}>
                       {formatCurrency(transaction.amount)}
+                    </td>
+                    <td className={'transaction-balance ' + (transaction.runningBalance < 0 ? 'negative' : 'positive')}>
+                      {formatCurrency(transaction.runningBalance)}
                     </td>
                     <td className="transaction-need-want">
                       <div className="need-want-buttons">

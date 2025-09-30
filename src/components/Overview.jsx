@@ -11,12 +11,16 @@ function Overview({
   selectedYear,
   selectedMonth,
   monthlyBudgets,
+  monthlyStartingBalances,
   onDateChange,
   onUpdateBudget,
+  onUpdateStartingBalance,
   currentBalance = 0
 }) {
   const [isEditingBudget, setIsEditingBudget] = useState(false)
   const [budgetInput, setBudgetInput] = useState('')
+  const [isEditingStartingBalance, setIsEditingStartingBalance] = useState(false)
+  const [startingBalanceInput, setStartingBalanceInput] = useState('')
 
   const monthlyTransactions = useMemo(() => {
     return transactions.filter(t => {
@@ -52,6 +56,11 @@ function Overview({
     const key = `${selectedYear}-${selectedMonth}`
     return monthlyBudgets[key] || 0
   }, [monthlyBudgets, selectedYear, selectedMonth])
+
+  const currentStartingBalance = useMemo(() => {
+    const key = `${selectedYear}-${selectedMonth}`
+    return monthlyStartingBalances[key] || 0
+  }, [monthlyStartingBalances, selectedYear, selectedMonth])
 
   const upcomingBills = useMemo(() => {
     const today = new Date()
@@ -257,6 +266,39 @@ function Overview({
     setIsEditingBudget(true)
   }
 
+  const handleSaveStartingBalance = () => {
+    const balance = parseFloat(startingBalanceInput)
+    if (!isNaN(balance)) {
+      onUpdateStartingBalance(selectedYear, selectedMonth, balance)
+      setIsEditingStartingBalance(false)
+    }
+  }
+
+  const handleEditStartingBalance = () => {
+    // Auto-calculate from previous month if current is 0
+    if (currentStartingBalance === 0) {
+      const prevMonth = selectedMonth === 0 ? 11 : selectedMonth - 1
+      const prevYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear
+      const prevKey = `${prevYear}-${prevMonth}`
+      const prevStartingBalance = monthlyStartingBalances[prevKey] || 0
+
+      // Get all transactions from previous month
+      const prevMonthTransactions = transactions.filter(t => {
+        const date = new Date(t.date)
+        return date.getFullYear() === prevYear && date.getMonth() === prevMonth
+      })
+
+      // Calculate ending balance of previous month
+      const prevMonthTotal = prevMonthTransactions.reduce((sum, t) => sum + t.amount, 0)
+      const calculatedStartingBalance = prevStartingBalance + prevMonthTotal
+
+      setStartingBalanceInput(calculatedStartingBalance.toString())
+    } else {
+      setStartingBalanceInput(currentStartingBalance.toString())
+    }
+    setIsEditingStartingBalance(true)
+  }
+
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
@@ -279,6 +321,27 @@ function Overview({
       </div>
 
       <div className="budget-section">
+        <div className="budget-card">
+          <h3>Starting Balance</h3>
+          {isEditingStartingBalance ? (
+            <div className="budget-edit">
+              <input
+                type="number"
+                value={startingBalanceInput}
+                onChange={(e) => setStartingBalanceInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSaveStartingBalance()}
+                autoFocus
+              />
+              <button onClick={handleSaveStartingBalance}>Save</button>
+              <button onClick={() => setIsEditingStartingBalance(false)}>Cancel</button>
+            </div>
+          ) : (
+            <div className="budget-display" onClick={handleEditStartingBalance}>
+              <p className="amount">{formatCurrency(currentStartingBalance)}</p>
+              <span className="edit-hint">Click to edit</span>
+            </div>
+          )}
+        </div>
         <div className="budget-card">
           <h3>Monthly Budget</h3>
           {isEditingBudget ? (
@@ -371,7 +434,7 @@ function Overview({
       <div className="cash-flow-section">
         <h2>Category Spending Over Time</h2>
         <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={categorySpendingData}>
+          <LineChart data={categorySpendingData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="date"
@@ -389,15 +452,17 @@ function Overview({
             {Array.from(new Set(monthlyTransactions.filter(t => t.amount < 0).map(t => t.category || 'Uncategorized'))).map(category => {
               const color = getCategoryColor(category, categories)
               return (
-                <Bar
+                <Line
                   key={category}
+                  type="monotone"
                   dataKey={category}
-                  stackId="spending"
-                  fill={color}
+                  stroke={color}
+                  strokeWidth={2}
+                  dot={false}
                 />
               )
             })}
-          </BarChart>
+          </LineChart>
         </ResponsiveContainer>
       </div>
 

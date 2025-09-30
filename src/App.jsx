@@ -18,6 +18,10 @@ function App() {
     const saved = localStorage.getItem('monthlyBudgets')
     return saved ? JSON.parse(saved) : {}
   })
+  const [monthlyStartingBalances, setMonthlyStartingBalances] = useState(() => {
+    const saved = localStorage.getItem('monthlyStartingBalances')
+    return saved ? JSON.parse(saved) : {}
+  })
   const [bills, setBills] = useState(() => {
     const saved = localStorage.getItem('bills')
     return saved ? JSON.parse(saved) : []
@@ -50,6 +54,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('monthlyBudgets', JSON.stringify(monthlyBudgets))
   }, [monthlyBudgets])
+
+  useEffect(() => {
+    localStorage.setItem('monthlyStartingBalances', JSON.stringify(monthlyStartingBalances))
+  }, [monthlyStartingBalances])
 
   useEffect(() => {
     localStorage.setItem('currentBalance', currentBalance.toString())
@@ -124,6 +132,14 @@ function App() {
     }))
   }
 
+  const handleUpdateStartingBalance = (year, month, balance) => {
+    const key = `${year}-${month}`
+    setMonthlyStartingBalances(prev => ({
+      ...prev,
+      [key]: balance
+    }))
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -164,9 +180,11 @@ function App() {
             selectedYear={selectedYear}
             selectedMonth={selectedMonth}
             monthlyBudgets={monthlyBudgets}
+            monthlyStartingBalances={monthlyStartingBalances}
             currentBalance={currentBalance}
             onDateChange={handleDateChange}
             onUpdateBudget={handleUpdateBudget}
+            onUpdateStartingBalance={handleUpdateStartingBalance}
           />
         ) : activeSection === 'spending' ? (
           <Spending
@@ -174,6 +192,7 @@ function App() {
             categories={categories}
             selectedYear={selectedYear}
             selectedMonth={selectedMonth}
+            monthlyStartingBalances={monthlyStartingBalances}
             onDateChange={handleDateChange}
             onUpdateTransaction={handleUpdateTransaction}
           />
