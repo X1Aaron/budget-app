@@ -10,6 +10,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
     dueDate: '',
     frequency: 'monthly',
     category: '',
+    memo: '',
     paidDates: []
   })
 
@@ -44,6 +45,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
       dueDate: '',
       frequency: 'monthly',
       category: '',
+      memo: '',
       paidDates: []
     })
     setIsAdding(false)
@@ -75,6 +77,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
       dueDate: '',
       frequency: 'monthly',
       category: '',
+      memo: '',
       paidDates: []
     })
     setIsAdding(false)
@@ -120,6 +123,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
       dueDate: '',
       frequency: 'monthly',
       category: '',
+      memo: '',
       paidDates: []
     })
   }
@@ -345,6 +349,15 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
                     ))}
                 </select>
               </div>
+              <div className="form-group form-group-full">
+                <label>Memo</label>
+                <textarea
+                  placeholder="Optional note about this bill"
+                  value={formData.memo}
+                  onChange={(e) => setFormData({ ...formData, memo: e.target.value })}
+                  rows="2"
+                />
+              </div>
             </div>
             <div className="form-actions">
               <button type="button" className="cancel-btn" onClick={handleCancelEdit}>
@@ -367,6 +380,20 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
           </div>
         ) : (
           <>
+            {categoryTotals.length > 0 && (
+              <div className="category-totals">
+                <h3>Total by Category</h3>
+                <div className="category-list">
+                  {categoryTotals.map(({ category, amount }) => (
+                    <div key={category} className="category-item">
+                      <span className="category-label">{category}</span>
+                      <span className="category-amount">{formatCurrency(amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="bills-list">
               {currentMonthBills.map((bill) => (
                 <div
@@ -387,6 +414,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
                       <span className="bill-frequency">{bill.frequency}</span>
                       {bill.category && <span className="bill-category">{bill.category}</span>}
                     </div>
+                    {bill.memo && <div className="bill-memo">{bill.memo}</div>}
                   </div>
                   <div className="bill-amount">{formatCurrency(bill.amount)}</div>
                   <div className="bill-actions">
@@ -408,20 +436,6 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
                 </div>
               ))}
             </div>
-
-            {categoryTotals.length > 0 && (
-              <div className="category-totals">
-                <h3>Total by Category</h3>
-                <div className="category-list">
-                  {categoryTotals.map(({ category, amount }) => (
-                    <div key={category} className="category-item">
-                      <span className="category-label">{category}</span>
-                      <span className="category-amount">{formatCurrency(amount)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </>
         )}
       </div>

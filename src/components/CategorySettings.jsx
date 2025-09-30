@@ -3,6 +3,7 @@ import './CategorySettings.css'
 import { autoCategorize } from '../utils/categories'
 
 function CategorySettings({ categories, onUpdateCategories, transactions, onUpdateTransactions }) {
+  const [isAdding, setIsAdding] = useState(false)
   const [newCategory, setNewCategory] = useState({
     name: '',
     color: '#6b7280',
@@ -105,6 +106,7 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
 
     setNewCategory({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0, needWant: 'need' })
     setKeywordInput('')
+    setIsAdding(false)
   }
 
   const handleDeleteCategory = (categoryId) => {
@@ -200,198 +202,211 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
   return (
     <div className="category-settings">
       <div className="category-settings-content">
-                  <div className="add-section">
-                    <h3>Add Category</h3>
-                    <div className="add-form">
-                      <input
-                        type="text"
-                        placeholder="Category name (e.g., Groceries)"
-                        value={newCategory.name}
-                        onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                        className="input-name"
-                      />
-                      <div className="form-row">
-                        <select
-                          value={newCategory.type}
-                          onChange={(e) => setNewCategory({ ...newCategory, type: e.target.value })}
-                          className="input-type"
-                        >
-                          <option value="expense">Expense</option>
-                          <option value="income">Income</option>
-                          <option value="both">Both</option>
-                        </select>
-                        <input
-                          type="color"
-                          value={newCategory.color}
-                          onChange={(e) => setNewCategory({ ...newCategory, color: e.target.value })}
-                          className="input-color"
-                        />
-                      </div>
-                      <div className="keywords-input-container">
-                        <label>Keywords for auto-categorization</label>
-                        <div className="keywords-tags">
-                          {newCategory.keywords && newCategory.keywords.split(',').map(k => k.trim()).filter(k => k).map((keyword, idx) => (
-                            <span key={idx} className="keyword-tag">
-                              {keyword}
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveKeyword(keyword, false)}
-                                className="keyword-remove"
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))}
+                  <div className="list-section">
+                    <div className="categories-header">
+                      <h3>Your Categories ({categories.length})</h3>
+                      {!isAdding && (
+                        <button className="add-category-btn" onClick={() => setIsAdding(true)}>
+                          + Add Category
+                        </button>
+                      )}
+                    </div>
+
+                    {isAdding && (
+                      <div className="add-section">
+                        <h3>Add Category</h3>
+                        <div className="add-form">
                           <input
                             type="text"
-                            placeholder="Type keyword and press Enter or comma"
-                            value={keywordInput}
-                            onChange={(e) => setKeywordInput(e.target.value)}
-                            onKeyDown={(e) => handleAddKeyword(e, false)}
-                            className="keyword-input"
+                            placeholder="Category name (e.g., Groceries)"
+                            value={newCategory.name}
+                            onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                            className="input-name"
                           />
-                        </div>
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="new-budget">Budget Amount (optional)</label>
-                        <input
-                          id="new-budget"
-                          type="number"
-                          placeholder="0.00"
-                          value={newCategory.budgeted}
-                          onChange={(e) => setNewCategory({ ...newCategory, budgeted: e.target.value })}
-                          className="input-budget"
-                          min="0"
-                          step="0.01"
-                        />
-                      </div>
-                      <div className="need-want-selector">
-                        <label>
-                          <input
-                            type="radio"
-                            name="newCategoryNeedWant"
-                            value="need"
-                            checked={newCategory.needWant === 'need'}
-                            onChange={(e) => setNewCategory({ ...newCategory, needWant: e.target.value })}
-                          />
-                          Need
-                        </label>
-                        <label>
-                          <input
-                            type="radio"
-                            name="newCategoryNeedWant"
-                            value="want"
-                            checked={newCategory.needWant === 'want'}
-                            onChange={(e) => setNewCategory({ ...newCategory, needWant: e.target.value })}
-                          />
-                          Want
-                        </label>
-                      </div>
-                      <button className="add-btn" onClick={handleAddCategory}>Add Category</button>
-                    </div>
-                    <p className="help-text">
-                      💡 Add keywords to automatically categorize transactions that contain those words
-                    </p>
-                  </div>
-
-                  {editingCategory && (
-                    <div className="edit-category-section">
-                      <h3>Edit Category</h3>
-                      <div className="add-form">
-                        <input
-                          type="text"
-                          placeholder="Category name"
-                          value={editCategoryForm.name}
-                          onChange={(e) => setEditCategoryForm({ ...editCategoryForm, name: e.target.value })}
-                          className="input-name"
-                        />
-                        <div className="form-row">
-                          <select
-                            value={editCategoryForm.type}
-                            onChange={(e) => setEditCategoryForm({ ...editCategoryForm, type: e.target.value })}
-                            className="input-type"
-                          >
-                            <option value="expense">Expense</option>
-                            <option value="income">Income</option>
-                            <option value="both">Both</option>
-                          </select>
-                          <input
-                            type="color"
-                            value={editCategoryForm.color}
-                            onChange={(e) => setEditCategoryForm({ ...editCategoryForm, color: e.target.value })}
-                            className="input-color"
-                          />
-                        </div>
-                        <div className="keywords-input-container">
-                          <label>Keywords</label>
-                          <div className="keywords-tags">
-                            {editCategoryForm.keywords && editCategoryForm.keywords.split(',').map(k => k.trim()).filter(k => k).map((keyword, idx) => (
-                              <span key={idx} className="keyword-tag">
-                                {keyword}
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveKeyword(keyword, true)}
-                                  className="keyword-remove"
-                                >
-                                  ×
-                                </button>
-                              </span>
-                            ))}
+                          <div className="form-row">
+                            <select
+                              value={newCategory.type}
+                              onChange={(e) => setNewCategory({ ...newCategory, type: e.target.value })}
+                              className="input-type"
+                            >
+                              <option value="expense">Expense</option>
+                              <option value="income">Income</option>
+                              <option value="both">Both</option>
+                            </select>
                             <input
-                              type="text"
-                              placeholder="Type keyword and press Enter or comma"
-                              value={editKeywordInput}
-                              onChange={(e) => setEditKeywordInput(e.target.value)}
-                              onKeyDown={(e) => handleAddKeyword(e, true)}
-                              className="keyword-input"
+                              type="color"
+                              value={newCategory.color}
+                              onChange={(e) => setNewCategory({ ...newCategory, color: e.target.value })}
+                              className="input-color"
                             />
                           </div>
+                          <div className="keywords-input-container">
+                            <label>Keywords for auto-categorization</label>
+                            <div className="keywords-tags">
+                              {newCategory.keywords && newCategory.keywords.split(',').map(k => k.trim()).filter(k => k).map((keyword, idx) => (
+                                <span key={idx} className="keyword-tag">
+                                  {keyword}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveKeyword(keyword, false)}
+                                    className="keyword-remove"
+                                  >
+                                    ×
+                                  </button>
+                                </span>
+                              ))}
+                              <input
+                                type="text"
+                                placeholder="Type keyword and press Enter or comma"
+                                value={keywordInput}
+                                onChange={(e) => setKeywordInput(e.target.value)}
+                                onKeyDown={(e) => handleAddKeyword(e, false)}
+                                className="keyword-input"
+                              />
+                            </div>
+                          </div>
+                          <div className="form-group">
+                            <label htmlFor="new-budget">Budget Amount (optional)</label>
+                            <input
+                              id="new-budget"
+                              type="number"
+                              placeholder="0.00"
+                              value={newCategory.budgeted}
+                              onChange={(e) => setNewCategory({ ...newCategory, budgeted: e.target.value })}
+                              className="input-budget"
+                              min="0"
+                              step="0.01"
+                            />
+                          </div>
+                          <div className="need-want-selector">
+                            <label>
+                              <input
+                                type="radio"
+                                name="newCategoryNeedWant"
+                                value="need"
+                                checked={newCategory.needWant === 'need'}
+                                onChange={(e) => setNewCategory({ ...newCategory, needWant: e.target.value })}
+                              />
+                              Need
+                            </label>
+                            <label>
+                              <input
+                                type="radio"
+                                name="newCategoryNeedWant"
+                                value="want"
+                                checked={newCategory.needWant === 'want'}
+                                onChange={(e) => setNewCategory({ ...newCategory, needWant: e.target.value })}
+                              />
+                              Want
+                            </label>
+                          </div>
+                          <div className="form-actions">
+                            <button className="cancel-btn" onClick={() => setIsAdding(false)}>Cancel</button>
+                            <button className="add-btn" onClick={handleAddCategory}>Add Category</button>
+                          </div>
                         </div>
-                        <div className="form-group">
-                          <label htmlFor="edit-budget">Budget Amount</label>
+                        <p className="help-text">
+                          💡 Add keywords to automatically categorize transactions that contain those words
+                        </p>
+                      </div>
+                    )}
+
+                    {editingCategory && (
+                      <div className="edit-category-section">
+                        <h3>Edit Category</h3>
+                        <div className="add-form">
                           <input
-                            id="edit-budget"
-                            type="number"
-                            placeholder="0.00"
-                            value={editCategoryForm.budgeted}
-                            onChange={(e) => setEditCategoryForm({ ...editCategoryForm, budgeted: e.target.value })}
-                            className="input-budget"
-                            min="0"
-                            step="0.01"
+                            type="text"
+                            placeholder="Category name"
+                            value={editCategoryForm.name}
+                            onChange={(e) => setEditCategoryForm({ ...editCategoryForm, name: e.target.value })}
+                            className="input-name"
                           />
-                        </div>
-                        <div className="need-want-selector">
-                          <label>
+                          <div className="form-row">
+                            <select
+                              value={editCategoryForm.type}
+                              onChange={(e) => setEditCategoryForm({ ...editCategoryForm, type: e.target.value })}
+                              className="input-type"
+                            >
+                              <option value="expense">Expense</option>
+                              <option value="income">Income</option>
+                              <option value="both">Both</option>
+                            </select>
                             <input
-                              type="radio"
-                              name="editCategoryNeedWant"
-                              value="need"
-                              checked={editCategoryForm.needWant === 'need'}
-                              onChange={(e) => setEditCategoryForm({ ...editCategoryForm, needWant: e.target.value })}
+                              type="color"
+                              value={editCategoryForm.color}
+                              onChange={(e) => setEditCategoryForm({ ...editCategoryForm, color: e.target.value })}
+                              className="input-color"
                             />
-                            Need
-                          </label>
-                          <label>
+                          </div>
+                          <div className="keywords-input-container">
+                            <label>Keywords</label>
+                            <div className="keywords-tags">
+                              {editCategoryForm.keywords && editCategoryForm.keywords.split(',').map(k => k.trim()).filter(k => k).map((keyword, idx) => (
+                                <span key={idx} className="keyword-tag">
+                                  {keyword}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveKeyword(keyword, true)}
+                                    className="keyword-remove"
+                                  >
+                                    ×
+                                  </button>
+                                </span>
+                              ))}
+                              <input
+                                type="text"
+                                placeholder="Type keyword and press Enter or comma"
+                                value={editKeywordInput}
+                                onChange={(e) => setEditKeywordInput(e.target.value)}
+                                onKeyDown={(e) => handleAddKeyword(e, true)}
+                                className="keyword-input"
+                              />
+                            </div>
+                          </div>
+                          <div className="form-group">
+                            <label htmlFor="edit-budget">Budget Amount</label>
                             <input
-                              type="radio"
-                              name="editCategoryNeedWant"
-                              value="want"
-                              checked={editCategoryForm.needWant === 'want'}
-                              onChange={(e) => setEditCategoryForm({ ...editCategoryForm, needWant: e.target.value })}
+                              id="edit-budget"
+                              type="number"
+                              placeholder="0.00"
+                              value={editCategoryForm.budgeted}
+                              onChange={(e) => setEditCategoryForm({ ...editCategoryForm, budgeted: e.target.value })}
+                              className="input-budget"
+                              min="0"
+                              step="0.01"
                             />
-                            Want
-                          </label>
-                        </div>
-                        <div className="form-actions">
-                          <button className="update-btn" onClick={handleUpdateCategory}>Update Category</button>
-                          <button className="cancel-btn" onClick={handleCancelCategoryEdit}>Cancel</button>
+                          </div>
+                          <div className="need-want-selector">
+                            <label>
+                              <input
+                                type="radio"
+                                name="editCategoryNeedWant"
+                                value="need"
+                                checked={editCategoryForm.needWant === 'need'}
+                                onChange={(e) => setEditCategoryForm({ ...editCategoryForm, needWant: e.target.value })}
+                              />
+                              Need
+                            </label>
+                            <label>
+                              <input
+                                type="radio"
+                                name="editCategoryNeedWant"
+                                value="want"
+                                checked={editCategoryForm.needWant === 'want'}
+                                onChange={(e) => setEditCategoryForm({ ...editCategoryForm, needWant: e.target.value })}
+                              />
+                              Want
+                            </label>
+                          </div>
+                          <div className="form-actions">
+                            <button className="cancel-btn" onClick={handleCancelCategoryEdit}>Cancel</button>
+                            <button className="update-btn" onClick={handleUpdateCategory}>Update Category</button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  <div className="list-section">
-                    <h3>Your Categories ({categories.length})</h3>
                     <div className="categories-table-wrapper">
                       <table className="categories-table">
                         <thead>
