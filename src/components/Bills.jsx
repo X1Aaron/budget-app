@@ -145,7 +145,8 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
     const recurringBills = []
 
     bills.forEach(bill => {
-      const startDate = new Date(bill.dueDate)
+      const [year, month, day] = bill.dueDate.split('-').map(Number)
+      const startDate = new Date(year, month - 1, day)
       const billYear = startDate.getFullYear()
       const billMonth = startDate.getMonth()
       const billDay = startDate.getDate()
