@@ -55,7 +55,9 @@ export const importTransactionsFromCSV = async (file) => {
     amount: parseFloat(row.amount),
     category: row.category || 'Uncategorized',
     needWant: row.needWant || undefined,
-    autoCategorized: row.autoCategorized === 'true' || row.autoCategorized === true || false
+    autoCategorized: row.autoCategorized === 'true' || row.autoCategorized === true || false,
+    merchantName: row.merchantName || row.friendlyName || row.description,
+    memo: row.memo || ''
   }))
 }
 
@@ -75,7 +77,9 @@ export const importTransactionsFromJSON = async (file) => {
     amount: parseFloat(t.amount),
     category: t.category || 'Uncategorized',
     needWant: t.needWant || undefined,
-    autoCategorized: t.autoCategorized || false
+    autoCategorized: t.autoCategorized || false,
+    merchantName: t.merchantName || t.friendlyName || t.description,
+    memo: t.memo || ''
   }))
 }
 

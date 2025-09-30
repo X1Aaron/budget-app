@@ -1,3 +1,61 @@
+// Generate a merchant name from a raw transaction description
+export const generateMerchantName = (description) => {
+  if (!description) return ''
+
+  let friendly = description.trim()
+
+  // Remove common prefixes
+  friendly = friendly.replace(/^(PURCHASE AUTHORIZED ON |DEBIT CARD PURCHASE - |VISA PURCHASE - |CARD PURCHASE - )/i, '')
+
+  // Remove date patterns (MM/DD, YYYY-MM-DD, etc)
+  friendly = friendly.replace(/\b\d{1,4}[-/]\d{1,2}[-/]\d{1,4}\b/g, '')
+
+  // Remove transaction IDs and reference numbers
+  friendly = friendly.replace(/\b[A-Z0-9]{10,}\b/g, '')
+  friendly = friendly.replace(/#\d+/g, '')
+  friendly = friendly.replace(/\*\d+/g, '')
+
+  // Remove location codes like "US*" or state abbreviations
+  friendly = friendly.replace(/\b[A-Z]{2}\*/g, '')
+
+  // Common merchant name cleanups
+  const merchantPatterns = [
+    { pattern: /AMZN MKTP/i, replacement: 'Amazon' },
+    { pattern: /AMAZON\.COM/i, replacement: 'Amazon' },
+    { pattern: /WM SUPERCENTER/i, replacement: 'Walmart' },
+    { pattern: /WALMART\.COM/i, replacement: 'Walmart' },
+    { pattern: /TARGET\.COM/i, replacement: 'Target' },
+    { pattern: /COSTCO WHSE/i, replacement: 'Costco' },
+    { pattern: /SHELL OIL/i, replacement: 'Shell' },
+    { pattern: /CHEVRON/i, replacement: 'Chevron' },
+    { pattern: /STARBUCKS/i, replacement: 'Starbucks' },
+    { pattern: /MCDONALD'S/i, replacement: 'McDonald\'s' },
+    { pattern: /SQ \*/i, replacement: '' },
+    { pattern: /TST\* /i, replacement: '' },
+    { pattern: /PAYPAL \*/i, replacement: 'PayPal - ' }
+  ]
+
+  for (const { pattern, replacement } of merchantPatterns) {
+    friendly = friendly.replace(pattern, replacement)
+  }
+
+  // Remove extra whitespace
+  friendly = friendly.replace(/\s+/g, ' ').trim()
+
+  // Remove trailing dashes or slashes
+  friendly = friendly.replace(/[-/\s]+$/, '')
+
+  // Capitalize properly
+  friendly = friendly.split(' ')
+    .map(word => {
+      if (word.length <= 2) return word.toUpperCase()
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    })
+    .join(' ')
+
+  return friendly || description
+}
+
 export const DEFAULT_CATEGORIES = [
   { id: 'income', name: 'Income', color: '#10b981', type: 'income', keywords: ['salary', 'paycheck', 'wage', 'income', 'bonus', 'refund'], budgeted: 0, needWant: 'need' },
   { id: 'food', name: 'Food & Dining', color: '#f59e0b', type: 'expense', keywords: ['grocery', 'restaurant', 'food', 'cafe', 'coffee', 'dinner', 'lunch', 'breakfast', 'uber eats', 'doordash', 'grubhub'], budgeted: 0, needWant: 'need' },

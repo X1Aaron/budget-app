@@ -322,12 +322,32 @@
   color: #3b82f6;
 }
 
-.transactions-table tbody tr {
+.transactions-table tbody tr.transaction-row {
   border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
-.transactions-table tbody tr:hover {
+.transactions-table tbody tr.transaction-row:hover {
   background: #f9fafb;
+}
+
+.transactions-table tbody tr.transaction-row.expanded {
+  background: #eff6ff;
+  border-bottom: none;
+}
+
+.transaction-expanded-row {
+  border-bottom: 1px solid #f3f4f6;
+  background: #f9fafb;
+}
+
+.transaction-expanded-row:hover {
+  background: #f9fafb;
+}
+
+.transaction-expanded-row td {
+  padding: 1.5rem !important;
 }
 
 .transactions-table tbody tr.uncategorized {
@@ -350,6 +370,106 @@
 .transaction-description {
   font-weight: 500;
   color: #111827;
+}
+
+.transaction-merchant-cell {
+  min-width: 200px;
+  max-width: 400px;
+}
+
+.transaction-merchant {
+  font-weight: 500;
+  color: #111827;
+}
+
+.transaction-merchant.editable {
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+  display: inline-block;
+}
+
+.transaction-merchant.editable:hover {
+  background: #e5e7eb;
+}
+
+.merchant-name-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.merchant-name-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.transaction-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.detail-value {
+  color: #6b7280;
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+.category-select-expanded {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  max-width: 300px;
+}
+
+.category-select-expanded:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.memo-section {
+  margin-top: 0.5rem;
+}
+
+.memo-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.memo-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.memo-input::placeholder {
+  color: #9ca3af;
 }
 
 .transaction-category-cell {

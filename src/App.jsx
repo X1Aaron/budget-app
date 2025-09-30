@@ -8,7 +8,7 @@ import CategorySettings from './components/CategorySettings'
 import ExportButton from './components/ExportButton'
 import ImportButton from './components/ImportButton'
 import MonthYearSelector from './components/MonthYearSelector'
-import { DEFAULT_CATEGORIES, autoCategorize } from './utils/categories'
+import { DEFAULT_CATEGORIES, autoCategorize, generateMerchantName } from './utils/categories'
 
 function App() {
   const [activeSection, setActiveSection] = useState('overview')
@@ -66,13 +66,37 @@ function App() {
     }
   }, [transactions])
 
-  const handleImport = (importedTransactions) => {
-    const categorizedTransactions = importedTransactions.map(t => {
+  const handleImport = (importedTransactions, existingTransactions = transactions) => {
+    // Check for duplicate transactions
+    const duplicates = []
+    const newTransactions = []
+
+    importedTransactions.forEach(imported => {
+      const isDuplicate = existingTransactions.some(existing =>
+        existing.date === imported.date &&
+        existing.description === imported.description &&
+        existing.amount === imported.amount
+      )
+
+      if (isDuplicate) {
+        duplicates.push(imported)
+      } else {
+        newTransactions.push(imported)
+      }
+    })
+
+    if (duplicates.length > 0) {
+      throw new Error(`Found ${duplicates.length} duplicate transaction${duplicates.length !== 1 ? 's' : ''} (same date, description, and amount). Import rejected to prevent duplicates.`)
+    }
+
+    const categorizedTransactions = newTransactions.map(t => {
       const result = autoCategorize(t.description, t.amount, t.category, categories)
       return {
         ...t,
         category: result.category,
-        autoCategorized: result.wasAutoCategorized
+        autoCategorized: result.wasAutoCategorized,
+        merchantName: t.merchantName || t.friendlyName || generateMerchantName(t.description),
+        memo: t.memo || ''
       }
     })
     setTransactions(categorizedTransactions)
@@ -85,12 +109,36 @@ function App() {
   }
 
   const handleImportTransactions = (importedTransactions) => {
-    const categorizedTransactions = importedTransactions.map(t => {
+    // Check for duplicate transactions
+    const duplicates = []
+    const newTransactions = []
+
+    importedTransactions.forEach(imported => {
+      const isDuplicate = transactions.some(existing =>
+        existing.date === imported.date &&
+        existing.description === imported.description &&
+        existing.amount === imported.amount
+      )
+
+      if (isDuplicate) {
+        duplicates.push(imported)
+      } else {
+        newTransactions.push(imported)
+      }
+    })
+
+    if (duplicates.length > 0) {
+      throw new Error(`Found ${duplicates.length} duplicate transaction${duplicates.length !== 1 ? 's' : ''} (same date, description, and amount). Import rejected to prevent duplicates.`)
+    }
+
+    const categorizedTransactions = newTransactions.map(t => {
       const result = autoCategorize(t.description, t.amount, t.category, categories)
       return {
         ...t,
         category: result.category,
-        autoCategorized: result.wasAutoCategorized
+        autoCategorized: result.wasAutoCategorized,
+        merchantName: t.merchantName || t.friendlyName || generateMerchantName(t.description),
+        memo: t.memo || ''
       }
     })
     setTransactions(categorizedTransactions)
@@ -158,6 +206,12 @@ function App() {
             Bills
           </button>
           <button
+            className={'nav-btn' + (activeSection === 'categories' ? ' active' : '')}
+            onClick={() => setActiveSection('categories')}
+          >
+            Categories
+          </button>
+          <button
             className={'nav-btn' + (activeSection === 'settings' ? ' active' : '')}
             onClick={() => setActiveSection('settings')}
           >
@@ -198,6 +252,16 @@ function App() {
             onDateChange={handleDateChange}
             categories={categories}
           />
+        ) : activeSection === 'categories' ? (
+          <div className="categories-section">
+            <h2>Categories</h2>
+            <CategorySettings
+              categories={categories}
+              onUpdateCategories={setCategories}
+              transactions={transactions}
+              onUpdateTransactions={setTransactions}
+            />
+          </div>
         ) : (
           <div className="settings-section">
             <h2>Settings</h2>
@@ -211,15 +275,6 @@ function App() {
                 />
                 <ExportButton transactions={transactions} categories={categories} />
               </div>
-            </div>
-            <div className="settings-group">
-              <h3>Categories</h3>
-              <CategorySettings
-                categories={categories}
-                onUpdateCategories={setCategories}
-                transactions={transactions}
-                onUpdateTransactions={setTransactions}
-              />
             </div>
           </div>
         )}

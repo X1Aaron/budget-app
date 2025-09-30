@@ -12,7 +12,8 @@ function Spending({
   startingBalances,
   onUpdateStartingBalance
 }) {
-  const [editingIndex, setEditingIndex] = useState(null)
+  const [expandedIndex, setExpandedIndex] = useState(null)
+  const [editingMerchantIndex, setEditingMerchantIndex] = useState(null)
   const [filterCategory, setFilterCategory] = useState('all')
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
   const [editingStartingBalance, setEditingStartingBalance] = useState(false)
@@ -193,22 +194,22 @@ function Spending({
                     {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
                   </span>
                 </th>
-                <th onClick={() => handleSort('description')} className="sortable">
-                  Description
+                <th onClick={() => handleSort('merchantName')} className="sortable">
+                  Merchant
                   <span className="sort-arrow">
-                    {sortConfig.key === 'description' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
-                  </span>
-                </th>
-                <th onClick={() => handleSort('category')} className="sortable">
-                  Category
-                  <span className="sort-arrow">
-                    {sortConfig.key === 'category' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
+                    {sortConfig.key === 'merchantName' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
                   </span>
                 </th>
                 <th onClick={() => handleSort('amount')} className="sortable">
                   Amount
                   <span className="sort-arrow">
                     {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
+                  </span>
+                </th>
+                <th onClick={() => handleSort('category')} className="sortable">
+                  Category
+                  <span className="sort-arrow">
+                    {sortConfig.key === 'category' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
                   </span>
                 </th>
                 <th onClick={() => handleSort('runningBalance')} className="sortable">
@@ -227,40 +228,56 @@ function Spending({
                   t.amount === transaction.amount
                 )
                 const color = getCategoryColor(transaction.category, categories)
-                const isEditing = editingIndex === originalIndex
+                const isExpanded = expandedIndex === originalIndex
+                const isEditingMerchant = editingMerchantIndex === originalIndex
                 const isUncategorized = !transaction.category || transaction.category === 'Uncategorized'
 
                 return (
-                  <tr
-                    key={originalIndex}
-                    className={'transaction-row ' + (transaction.amount < 0 ? 'expense' : 'income') + (isUncategorized ? ' uncategorized' : '')}
-                  >
-                    <td className="transaction-date">{transaction.date}</td>
-                    <td className="transaction-description">{transaction.description}</td>
-                    <td className="transaction-category-cell">
-                      {isEditing ? (
-                        <select
-                          className="category-select"
-                          value={transaction.category || 'Uncategorized'}
-                          onChange={(e) => {
-                            onUpdateTransaction(originalIndex, {
-                              ...transaction,
-                              category: e.target.value,
-                              autoCategorized: false
-                            })
-                            setEditingIndex(null)
-                          }}
-                          autoFocus
-                        >
-                          <option value="Uncategorized">Uncategorized</option>
-                          {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
-                            <option key={cat.id} value={cat.name}>{cat.name}</option>
-                          ))}
-                        </select>
-                      ) : (
+                  <>
+                    <tr
+                      key={originalIndex}
+                      className={'transaction-row ' + (transaction.amount < 0 ? 'expense' : 'income') + (isUncategorized ? ' uncategorized' : '') + (isExpanded ? ' expanded' : '')}
+                      onClick={() => setExpandedIndex(isExpanded ? null : originalIndex)}
+                    >
+                      <td className="transaction-date">{transaction.date}</td>
+                      <td className="transaction-merchant-cell" onClick={(e) => e.stopPropagation()}>
+                        {isEditingMerchant ? (
+                          <input
+                            type="text"
+                            className="merchant-name-input"
+                            defaultValue={transaction.merchantName || transaction.description}
+                            onBlur={(e) => {
+                              onUpdateTransaction(originalIndex, {
+                                ...transaction,
+                                merchantName: e.target.value
+                              })
+                              setEditingMerchantIndex(null)
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.target.blur()
+                              } else if (e.key === 'Escape') {
+                                setEditingMerchantIndex(null)
+                              }
+                            }}
+                            autoFocus
+                          />
+                        ) : (
+                          <span
+                            className="transaction-merchant editable"
+                            onClick={() => setEditingMerchantIndex(originalIndex)}
+                            title="Click to edit merchant name"
+                          >
+                            {transaction.merchantName || transaction.description}
+                          </span>
+                        )}
+                      </td>
+                      <td className={'transaction-amount ' + (transaction.amount < 0 ? 'negative' : 'positive')}>
+                        {formatCurrency(transaction.amount)}
+                      </td>
+                      <td className="transaction-category-cell" onClick={(e) => e.stopPropagation()}>
                         <span
                           className={'transaction-category editable' + (isUncategorized ? ' uncategorized-label' : '')}
-                          onClick={() => setEditingIndex(originalIndex)}
                           style={{ color }}
                         >
                           <span className="category-dot" style={{ backgroundColor: color }}></span>
@@ -268,15 +285,58 @@ function Spending({
                           {transaction.autoCategorized && <span className="auto-icon" title="Auto-categorized"> 🤖</span>}
                           {isUncategorized && <span className="warning-icon"> ⚠️</span>}
                         </span>
-                      )}
-                    </td>
-                    <td className={'transaction-amount ' + (transaction.amount < 0 ? 'negative' : 'positive')}>
-                      {formatCurrency(transaction.amount)}
-                    </td>
-                    <td className={'transaction-balance ' + (transaction.runningBalance < 0 ? 'negative' : 'positive')}>
-                      {formatCurrency(transaction.runningBalance)}
-                    </td>
-                  </tr>
+                      </td>
+                      <td className={'transaction-balance ' + (transaction.runningBalance < 0 ? 'negative' : 'positive')}>
+                        {formatCurrency(transaction.runningBalance)}
+                      </td>
+                    </tr>
+                    {isExpanded && (
+                      <tr key={`${originalIndex}-expanded`} className="transaction-expanded-row">
+                        <td colSpan="5" onClick={(e) => e.stopPropagation()}>
+                          <div className="transaction-details">
+                            <div className="detail-section">
+                              <label className="detail-label">Description:</label>
+                              <span className="detail-value">{transaction.description}</span>
+                            </div>
+                            <div className="detail-section">
+                              <label className="detail-label">Category:</label>
+                              <select
+                                className="category-select-expanded"
+                                value={transaction.category || 'Uncategorized'}
+                                onChange={(e) => {
+                                  onUpdateTransaction(originalIndex, {
+                                    ...transaction,
+                                    category: e.target.value,
+                                    autoCategorized: false
+                                  })
+                                }}
+                              >
+                                <option value="Uncategorized">Uncategorized</option>
+                                {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
+                                  <option key={cat.id} value={cat.name}>{cat.name}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="detail-section memo-section">
+                              <label className="detail-label">Memo:</label>
+                              <textarea
+                                className="memo-input"
+                                value={transaction.memo || ''}
+                                onChange={(e) => {
+                                  onUpdateTransaction(originalIndex, {
+                                    ...transaction,
+                                    memo: e.target.value
+                                  })
+                                }}
+                                placeholder="Add notes about this transaction..."
+                                rows="3"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 )
               })}
             </tbody>

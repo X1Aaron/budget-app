@@ -19,6 +19,9 @@ function CSVImport({ onImport }) {
     const categoryIndex = headers.findIndex(h => h.includes('category') || h.includes('cat'))
     const needWantIndex = headers.findIndex(h => h.includes('need') || h.includes('want'))
     const autoCategorizedIndex = headers.findIndex(h => h.includes('auto'))
+    const merchantNameIndex = headers.findIndex(h => h.includes('merchant'))
+    const friendlyNameIndex = headers.findIndex(h => h.includes('friendly') || (h.includes('name') && !h.includes('merchant')))
+    const memoIndex = headers.findIndex(h => h.includes('memo') || h.includes('note'))
 
     if (dateIndex === -1 || descIndex === -1 || amountIndex === -1) {
       throw new Error('CSV must have columns for: date, description, and amount')
@@ -35,7 +38,9 @@ function CSVImport({ onImport }) {
         amount: parseFloat(values[amountIndex]),
         category: categoryIndex !== -1 ? values[categoryIndex] : 'Uncategorized',
         needWant: needWantIndex !== -1 ? values[needWantIndex] : undefined,
-        autoCategorized: autoCategorizedIndex !== -1 ? (values[autoCategorizedIndex] === 'true') : false
+        autoCategorized: autoCategorizedIndex !== -1 ? (values[autoCategorizedIndex] === 'true') : false,
+        merchantName: merchantNameIndex !== -1 ? values[merchantNameIndex] : (friendlyNameIndex !== -1 ? values[friendlyNameIndex] : values[descIndex]),
+        memo: memoIndex !== -1 ? values[memoIndex] : ''
       }
 
       if (!isNaN(transaction.amount)) {
@@ -59,14 +64,13 @@ function CSVImport({ onImport }) {
     setError('')
 
     const reader = new FileReader()
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const transactions = parseCSV(e.target.result)
-        onImport(transactions)
+        await onImport(transactions)
         setError('')
       } catch (err) {
         setError(err.message)
-        onImport([])
       }
     }
     reader.onerror = () => {
@@ -80,7 +84,7 @@ function CSVImport({ onImport }) {
       <div className="import-card">
         <h2>Import Transactions</h2>
         <p className="import-description">
-          Upload a CSV file with columns: date, description, amount, category (optional), needWant (optional)
+          Upload a CSV file with columns: date, description, amount, category (optional), merchantName (optional), memo (optional), needWant (optional)
         </p>
         
         <div className="file-input-wrapper">
@@ -102,11 +106,11 @@ function CSVImport({ onImport }) {
         <div className="example-format">
           <strong>Example CSV format:</strong>
           <pre>
-date,description,amount,category,needWant
-2024-01-01,Salary,3000,Income,
-2024-01-02,Groceries,-150,Food,need
-2024-01-03,Rent,-1200,Housing,need
-2024-01-04,Movie tickets,-50,Entertainment,want
+date,description,amount,category,merchantName,memo,needWant
+2024-01-01,ACME CORP PAYROLL,3000,Income,ACME Corp,Monthly salary payment,
+2024-01-02,WHLE FDS #123,-150,Food,Whole Foods,Weekly groceries,need
+2024-01-03,PROP MGT LLC,-1200,Housing,Rent Payment,January rent,need
+2024-01-04,AMC THEATERS,-50,Entertainment,AMC,Watched new release,want
           </pre>
         </div>
       </div>
