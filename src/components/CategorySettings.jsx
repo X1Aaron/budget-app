@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import './CategorySettings.css'
+import { autoCategorize } from '../utils/categories'
 
-function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules }) {
+function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules, transactions, onUpdateTransactions }) {
   const [isOpen, setIsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('categories')
   const [newCategory, setNewCategory] = useState({
@@ -106,6 +107,33 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
     })
 
     onUpdateRules(newRules)
+  }
+
+  const handleReapplyRules = () => {
+    if (!transactions || !onUpdateTransactions) {
+      alert('Unable to reapply rules. Transactions data not available.')
+      return
+    }
+
+    if (!confirm(`This will reapply all auto-categorization rules to ${transactions.length} transactions. Manually categorized transactions will not be changed. Continue?`)) {
+      return
+    }
+
+    const updatedTransactions = transactions.map(t => {
+      // Only reapply if the transaction was auto-categorized or uncategorized
+      if (t.autoCategorized || !t.category || t.category === 'Uncategorized') {
+        const result = autoCategorize(t.description, t.amount, 'Uncategorized', rules)
+        return {
+          ...t,
+          category: result.category,
+          autoCategorized: result.wasAutoCategorized
+        }
+      }
+      return t
+    })
+
+    onUpdateTransactions(updatedTransactions)
+    alert('Rules reapplied successfully!')
   }
 
   return (
@@ -217,6 +245,17 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
                   <div className="rules-info">
                     <p>🎯 Advanced rules for complex pattern matching. Rules are checked in order (top to bottom).</p>
                   </div>
+
+                  {transactions && onUpdateTransactions && (
+                    <div className="reapply-section">
+                      <button className="reapply-btn" onClick={handleReapplyRules}>
+                        🔄 Reapply Rules to All Transactions
+                      </button>
+                      <p className="reapply-note">
+                        This will recategorize transactions that were auto-categorized or uncategorized. Manually categorized transactions will not be changed.
+                      </p>
+                    </div>
+                  )}
 
                   <div className="add-section">
                     <h3>{editingRuleId ? 'Edit Rule' : 'Add Advanced Rule'}</h3>

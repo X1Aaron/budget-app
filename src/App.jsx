@@ -126,6 +126,8 @@ function App() {
             rules={rules}
             onUpdateCategories={setCategories}
             onUpdateRules={setRules}
+            transactions={transactions}
+            onUpdateTransactions={setTransactions}
           />
           <ImportButton
             onImportTransactions={handleImportTransactions}
