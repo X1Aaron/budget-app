@@ -252,25 +252,30 @@
 
 .categories-list {
   display: grid;
+  gap: 1rem;
+}
+
+.category-card {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.category-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: 0.5rem;
 }
 
-.category-item {
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
-  background: #f9fafb;
-  border-radius: 8px;
-  border-left: 4px solid;
-  gap: 0.75rem;
-}
-
-.category-name-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e5e7eb;
+.category-column:first-child {
+  align-items: flex-start;
+  text-align: left;
 }
 
 .category-color-dot {
@@ -281,19 +286,9 @@
 }
 
 .category-name {
-  flex: 1;
   font-weight: 700;
   font-size: 1.1rem;
   color: #111827;
-}
-
-.category-detail-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem;
-  background: white;
-  border-radius: 4px;
 }
 
 .detail-label {
@@ -316,12 +311,4 @@
 .detail-value.under-budget {
   color: #10b981;
   font-weight: 700;
-}
-
-.category-item.expense .category-amount {
-  color: #ef4444;
-}
-
-.category-item.income .category-amount {
-  color: #10b981;
 }
