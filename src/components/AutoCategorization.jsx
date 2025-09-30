@@ -1,22 +1,58 @@
 import React, { useMemo, useState } from 'react'
 import './AutoCategorization.css'
 
-function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMerchantMapping, onDeleteCategoryMapping }) {
-  const [activeTab, setActiveTab] = useState('category')
+function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMerchantMapping, onDeleteCategoryMapping, onImportRules }) {
+  const combinedMappings = useMemo(() => {
+    const allDescriptions = new Set([
+      ...Object.keys(merchantMappings),
+      ...Object.keys(categoryMappings)
+    ])
 
-  const merchantMappingsList = useMemo(() => {
-    return Object.entries(merchantMappings).map(([description, merchantName]) => ({
+    return Array.from(allDescriptions).map(description => ({
       description,
-      merchantName
+      merchantName: merchantMappings[description] || '-',
+      category: categoryMappings[description] || '-'
     }))
-  }, [merchantMappings])
+  }, [merchantMappings, categoryMappings])
 
-  const categoryMappingsList = useMemo(() => {
-    return Object.entries(categoryMappings).map(([description, category]) => ({
-      description,
-      category
-    }))
-  }, [categoryMappings])
+  const handleExport = () => {
+    const exportData = {
+      merchantMappings,
+      categoryMappings,
+      exportedAt: new Date().toISOString()
+    }
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `auto-categorization-rules-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
+  const handleImport = (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const importedData = JSON.parse(e.target.result)
+        if (importedData.merchantMappings && importedData.categoryMappings) {
+          onImportRules(importedData.merchantMappings, importedData.categoryMappings)
+        } else {
+          alert('Invalid file format. Please select a valid auto-categorization rules file.')
+        }
+      } catch (error) {
+        alert('Error reading file: ' + error.message)
+      }
+    }
+    reader.readAsText(file)
+    event.target.value = '' // Reset input
+  }
 
   return (
     <div className="auto-categorization">
@@ -28,95 +64,70 @@ function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMercha
         </p>
       </div>
 
-      <div className="auto-cat-tabs">
-        <button
-          className={'tab-btn' + (activeTab === 'category' ? ' active' : '')}
-          onClick={() => setActiveTab('category')}
-        >
-          Category Mappings ({categoryMappingsList.length})
-        </button>
-        <button
-          className={'tab-btn' + (activeTab === 'merchant' ? ' active' : '')}
-          onClick={() => setActiveTab('merchant')}
-        >
-          Merchant Name Mappings ({merchantMappingsList.length})
-        </button>
-      </div>
-
       <div className="auto-cat-content">
-        {activeTab === 'category' ? (
-          <div className="mappings-table-container">
-            {categoryMappingsList.length === 0 ? (
-              <div className="empty-state">
-                <p>No category mappings yet.</p>
-                <p className="empty-hint">When you manually assign a category to a transaction, a mapping will be created here.</p>
-              </div>
-            ) : (
-              <table className="mappings-table">
-                <thead>
-                  <tr>
-                    <th>Transaction Description</th>
-                    <th>Assigned Category</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {categoryMappingsList.map((mapping, index) => (
-                    <tr key={index}>
-                      <td className="description-cell">{mapping.description}</td>
-                      <td className="category-cell">{mapping.category}</td>
-                      <td className="actions-cell">
+        <div className="mappings-table-container">
+          {combinedMappings.length === 0 ? (
+            <div className="empty-state">
+              <p>No mappings yet.</p>
+              <p className="empty-hint">When you manually assign a category or change a merchant name for a transaction, a mapping will be created here.</p>
+            </div>
+          ) : (
+            <table className="mappings-table">
+              <thead>
+                <tr>
+                  <th>Transaction Description</th>
+                  <th>Assigned Category</th>
+                  <th>Merchant Name</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {combinedMappings.map((mapping, index) => (
+                  <tr key={index}>
+                    <td className="description-cell">{mapping.description}</td>
+                    <td className="category-cell">{mapping.category}</td>
+                    <td className="merchant-cell">{mapping.merchantName}</td>
+                    <td className="actions-cell">
+                      {categoryMappings[mapping.description] && (
                         <button
                           className="delete-btn"
                           onClick={() => onDeleteCategoryMapping(mapping.description)}
-                          title="Delete this mapping"
+                          title="Delete category mapping"
                         >
-                          Delete
+                          Delete Category
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        ) : (
-          <div className="mappings-table-container">
-            {merchantMappingsList.length === 0 ? (
-              <div className="empty-state">
-                <p>No merchant name mappings yet.</p>
-                <p className="empty-hint">When you manually change a merchant name for a transaction, a mapping will be created here.</p>
-              </div>
-            ) : (
-              <table className="mappings-table">
-                <thead>
-                  <tr>
-                    <th>Transaction Description</th>
-                    <th>Merchant Name</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {merchantMappingsList.map((mapping, index) => (
-                    <tr key={index}>
-                      <td className="description-cell">{mapping.description}</td>
-                      <td className="merchant-cell">{mapping.merchantName}</td>
-                      <td className="actions-cell">
+                      )}
+                      {merchantMappings[mapping.description] && (
                         <button
                           className="delete-btn"
                           onClick={() => onDeleteMerchantMapping(mapping.description)}
-                          title="Delete this mapping"
+                          title="Delete merchant mapping"
                         >
-                          Delete
+                          Delete Merchant
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        )}
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        <div className="import-export-section">
+          <button className="export-btn" onClick={handleExport}>
+            Export Rules
+          </button>
+          <label className="import-btn">
+            Import Rules
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleImport}
+              style={{ display: 'none' }}
+            />
+          </label>
+        </div>
       </div>
     </div>
   )

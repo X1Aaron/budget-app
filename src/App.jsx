@@ -240,6 +240,18 @@ function App() {
     })
   }
 
+  const handleImportRules = (importedMerchantMappings, importedCategoryMappings) => {
+    setMerchantMappings(prev => ({
+      ...prev,
+      ...importedMerchantMappings
+    }))
+    setCategoryMappings(prev => ({
+      ...prev,
+      ...importedCategoryMappings
+    }))
+    alert('Rules imported successfully!')
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -341,6 +353,7 @@ function App() {
             categoryMappings={categoryMappings}
             onDeleteMerchantMapping={handleDeleteMerchantMapping}
             onDeleteCategoryMapping={handleDeleteCategoryMapping}
+            onImportRules={handleImportRules}
           />
         ) : (
           <div className="settings-section">

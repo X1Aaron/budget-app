@@ -134,3 +134,34 @@
   font-size: 14px;
   color: #bbb;
 }
+
+.import-export-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.export-btn,
+.import-btn {
+  padding: 10px 20px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.export-btn:hover,
+.import-btn:hover {
+  background: #45a049;
+}
+
+.import-btn {
+  display: inline-block;
+}
