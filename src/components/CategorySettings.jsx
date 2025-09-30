@@ -20,6 +20,14 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
   const [editingRuleId, setEditingRuleId] = useState(null)
   const [editingCategoryId, setEditingCategoryId] = useState(null)
   const [editBudget, setEditBudget] = useState('')
+  const [editingCategory, setEditingCategory] = useState(null)
+  const [editCategoryForm, setEditCategoryForm] = useState({
+    name: '',
+    color: '#6b7280',
+    type: 'expense',
+    keywords: '',
+    budgeted: 0
+  })
 
   const handleAddCategory = () => {
     if (!newCategory.name.trim()) return
@@ -40,6 +48,44 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
   const handleDeleteCategory = (categoryId) => {
     if (categoryId === 'uncategorized') return
     onUpdateCategories(categories.filter(cat => cat.id !== categoryId))
+  }
+
+  const handleEditCategory = (category) => {
+    setEditingCategory(category.id)
+    setEditCategoryForm({
+      name: category.name,
+      color: category.color,
+      type: category.type,
+      keywords: (category.keywords || []).join(', '),
+      budgeted: category.budgeted || 0
+    })
+  }
+
+  const handleUpdateCategory = () => {
+    if (!editCategoryForm.name.trim()) return
+
+    const updatedCategories = categories.map(cat => {
+      if (cat.id === editingCategory) {
+        return {
+          ...cat,
+          name: editCategoryForm.name,
+          color: editCategoryForm.color,
+          type: editCategoryForm.type,
+          keywords: editCategoryForm.keywords.split(',').map(k => k.trim()).filter(k => k),
+          budgeted: parseFloat(editCategoryForm.budgeted) || 0
+        }
+      }
+      return cat
+    })
+
+    onUpdateCategories(updatedCategories)
+    setEditingCategory(null)
+    setEditCategoryForm({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0 })
+  }
+
+  const handleCancelCategoryEdit = () => {
+    setEditingCategory(null)
+    setEditCategoryForm({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0 })
   }
 
   const handleAddRule = () => {
@@ -238,6 +284,58 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
                     </p>
                   </div>
 
+                  {editingCategory && (
+                    <div className="edit-category-section">
+                      <h3>Edit Category</h3>
+                      <div className="add-form">
+                        <input
+                          type="text"
+                          placeholder="Category name"
+                          value={editCategoryForm.name}
+                          onChange={(e) => setEditCategoryForm({ ...editCategoryForm, name: e.target.value })}
+                          className="input-name"
+                        />
+                        <div className="form-row">
+                          <select
+                            value={editCategoryForm.type}
+                            onChange={(e) => setEditCategoryForm({ ...editCategoryForm, type: e.target.value })}
+                            className="input-type"
+                          >
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                            <option value="both">Both</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={editCategoryForm.color}
+                            onChange={(e) => setEditCategoryForm({ ...editCategoryForm, color: e.target.value })}
+                            className="input-color"
+                          />
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Keywords (comma separated)"
+                          value={editCategoryForm.keywords}
+                          onChange={(e) => setEditCategoryForm({ ...editCategoryForm, keywords: e.target.value })}
+                          className="input-keywords"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Budget amount"
+                          value={editCategoryForm.budgeted}
+                          onChange={(e) => setEditCategoryForm({ ...editCategoryForm, budgeted: e.target.value })}
+                          className="input-budget"
+                          min="0"
+                          step="0.01"
+                        />
+                        <div className="form-actions">
+                          <button className="update-btn" onClick={handleUpdateCategory}>Update Category</button>
+                          <button className="cancel-btn" onClick={handleCancelCategoryEdit}>Cancel</button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="list-section">
                     <h3>Your Categories ({categories.length})</h3>
                     <div className="categories-table-wrapper">
@@ -295,13 +393,22 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
                               </td>
                               <td className="actions-cell">
                                 {category.id !== 'uncategorized' && (
-                                  <button
-                                    className="delete-btn"
-                                    onClick={() => handleDeleteCategory(category.id)}
-                                    title="Delete category"
-                                  >
-                                    ×
-                                  </button>
+                                  <>
+                                    <button
+                                      className="edit-btn-small"
+                                      onClick={() => handleEditCategory(category)}
+                                      title="Edit category"
+                                    >
+                                      ✏️
+                                    </button>
+                                    <button
+                                      className="delete-btn"
+                                      onClick={() => handleDeleteCategory(category.id)}
+                                      title="Delete category"
+                                    >
+                                      ×
+                                    </button>
+                                  </>
                                 )}
                               </td>
                             </tr>

@@ -122,7 +122,16 @@
   border: 2px solid #e5e7eb;
 }
 
-.add-section h3 {
+.edit-category-section {
+  background: #fef3c7;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border: 2px solid #fbbf24;
+}
+
+.add-section h3,
+.edit-category-section h3 {
   margin-top: 0;
   margin-bottom: 1rem;
   color: #374151;
@@ -314,7 +323,7 @@
 }
 
 .actions-cell {
-  width: 60px;
+  width: 80px;
   text-align: right;
 }
 

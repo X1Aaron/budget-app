@@ -278,6 +278,12 @@
   text-align: left;
 }
 
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .category-color-dot {
   width: 14px;
   height: 14px;

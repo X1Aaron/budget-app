@@ -228,8 +228,10 @@ function Overview({
                   className={'category-card ' + (amount < 0 ? 'expense' : 'income')}
                 >
                   <div className="category-column">
-                    <div className="category-color-dot" style={{ backgroundColor: color }}></div>
-                    <span className="category-name">{category}</span>
+                    <div className="category-header">
+                      <div className="category-color-dot" style={{ backgroundColor: color }}></div>
+                      <span className="category-name">{category}</span>
+                    </div>
                   </div>
                   <div className="category-column">
                     <span className="detail-label">Spent</span>
