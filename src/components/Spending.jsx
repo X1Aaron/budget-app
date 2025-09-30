@@ -7,16 +7,12 @@ function Spending({
   categories,
   selectedYear,
   selectedMonth,
-  monthlyStartingBalances,
   onDateChange,
-  onUpdateTransaction,
-  onUpdateStartingBalance
+  onUpdateTransaction
 }) {
   const [editingIndex, setEditingIndex] = useState(null)
   const [filterCategory, setFilterCategory] = useState('all')
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
-  const [isEditingStartingBalance, setIsEditingStartingBalance] = useState(false)
-  const [startingBalanceInput, setStartingBalanceInput] = useState('')
 
   const handleSort = (key) => {
     let direction = 'asc'
@@ -40,14 +36,9 @@ function Spending({
     return filtered.sort((a, b) => new Date(a.date) - new Date(b.date))
   }, [transactions, selectedYear, selectedMonth])
 
-  const currentStartingBalance = useMemo(() => {
-    const key = `${selectedYear}-${selectedMonth}`
-    return monthlyStartingBalances[key] || 0
-  }, [monthlyStartingBalances, selectedYear, selectedMonth])
-
   // Calculate running balance for each transaction
   const transactionsWithBalance = useMemo(() => {
-    let runningBalance = currentStartingBalance
+    let runningBalance = 0
     return monthlyTransactions.map(t => {
       runningBalance += t.amount
       return {
@@ -55,7 +46,7 @@ function Spending({
         runningBalance: runningBalance
       }
     })
-  }, [monthlyTransactions, currentStartingBalance])
+  }, [monthlyTransactions])
 
   const filteredTransactions = useMemo(() => {
     let filtered = filterCategory === 'all'
@@ -106,41 +97,8 @@ function Spending({
     }).format(amount)
   }
 
-  const handleSaveStartingBalance = () => {
-    const balance = parseFloat(startingBalanceInput)
-    if (!isNaN(balance)) {
-      onUpdateStartingBalance(selectedYear, selectedMonth, balance)
-      setIsEditingStartingBalance(false)
-    }
-  }
-
-  const handleEditStartingBalance = () => {
-    setStartingBalanceInput(currentStartingBalance.toString())
-    setIsEditingStartingBalance(true)
-  }
-
   return (
     <div className="spending">
-      <div className="starting-balance-display">
-        <span className="balance-label">Starting Balance:</span>
-        {isEditingStartingBalance ? (
-          <div className="balance-edit">
-            <input
-              type="number"
-              value={startingBalanceInput}
-              onChange={(e) => setStartingBalanceInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSaveStartingBalance()}
-              onBlur={handleSaveStartingBalance}
-              autoFocus
-            />
-          </div>
-        ) : (
-          <span className="balance-amount editable" onClick={handleEditStartingBalance}>
-            {formatCurrency(currentStartingBalance)}
-          </span>
-        )}
-      </div>
-
       {monthlyTransactions.length === 0 ? (
         <div className="spending-empty">
           <p>No transactions for {monthNames[selectedMonth]} {selectedYear}.</p>

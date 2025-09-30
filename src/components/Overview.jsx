@@ -11,15 +11,11 @@ function Overview({
   selectedYear,
   selectedMonth,
   monthlyBudgets,
-  monthlyStartingBalances,
   onDateChange,
-  onUpdateBudget,
-  onUpdateStartingBalance
+  onUpdateBudget
 }) {
   const [isEditingBudget, setIsEditingBudget] = useState(false)
   const [budgetInput, setBudgetInput] = useState('')
-  const [isEditingStartingBalance, setIsEditingStartingBalance] = useState(false)
-  const [startingBalanceInput, setStartingBalanceInput] = useState('')
 
   const monthlyTransactions = useMemo(() => {
     return transactions.filter(t => {
@@ -73,10 +69,6 @@ function Overview({
     return monthlyBudgets[key] || 0
   }, [monthlyBudgets, selectedYear, selectedMonth])
 
-  const currentStartingBalance = useMemo(() => {
-    const key = `${selectedYear}-${selectedMonth}`
-    return monthlyStartingBalances[key] || 0
-  }, [monthlyStartingBalances, selectedYear, selectedMonth])
 
   const upcomingBills = useMemo(() => {
     const today = new Date()
@@ -191,8 +183,7 @@ function Overview({
     })
 
     // Calculate cumulative cash flow for each day
-    const key = `${selectedYear}-${selectedMonth}`
-    let balance = monthlyStartingBalances[key] || 0
+    let balance = 0
     for (let day = 1; day <= daysInMonth; day++) {
       // Add transactions for this day (income is positive, expenses are negative)
       const transactionsAmount = dailyTransactions[day] || 0
@@ -211,7 +202,7 @@ function Overview({
     }
 
     return data
-  }, [bills, monthlyStartingBalances, selectedYear, selectedMonth, monthlyTransactions])
+  }, [bills, selectedYear, selectedMonth, monthlyTransactions])
 
   const categorySpendingData = useMemo(() => {
     // Group transactions by day and category
@@ -281,38 +272,6 @@ function Overview({
     setIsEditingBudget(true)
   }
 
-  const handleSaveStartingBalance = () => {
-    const balance = parseFloat(startingBalanceInput)
-    if (!isNaN(balance)) {
-      onUpdateStartingBalance(selectedYear, selectedMonth, balance)
-      setIsEditingStartingBalance(false)
-    }
-  }
-
-  const handleEditStartingBalance = () => {
-    // Auto-calculate from previous month if current is 0
-    if (currentStartingBalance === 0) {
-      const prevMonth = selectedMonth === 0 ? 11 : selectedMonth - 1
-      const prevYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear
-      const prevKey = `${prevYear}-${prevMonth}`
-      const prevStartingBalance = monthlyStartingBalances[prevKey] || 0
-
-      // Get all transactions from previous month
-      const prevMonthTransactions = transactions.filter(t => {
-        const date = new Date(t.date)
-        return date.getFullYear() === prevYear && date.getMonth() === prevMonth
-      })
-
-      // Calculate ending balance of previous month
-      const prevMonthTotal = prevMonthTransactions.reduce((sum, t) => sum + t.amount, 0)
-      const calculatedStartingBalance = prevStartingBalance + prevMonthTotal
-
-      setStartingBalanceInput(calculatedStartingBalance.toString())
-    } else {
-      setStartingBalanceInput(currentStartingBalance.toString())
-    }
-    setIsEditingStartingBalance(true)
-  }
 
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
