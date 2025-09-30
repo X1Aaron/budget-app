@@ -40,7 +40,7 @@ function CategoryPieChart({ categoryBreakdown, categories }) {
 
   return (
     <div className="pie-chart-container">
-      <h2>Expense Breakdown</h2>
+      <h2>Spending Breakdown</h2>
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
