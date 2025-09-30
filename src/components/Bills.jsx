@@ -10,8 +10,10 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange }) {
     dueDate: '',
     frequency: 'monthly',
     category: '',
-    isPaid: false
+    paidDates: []
   })
+
+  const cashRegisterSound = useMemo(() => new Audio('/cash-register.mp3'), [])
 
   const handleAddBill = () => {
     if (!formData.name || !formData.amount || !formData.dueDate) {
@@ -32,7 +34,7 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange }) {
       dueDate: '',
       frequency: 'monthly',
       category: '',
-      isPaid: false
+      paidDates: []
     })
     setIsAdding(false)
   }
@@ -62,7 +64,7 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange }) {
       dueDate: '',
       frequency: 'monthly',
       category: '',
-      isPaid: false
+      paidDates: []
     })
     setIsAdding(false)
     setEditingId(null)
@@ -74,10 +76,27 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange }) {
     }
   }
 
-  const handleTogglePaid = (id) => {
-    const updatedBills = bills.map(bill =>
-      bill.id === id ? { ...bill, isPaid: !bill.isPaid } : bill
-    )
+  const handleTogglePaid = (billId, occurrenceDate) => {
+    const updatedBills = bills.map(bill => {
+      if (bill.id === billId) {
+        const paidDates = bill.paidDates || []
+        const isPaid = paidDates.includes(occurrenceDate)
+
+        if (isPaid) {
+          return {
+            ...bill,
+            paidDates: paidDates.filter(date => date !== occurrenceDate)
+          }
+        } else {
+          cashRegisterSound.play().catch(err => console.log('Sound play failed:', err))
+          return {
+            ...bill,
+            paidDates: [...paidDates, occurrenceDate]
+          }
+        }
+      }
+      return bill
+    })
     onUpdateBills(updatedBills)
   }
 
@@ -90,9 +109,85 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange }) {
       dueDate: '',
       frequency: 'monthly',
       category: '',
-      isPaid: false
+      paidDates: []
     })
   }
+
+  const generateRecurringBills = useMemo(() => {
+    const recurringBills = []
+
+    bills.forEach(bill => {
+      const startDate = new Date(bill.dueDate)
+      const billYear = startDate.getFullYear()
+      const billMonth = startDate.getMonth()
+      const billDay = startDate.getDate()
+
+      if (bill.frequency === 'one-time') {
+        recurringBills.push({
+          ...bill,
+          occurrenceDate: bill.dueDate,
+          isPaid: (bill.paidDates || []).includes(bill.dueDate)
+        })
+      } else {
+        const startYear = Math.min(billYear, selectedYear)
+        const endYear = Math.max(billYear, selectedYear + 1)
+
+        for (let year = startYear; year <= endYear; year++) {
+          if (bill.frequency === 'yearly') {
+            const occurrenceDate = new Date(year, billMonth, billDay).toISOString().split('T')[0]
+            if (new Date(occurrenceDate) >= startDate) {
+              recurringBills.push({
+                ...bill,
+                occurrenceDate,
+                isPaid: (bill.paidDates || []).includes(occurrenceDate)
+              })
+            }
+          } else if (bill.frequency === 'monthly') {
+            for (let month = 0; month < 12; month++) {
+              const occurrenceDate = new Date(year, month, billDay).toISOString().split('T')[0]
+              if (new Date(occurrenceDate) >= startDate) {
+                recurringBills.push({
+                  ...bill,
+                  occurrenceDate,
+                  isPaid: (bill.paidDates || []).includes(occurrenceDate)
+                })
+              }
+            }
+          } else if (bill.frequency === 'quarterly') {
+            for (let quarter = 0; quarter < 4; quarter++) {
+              const month = billMonth + (quarter * 3)
+              if (month < 12) {
+                const occurrenceDate = new Date(year, month, billDay).toISOString().split('T')[0]
+                if (new Date(occurrenceDate) >= startDate) {
+                  recurringBills.push({
+                    ...bill,
+                    occurrenceDate,
+                    isPaid: (bill.paidDates || []).includes(occurrenceDate)
+                  })
+                }
+              }
+            }
+          } else if (bill.frequency === 'weekly') {
+            const weekMs = 7 * 24 * 60 * 60 * 1000
+            let currentDate = new Date(startDate)
+            const endDate = new Date(endYear + 1, 0, 1)
+
+            while (currentDate < endDate) {
+              const occurrenceDate = currentDate.toISOString().split('T')[0]
+              recurringBills.push({
+                ...bill,
+                occurrenceDate,
+                isPaid: (bill.paidDates || []).includes(occurrenceDate)
+              })
+              currentDate = new Date(currentDate.getTime() + weekMs)
+            }
+          }
+        }
+      }
+    })
+
+    return recurringBills
+  }, [bills, selectedYear])
 
   const monthlyBillTotals = useMemo(() => {
     const months = Array(12).fill(0).map((_, idx) => ({
@@ -101,8 +196,8 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange }) {
       bills: []
     }))
 
-    bills.forEach(bill => {
-      const dueDate = new Date(bill.dueDate)
+    generateRecurringBills.forEach(bill => {
+      const dueDate = new Date(bill.occurrenceDate)
       if (dueDate.getFullYear() === selectedYear) {
         const monthIdx = dueDate.getMonth()
         months[monthIdx].total += bill.amount
@@ -111,23 +206,23 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange }) {
     })
 
     return months
-  }, [bills, selectedYear])
+  }, [generateRecurringBills, selectedYear])
 
   const yearlyTotal = useMemo(() => {
     return monthlyBillTotals.reduce((sum, month) => sum + month.total, 0)
   }, [monthlyBillTotals])
 
   const sortedBills = useMemo(() => {
-    return [...bills]
+    return generateRecurringBills
       .filter(bill => {
-        const dueDate = new Date(bill.dueDate)
+        const dueDate = new Date(bill.occurrenceDate)
         return dueDate.getFullYear() === selectedYear
       })
       .sort((a, b) => {
         if (a.isPaid !== b.isPaid) return a.isPaid ? 1 : -1
-        return new Date(a.dueDate) - new Date(b.dueDate)
+        return new Date(a.occurrenceDate) - new Date(b.occurrenceDate)
       })
-  }, [bills, selectedYear])
+  }, [generateRecurringBills, selectedYear])
 
   const totalAmount = useMemo(() => {
     return sortedBills.reduce((sum, bill) => sum + bill.amount, 0)
@@ -291,20 +386,20 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange }) {
           <div className="bills-list">
             {sortedBills.map((bill) => (
               <div
-                key={bill.id}
+                key={`${bill.id}-${bill.occurrenceDate}`}
                 className={'bill-item' + (bill.isPaid ? ' paid' : '')}
               >
                 <div className="bill-checkbox">
                   <input
                     type="checkbox"
                     checked={bill.isPaid}
-                    onChange={() => handleTogglePaid(bill.id)}
+                    onChange={() => handleTogglePaid(bill.id, bill.occurrenceDate)}
                   />
                 </div>
                 <div className="bill-info">
                   <div className="bill-name">{bill.name}</div>
                   <div className="bill-meta">
-                    <span className="bill-date">Due: {formatDate(bill.dueDate)}</span>
+                    <span className="bill-date">Due: {formatDate(bill.occurrenceDate)}</span>
                     <span className="bill-frequency">{bill.frequency}</span>
                     {bill.category && <span className="bill-category">{bill.category}</span>}
                   </div>
