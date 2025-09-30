@@ -221,7 +221,11 @@ function Spending({
             </thead>
             <tbody>
               {filteredTransactions.map((transaction, filteredIndex) => {
-                const originalIndex = transactions.findIndex(t => t === transaction)
+                const originalIndex = transactions.findIndex(t =>
+                  t.date === transaction.date &&
+                  t.description === transaction.description &&
+                  t.amount === transaction.amount
+                )
                 const color = getCategoryColor(transaction.category, categories)
                 const isEditing = editingIndex === originalIndex
                 const isUncategorized = !transaction.category || transaction.category === 'Uncategorized'

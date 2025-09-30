@@ -4,10 +4,15 @@ import './Bills.css'
 function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange, categories }) {
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState(null)
+  const getDefaultDueDate = () => {
+    const date = new Date(selectedYear, selectedMonth, 15)
+    return date.toISOString().split('T')[0]
+  }
+
   const [formData, setFormData] = useState({
     name: '',
     amount: '',
-    dueDate: '',
+    dueDate: getDefaultDueDate(),
     frequency: 'monthly',
     category: '',
     paidDates: []
@@ -31,7 +36,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
     setFormData({
       name: '',
       amount: '',
-      dueDate: '',
+      dueDate: getDefaultDueDate(),
       frequency: 'monthly',
       category: '',
       paidDates: []
@@ -61,7 +66,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
     setFormData({
       name: '',
       amount: '',
-      dueDate: '',
+      dueDate: getDefaultDueDate(),
       frequency: 'monthly',
       category: '',
       paidDates: []
@@ -106,7 +111,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
     setFormData({
       name: '',
       amount: '',
-      dueDate: '',
+      dueDate: getDefaultDueDate(),
       frequency: 'monthly',
       category: '',
       paidDates: []
@@ -189,28 +194,6 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
     return recurringBills
   }, [bills, selectedYear])
 
-  const monthlyBillTotals = useMemo(() => {
-    const months = Array(12).fill(0).map((_, idx) => ({
-      month: idx,
-      total: 0,
-      bills: []
-    }))
-
-    generateRecurringBills.forEach(bill => {
-      const dueDate = new Date(bill.occurrenceDate)
-      if (dueDate.getFullYear() === selectedYear) {
-        const monthIdx = dueDate.getMonth()
-        months[monthIdx].total += bill.amount
-        months[monthIdx].bills.push(bill)
-      }
-    })
-
-    return months
-  }, [generateRecurringBills, selectedYear])
-
-  const yearlyTotal = useMemo(() => {
-    return monthlyBillTotals.reduce((sum, month) => sum + month.total, 0)
-  }, [monthlyBillTotals])
 
   const sortedBills = useMemo(() => {
     return generateRecurringBills
@@ -230,10 +213,6 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
       return billDate.getMonth() === selectedMonth && billDate.getFullYear() === selectedYear
     })
   }, [sortedBills, selectedMonth, selectedYear])
-
-  const handleMonthClick = (month) => {
-    onDateChange(selectedYear, month)
-  }
 
   const totalAmount = useMemo(() => {
     return currentMonthBills.reduce((sum, bill) => sum + bill.amount, 0)
@@ -265,29 +244,9 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
 
   return (
     <div className="bills">
-      <div className="monthly-breakdown">
-        <h2>Monthly Breakdown</h2>
-        <div className="months-grid">
-          {monthlyBillTotals.map((monthData) => (
-            <div
-              key={monthData.month}
-              className={'month-card' + (monthData.total > 0 ? ' has-bills' : '') + (monthData.month === selectedMonth ? ' selected' : '')}
-              onClick={() => handleMonthClick(monthData.month)}
-              style={{ cursor: 'pointer' }}
-            >
-              <h3>{monthNames[monthData.month]}</h3>
-              <p className="month-total">{formatCurrency(monthData.total)}</p>
-              {monthData.bills.length > 0 && (
-                <p className="bill-count">{monthData.bills.length} bill{monthData.bills.length !== 1 ? 's' : ''}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
       <div className="bills-section">
         <div className="bills-header">
-          <h2>Bills for {monthNames[selectedMonth]}</h2>
+          <h2>Bills</h2>
           {!isAdding && (
             <button className="add-bill-btn" onClick={() => setIsAdding(true)}>
               + Add Bill
