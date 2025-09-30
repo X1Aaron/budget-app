@@ -208,6 +208,16 @@ function Overview({
     return data
   }, [bills, selectedYear, selectedMonth, monthlyTransactions, startingBalances])
 
+  const categorySpendingData = useMemo(() => {
+    return Object.entries(summary.categoryBreakdown)
+      .filter(([category, amount]) => amount < 0)
+      .map(([category, amount]) => ({
+        category,
+        amount: Math.abs(amount)
+      }))
+      .sort((a, b) => b.amount - a.amount)
+  }, [summary.categoryBreakdown])
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -356,7 +366,7 @@ function Overview({
                     <tr key={category}>
                       <td className="category-name-cell">
                         <span className="category-color-dot" style={{ backgroundColor: color }}></span>
-                        <span className="category-name">{category}</span>
+                        <span className="category-name" style={{ color }}>{category}</span>
                       </td>
                       <td className="spent-cell">{formatCurrency(spent)}</td>
                       <td className="budget-cell">{budgeted === 0 ? '—' : formatCurrency(budgeted)}</td>
@@ -391,14 +401,7 @@ function Overview({
       <div className="cash-flow-section">
         <h2>Category Spending</h2>
         <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={Object.entries(summary.categoryBreakdown)
-            .filter(([category, amount]) => amount < 0)
-            .map(([category, amount]) => ({
-              category,
-              amount: Math.abs(amount)
-            }))
-            .sort((a, b) => b.amount - a.amount)
-          }>
+          <BarChart data={categorySpendingData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="category"
@@ -414,19 +417,12 @@ function Overview({
               formatter={(value) => [`$${value.toLocaleString()}`, 'Spent']}
             />
             <Bar dataKey="amount">
-              {Object.entries(summary.categoryBreakdown)
-                .filter(([category, amount]) => amount < 0)
-                .map(([category, amount]) => ({
-                  category,
-                  amount: Math.abs(amount)
-                }))
-                .sort((a, b) => b.amount - a.amount)
-                .map((entry) => (
-                  <Cell
-                    key={entry.category}
-                    fill={getCategoryColor(entry.category, categories)}
-                  />
-                ))}
+              {categorySpendingData.map((entry) => (
+                <Cell
+                  key={entry.category}
+                  fill={getCategoryColor(entry.category, categories)}
+                />
+              ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
