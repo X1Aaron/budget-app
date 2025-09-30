@@ -1,0 +1,275 @@
+.spending {
+  padding: 1rem;
+}
+
+.spending-empty {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.spending-filters {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.spending-filters label {
+  font-weight: 500;
+  color: #333;
+}
+
+.category-filter-select {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: white;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.category-filter-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.clear-filter-btn {
+  padding: 0.5rem 1rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.clear-filter-btn:hover {
+  background: #dc2626;
+}
+
+.transactions-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.transactions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.transactions-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.transaction-count {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.transactions-table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transactions-table thead {
+  background: #f9fafb;
+}
+
+.transactions-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.transactions-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.transactions-table th.sortable:hover {
+  background: #f3f4f6;
+}
+
+.sort-arrow {
+  margin-left: 0.25rem;
+  color: #3b82f6;
+}
+
+.transactions-table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.transactions-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.transactions-table tbody tr.uncategorized {
+  background: #fef3c7;
+}
+
+.transactions-table tbody tr.uncategorized:hover {
+  background: #fde68a;
+}
+
+.transactions-table td {
+  padding: 0.75rem 1rem;
+}
+
+.transaction-date {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.transaction-description {
+  font-weight: 500;
+  color: #111827;
+}
+
+.transaction-category-cell {
+  min-width: 150px;
+}
+
+.transaction-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.transaction-category.editable {
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.transaction-category.editable:hover {
+  background: #f3f4f6;
+}
+
+.transaction-category.uncategorized-label {
+  color: #d97706 !important;
+}
+
+.category-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.category-select {
+  padding: 0.5rem;
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  width: 100%;
+  max-width: 200px;
+}
+
+.auto-icon {
+  font-size: 0.9rem;
+}
+
+.warning-icon {
+  font-size: 1rem;
+}
+
+.transaction-amount {
+  font-weight: 600;
+  text-align: right;
+}
+
+.transaction-amount.positive {
+  color: #10b981;
+}
+
+.transaction-amount.negative {
+  color: #ef4444;
+}
+
+.transaction-need-want {
+  text-align: center;
+}
+
+.need-want-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.need-btn,
+.want-btn {
+  padding: 0.25rem 0.75rem;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.need-btn:hover,
+.want-btn:hover {
+  background: #e5e7eb;
+}
+
+.need-btn.active {
+  background: #10b981;
+  color: white;
+  border-color: #059669;
+}
+
+.want-btn.active {
+  background: #f59e0b;
+  color: white;
+  border-color: #d97706;
+}
+
+.transactions-total {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid #e5e7eb;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.total-label {
+  color: #374151;
+}
+
+.total-amount.positive {
+  color: #10b981;
+}
+
+.total-amount.negative {
+  color: #ef4444;
+}

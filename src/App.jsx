@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-import BudgetDashboard from './components/BudgetDashboard'
+import Overview from './components/Overview'
+import Spending from './components/Spending'
 import CSVImport from './components/CSVImport'
 import CategoryManager from './components/CategoryManager'
 import AutoCategorizationRules from './components/AutoCategorizationRules'
@@ -9,6 +10,7 @@ import ImportButton from './components/ImportButton'
 import { DEFAULT_CATEGORIES, autoCategorize } from './utils/categories'
 
 function App() {
+  const [activeSection, setActiveSection] = useState('overview')
   const [transactions, setTransactions] = useState([])
   const [categories, setCategories] = useState(() => {
     const saved = localStorage.getItem('categories')
@@ -87,6 +89,20 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1>Budget Tracker</h1>
+        <nav className="app-nav">
+          <button
+            className={'nav-btn' + (activeSection === 'overview' ? ' active' : '')}
+            onClick={() => setActiveSection('overview')}
+          >
+            Overview
+          </button>
+          <button
+            className={'nav-btn' + (activeSection === 'spending' ? ' active' : '')}
+            onClick={() => setActiveSection('spending')}
+          >
+            Spending
+          </button>
+        </nav>
       </header>
       <main className="app-main">
         <CSVImport onImport={handleImport} />
@@ -100,11 +116,15 @@ function App() {
           />
           <ExportButton transactions={transactions} categories={categories} rules={rules} />
         </div>
-        <BudgetDashboard
-          transactions={transactions}
-          categories={categories}
-          onUpdateTransaction={handleUpdateTransaction}
-        />
+        {activeSection === 'overview' ? (
+          <Overview transactions={transactions} categories={categories} />
+        ) : (
+          <Spending
+            transactions={transactions}
+            categories={categories}
+            onUpdateTransaction={handleUpdateTransaction}
+          />
+        )}
       </main>
     </div>
   )

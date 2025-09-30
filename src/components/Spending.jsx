@@ -1,0 +1,223 @@
+import { useMemo, useState } from 'react'
+import './Spending.css'
+import { getCategoryColor } from '../utils/categories'
+
+function Spending({ transactions, categories, onUpdateTransaction }) {
+  const [editingIndex, setEditingIndex] = useState(null)
+  const [filterCategory, setFilterCategory] = useState('all')
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
+
+  const handleSort = (key) => {
+    let direction = 'asc'
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc'
+    }
+    setSortConfig({ key, direction })
+  }
+
+  const filteredTransactions = useMemo(() => {
+    let filtered = filterCategory === 'all'
+      ? [...transactions]
+      : transactions.filter(t => t.category === filterCategory)
+
+    if (sortConfig.key) {
+      filtered.sort((a, b) => {
+        let aVal = a[sortConfig.key]
+        let bVal = b[sortConfig.key]
+
+        if (sortConfig.key === 'amount') {
+          aVal = parseFloat(aVal)
+          bVal = parseFloat(bVal)
+        } else if (sortConfig.key === 'date') {
+          aVal = new Date(aVal)
+          bVal = new Date(bVal)
+        } else {
+          aVal = String(aVal).toLowerCase()
+          bVal = String(bVal).toLowerCase()
+        }
+
+        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1
+        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1
+        return 0
+      })
+    }
+
+    return filtered
+  }, [transactions, filterCategory, sortConfig])
+
+  const filteredTotal = useMemo(() => {
+    return filteredTransactions.reduce((sum, t) => sum + t.amount, 0)
+  }, [filteredTransactions])
+
+  const availableCategories = useMemo(() => {
+    const categorySet = new Set()
+    transactions.forEach(t => {
+      categorySet.add(t.category || 'Uncategorized')
+    })
+    return Array.from(categorySet).sort()
+  }, [transactions])
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount)
+  }
+
+  if (transactions.length === 0) {
+    return (
+      <div className="spending-empty">
+        <p>No transactions yet. Import a CSV file to get started.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="spending">
+      <div className="spending-filters">
+        <label htmlFor="category-filter">Filter by category:</label>
+        <select
+          id="category-filter"
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+          className="category-filter-select"
+        >
+          <option value="all">All Categories</option>
+          {availableCategories.map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+        {filterCategory !== 'all' && (
+          <button className="clear-filter-btn" onClick={() => setFilterCategory('all')}>
+            Clear Filter
+          </button>
+        )}
+      </div>
+
+      <div className="transactions-section">
+        <div className="transactions-header">
+          <h2>Transactions{filterCategory !== 'all' && ` - ${filterCategory}`}</h2>
+          <span className="transaction-count">
+            {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+        <div className="transactions-table-container">
+          <table className="transactions-table">
+            <thead>
+              <tr>
+                <th onClick={() => handleSort('date')} className="sortable">
+                  Date
+                  <span className="sort-arrow">
+                    {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
+                  </span>
+                </th>
+                <th onClick={() => handleSort('description')} className="sortable">
+                  Description
+                  <span className="sort-arrow">
+                    {sortConfig.key === 'description' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
+                  </span>
+                </th>
+                <th onClick={() => handleSort('category')} className="sortable">
+                  Category
+                  <span className="sort-arrow">
+                    {sortConfig.key === 'category' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
+                  </span>
+                </th>
+                <th onClick={() => handleSort('amount')} className="sortable">
+                  Amount
+                  <span className="sort-arrow">
+                    {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
+                  </span>
+                </th>
+                <th>Need/Want</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTransactions.map((transaction, filteredIndex) => {
+                const originalIndex = transactions.findIndex(t => t === transaction)
+                const color = getCategoryColor(transaction.category, categories)
+                const isEditing = editingIndex === originalIndex
+                const isUncategorized = !transaction.category || transaction.category === 'Uncategorized'
+
+                return (
+                  <tr
+                    key={originalIndex}
+                    className={'transaction-row ' + (transaction.amount < 0 ? 'expense' : 'income') + (isUncategorized ? ' uncategorized' : '')}
+                  >
+                    <td className="transaction-date">{transaction.date}</td>
+                    <td className="transaction-description">{transaction.description}</td>
+                    <td className="transaction-category-cell">
+                      {isEditing ? (
+                        <select
+                          className="category-select"
+                          value={transaction.category}
+                          onChange={(e) => {
+                            onUpdateTransaction(originalIndex, {
+                              ...transaction,
+                              category: e.target.value,
+                              autoCategorized: false
+                            })
+                            setEditingIndex(null)
+                          }}
+                          onBlur={() => setTimeout(() => setEditingIndex(null), 200)}
+                          autoFocus
+                        >
+                          <option value="Uncategorized">Select category</option>
+                          {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
+                            <option key={cat.id} value={cat.name}>{cat.name}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span
+                          className={'transaction-category editable' + (isUncategorized ? ' uncategorized-label' : '')}
+                          onClick={() => setEditingIndex(originalIndex)}
+                          style={{ color }}
+                        >
+                          <span className="category-dot" style={{ backgroundColor: color }}></span>
+                          {transaction.category || 'Uncategorized'}
+                          {transaction.autoCategorized && <span className="auto-icon" title="Auto-categorized"> 🤖</span>}
+                          {isUncategorized && <span className="warning-icon"> ⚠️</span>}
+                        </span>
+                      )}
+                    </td>
+                    <td className={'transaction-amount ' + (transaction.amount < 0 ? 'negative' : 'positive')}>
+                      {formatCurrency(transaction.amount)}
+                    </td>
+                    <td className="transaction-need-want">
+                      <div className="need-want-buttons">
+                        <button
+                          className={'need-btn' + (transaction.needWant === 'need' ? ' active' : '')}
+                          onClick={() => onUpdateTransaction(originalIndex, { ...transaction, needWant: 'need' })}
+                          title="Mark as Need"
+                        >
+                          Need
+                        </button>
+                        <button
+                          className={'want-btn' + (transaction.needWant === 'want' ? ' active' : '')}
+                          onClick={() => onUpdateTransaction(originalIndex, { ...transaction, needWant: 'want' })}
+                          title="Mark as Want"
+                        >
+                          Want
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+        {filterCategory !== 'all' && (
+          <div className="transactions-total">
+            <span className="total-label">Total for {filterCategory}:</span>
+            <span className={'total-amount ' + (filteredTotal < 0 ? 'negative' : 'positive')}>
+              {formatCurrency(filteredTotal)}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default Spending
