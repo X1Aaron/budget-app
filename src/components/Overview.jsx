@@ -449,6 +449,7 @@ function Overview({
         <h2>Categories</h2>
         <div className="categories-list">
           {Object.entries(summary.categoryBreakdown)
+            .filter(([category, amount]) => amount < 0)
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([category, amount]) => {
               const color = getCategoryColor(category, categories)
