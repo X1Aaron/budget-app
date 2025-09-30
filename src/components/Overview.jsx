@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react'
 import './Overview.css'
 import { getCategoryColor } from '../utils/categories'
-import CategoryPieChart from './CategoryPieChart'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 
 function Overview({
   transactions,
@@ -209,33 +208,6 @@ function Overview({
     return data
   }, [bills, selectedYear, selectedMonth, monthlyTransactions, startingBalances])
 
-  const categorySpendingData = useMemo(() => {
-    // Group transactions by day and category
-    const dailySpending = {}
-
-    monthlyTransactions.forEach(t => {
-      if (t.amount < 0) { // Only expenses
-        const day = new Date(t.date).getDate()
-        const category = t.category || 'Uncategorized'
-
-        if (!dailySpending[day]) {
-          dailySpending[day] = { day, date: `${selectedMonth + 1}/${day}` }
-        }
-
-        if (!dailySpending[day][category]) {
-          dailySpending[day][category] = 0
-        }
-
-        dailySpending[day][category] += Math.abs(t.amount)
-      }
-    })
-
-    // Convert to array and sort by day
-    const data = Object.values(dailySpending).sort((a, b) => a.day - b.day)
-
-    return data
-  }, [monthlyTransactions, selectedMonth])
-
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -327,6 +299,34 @@ function Overview({
         </div>
       )}
 
+      <div className="cash-flow-section">
+        <h2>Cash Flow for {monthNames[selectedMonth]}</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={cashFlowData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              dataKey="date"
+              label={{ value: 'Day of Month', position: 'insideBottom', offset: -5 }}
+            />
+            <YAxis
+              label={{ value: 'Balance ($)', angle: -90, position: 'insideLeft' }}
+              tickFormatter={(value) => `$${value.toLocaleString()}`}
+            />
+            <Tooltip
+              formatter={(value) => [`$${value.toLocaleString()}`, 'Balance']}
+              labelFormatter={(label) => `Date: ${label}`}
+            />
+            <Line
+              type="monotone"
+              dataKey="balance"
+              stroke="#8884d8"
+              strokeWidth={2}
+              dot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
       <div className="categories-section">
         <h2>Categories</h2>
         <div className="categories-list">
@@ -392,69 +392,49 @@ function Overview({
       </div>
 
       <div className="cash-flow-section">
-        <h2>Cash Flow for {monthNames[selectedMonth]}</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={cashFlowData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="date"
-              label={{ value: 'Day of Month', position: 'insideBottom', offset: -5 }}
-            />
-            <YAxis
-              label={{ value: 'Balance ($)', angle: -90, position: 'insideLeft' }}
-              tickFormatter={(value) => `$${value.toLocaleString()}`}
-            />
-            <Tooltip
-              formatter={(value) => [`$${value.toLocaleString()}`, 'Balance']}
-              labelFormatter={(label) => `Date: ${label}`}
-            />
-            <Line
-              type="monotone"
-              dataKey="balance"
-              stroke="#8884d8"
-              strokeWidth={2}
-              dot={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div className="cash-flow-section">
-        <h2>Category Spending Over Time</h2>
+        <h2>Category Spending</h2>
         <ResponsiveContainer width="100%" height={400}>
-          <LineChart data={categorySpendingData}>
+          <BarChart data={Object.entries(summary.categoryBreakdown)
+            .filter(([category, amount]) => amount < 0)
+            .map(([category, amount]) => ({
+              category,
+              amount: Math.abs(amount)
+            }))
+            .sort((a, b) => b.amount - a.amount)
+          }>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
-              dataKey="date"
-              label={{ value: 'Day of Month', position: 'insideBottom', offset: -5 }}
+              dataKey="category"
+              angle={-45}
+              textAnchor="end"
+              height={100}
             />
             <YAxis
               label={{ value: 'Amount ($)', angle: -90, position: 'insideLeft' }}
               tickFormatter={(value) => `$${value.toLocaleString()}`}
             />
             <Tooltip
-              formatter={(value) => `$${value.toLocaleString()}`}
-              labelFormatter={(label) => `Date: ${label}`}
+              formatter={(value) => [`$${value.toLocaleString()}`, 'Spent']}
             />
-            <Legend />
-            {Array.from(new Set(monthlyTransactions.filter(t => t.amount < 0).map(t => t.category || 'Uncategorized'))).map(category => {
-              const color = getCategoryColor(category, categories)
-              return (
-                <Line
-                  key={category}
-                  type="monotone"
-                  dataKey={category}
-                  stroke={color}
-                  strokeWidth={2}
-                  dot={false}
-                />
-              )
-            })}
-          </LineChart>
+            <Bar dataKey="amount" fill="#8884d8">
+              {Object.entries(summary.categoryBreakdown)
+                .filter(([category, amount]) => amount < 0)
+                .map(([category, amount]) => ({
+                  category,
+                  amount: Math.abs(amount)
+                }))
+                .sort((a, b) => b.amount - a.amount)
+                .map((entry) => (
+                  <Bar
+                    key={entry.category}
+                    dataKey="amount"
+                    fill={getCategoryColor(entry.category, categories)}
+                  />
+                ))}
+            </Bar>
+          </BarChart>
         </ResponsiveContainer>
       </div>
-
-      <CategoryPieChart transactions={monthlyTransactions} categories={categories} />
     </div>
   )
 }
