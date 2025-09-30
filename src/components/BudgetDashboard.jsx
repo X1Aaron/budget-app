@@ -197,6 +197,7 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
                           onBlur={() => setTimeout(() => setEditingIndex(null), 200)}
                           autoFocus
                         >
+                          <option value="Uncategorized">Select category</option>
                           {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
                             <option key={cat.id} value={cat.name}>{cat.name}</option>
                           ))}
