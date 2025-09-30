@@ -25,6 +25,9 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
   })
   const [keywordInput, setKeywordInput] = useState('')
   const [editKeywordInput, setEditKeywordInput] = useState('')
+  const [inlineEditingId, setInlineEditingId] = useState(null)
+  const [inlineEditField, setInlineEditField] = useState(null)
+  const [inlineEditValue, setInlineEditValue] = useState('')
 
   const handleAddKeyword = (e, isEdit = false) => {
     if (e.key === 'Enter' || e.key === ',') {
@@ -170,6 +173,32 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
     onUpdateCategories(updatedCategories)
     setEditingCategoryId(null)
     setEditBudget('')
+  }
+
+  const startInlineEdit = (categoryId, field, currentValue) => {
+    setInlineEditingId(categoryId)
+    setInlineEditField(field)
+    setInlineEditValue(currentValue)
+  }
+
+  const cancelInlineEdit = () => {
+    setInlineEditingId(null)
+    setInlineEditField(null)
+    setInlineEditValue('')
+  }
+
+  const saveInlineEdit = () => {
+    if (!inlineEditingId || !inlineEditField) return
+
+    const updatedCategories = categories.map(cat => {
+      if (cat.id === inlineEditingId) {
+        return { ...cat, [inlineEditField]: inlineEditValue }
+      }
+      return cat
+    })
+
+    onUpdateCategories(updatedCategories)
+    cancelInlineEdit()
   }
 
   const handleReapplyKeywords = () => {
@@ -424,19 +453,106 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
                           {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(category => (
                             <tr key={category.id}>
                               <td className="color-cell">
-                                <div className="category-color" style={{ backgroundColor: category.color }}></div>
+                                {inlineEditingId === category.id && inlineEditField === 'color' ? (
+                                  <div className="inline-edit">
+                                    <input
+                                      type="color"
+                                      value={inlineEditValue}
+                                      onChange={(e) => setInlineEditValue(e.target.value)}
+                                      autoFocus
+                                    />
+                                    <button onClick={saveInlineEdit}>✓</button>
+                                    <button onClick={cancelInlineEdit}>✗</button>
+                                  </div>
+                                ) : (
+                                  <div
+                                    className="category-color clickable"
+                                    style={{ backgroundColor: category.color }}
+                                    onClick={() => category.id !== 'uncategorized' && startInlineEdit(category.id, 'color', category.color)}
+                                    title="Click to edit color"
+                                  ></div>
+                                )}
                               </td>
-                              <td className="name-cell">{category.name}</td>
+                              <td className="name-cell">
+                                {inlineEditingId === category.id && inlineEditField === 'name' ? (
+                                  <div className="inline-edit">
+                                    <input
+                                      type="text"
+                                      value={inlineEditValue}
+                                      onChange={(e) => setInlineEditValue(e.target.value)}
+                                      onKeyDown={(e) => e.key === 'Enter' && saveInlineEdit()}
+                                      autoFocus
+                                    />
+                                    <button onClick={saveInlineEdit}>✓</button>
+                                    <button onClick={cancelInlineEdit}>✗</button>
+                                  </div>
+                                ) : (
+                                  <span
+                                    className={category.id !== 'uncategorized' ? 'editable-text' : ''}
+                                    onClick={() => category.id !== 'uncategorized' && startInlineEdit(category.id, 'name', category.name)}
+                                    title={category.id !== 'uncategorized' ? 'Click to edit name' : ''}
+                                  >
+                                    {category.name}
+                                  </span>
+                                )}
+                              </td>
                               <td className="type-cell">
-                                <span className="category-type-badge">{category.type}</span>
+                                {inlineEditingId === category.id && inlineEditField === 'type' ? (
+                                  <div className="inline-edit">
+                                    <select
+                                      value={inlineEditValue}
+                                      onChange={(e) => setInlineEditValue(e.target.value)}
+                                      autoFocus
+                                    >
+                                      <option value="expense">Expense</option>
+                                      <option value="income">Income</option>
+                                      <option value="both">Both</option>
+                                    </select>
+                                    <button onClick={saveInlineEdit}>✓</button>
+                                    <button onClick={cancelInlineEdit}>✗</button>
+                                  </div>
+                                ) : (
+                                  <span
+                                    className={`category-type-badge ${category.id !== 'uncategorized' ? 'clickable' : ''}`}
+                                    onClick={() => category.id !== 'uncategorized' && startInlineEdit(category.id, 'type', category.type)}
+                                    title={category.id !== 'uncategorized' ? 'Click to edit type' : ''}
+                                  >
+                                    {category.type}
+                                  </span>
+                                )}
                               </td>
                               <td className="need-want-cell">
-                                {category.needWant ? (
-                                  <span className={`need-want-badge ${category.needWant}`}>
-                                    {category.needWant === 'need' ? 'Need' : 'Want'}
-                                  </span>
+                                {inlineEditingId === category.id && inlineEditField === 'needWant' ? (
+                                  <div className="inline-edit">
+                                    <select
+                                      value={inlineEditValue}
+                                      onChange={(e) => setInlineEditValue(e.target.value)}
+                                      autoFocus
+                                    >
+                                      <option value="need">Need</option>
+                                      <option value="want">Want</option>
+                                    </select>
+                                    <button onClick={saveInlineEdit}>✓</button>
+                                    <button onClick={cancelInlineEdit}>✗</button>
+                                  </div>
                                 ) : (
-                                  <span className="no-keywords">—</span>
+                                  category.needWant ? (
+                                    <span
+                                      className={`need-want-badge ${category.needWant} ${category.id !== 'uncategorized' ? 'clickable' : ''}`}
+                                      onClick={() => category.id !== 'uncategorized' && startInlineEdit(category.id, 'needWant', category.needWant)}
+                                      title={category.id !== 'uncategorized' ? 'Click to edit' : ''}
+                                    >
+                                      {category.needWant === 'need' ? 'Need' : 'Want'}
+                                    </span>
+                                  ) : (
+                                    <span
+                                      className={category.id !== 'uncategorized' ? 'no-keywords clickable' : 'no-keywords'}
+                                      onClick={() => category.id !== 'uncategorized' && startInlineEdit(category.id, 'needWant', 'need')}
+                                      title={category.id !== 'uncategorized' ? 'Click to set' : ''}
+                                    >
+                                      —
+                                    </span>
+                                  )
                                 )}
                               </td>
                               <td className="budget-cell">
@@ -455,39 +571,48 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
                                     <button onClick={() => { setEditingCategoryId(null); setEditBudget(''); }}>✗</button>
                                   </div>
                                 ) : (
-                                  <div className="budget-display" onClick={() => {
-                                    setEditingCategoryId(category.id);
-                                    setEditBudget((category.budgeted || 0).toString());
-                                  }}>
+                                  <div
+                                    className={`budget-display ${category.id !== 'uncategorized' ? 'clickable' : ''}`}
+                                    onClick={() => {
+                                      if (category.id !== 'uncategorized') {
+                                        setEditingCategoryId(category.id);
+                                        setEditBudget((category.budgeted || 0).toString());
+                                      }
+                                    }}
+                                    title={category.id !== 'uncategorized' ? 'Click to edit budget' : ''}
+                                  >
                                     ${(category.budgeted || 0).toFixed(2)}
                                   </div>
                                 )}
                               </td>
                               <td className="keywords-cell">
                                 {category.keywords && category.keywords.length > 0 ? (
-                                  category.keywords.join(', ')
+                                  <span
+                                    className={category.id !== 'uncategorized' ? 'editable-text' : ''}
+                                    onClick={() => category.id !== 'uncategorized' && handleEditCategory(category)}
+                                    title={category.id !== 'uncategorized' ? 'Click to edit keywords' : ''}
+                                  >
+                                    {category.keywords.join(', ')}
+                                  </span>
                                 ) : (
-                                  <span className="no-keywords">—</span>
+                                  <span
+                                    className={category.id !== 'uncategorized' ? 'no-keywords clickable' : 'no-keywords'}
+                                    onClick={() => category.id !== 'uncategorized' && handleEditCategory(category)}
+                                    title={category.id !== 'uncategorized' ? 'Click to add keywords' : ''}
+                                  >
+                                    —
+                                  </span>
                                 )}
                               </td>
                               <td className="actions-cell">
                                 {category.id !== 'uncategorized' && (
-                                  <>
-                                    <button
-                                      className="edit-btn-small"
-                                      onClick={() => handleEditCategory(category)}
-                                      title="Edit category"
-                                    >
-                                      ✏️
-                                    </button>
-                                    <button
-                                      className="delete-btn"
-                                      onClick={() => handleDeleteCategory(category.id)}
-                                      title="Delete category"
-                                    >
-                                      ×
-                                    </button>
-                                  </>
+                                  <button
+                                    className="delete-btn"
+                                    onClick={() => handleDeleteCategory(category.id)}
+                                    title="Delete category"
+                                  >
+                                    ×
+                                  </button>
                                 )}
                               </td>
                             </tr>
