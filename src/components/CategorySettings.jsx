@@ -23,6 +23,54 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
     budgeted: 0,
     needWant: 'need'
   })
+  const [keywordInput, setKeywordInput] = useState('')
+  const [editKeywordInput, setEditKeywordInput] = useState('')
+
+  const handleAddKeyword = (e, isEdit = false) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      const input = isEdit ? editKeywordInput : keywordInput
+      const keyword = input.trim().replace(/,/g, '')
+
+      if (keyword) {
+        if (isEdit) {
+          const currentKeywords = editCategoryForm.keywords ? editCategoryForm.keywords.split(',').map(k => k.trim()).filter(k => k) : []
+          if (!currentKeywords.includes(keyword)) {
+            setEditCategoryForm({
+              ...editCategoryForm,
+              keywords: [...currentKeywords, keyword].join(', ')
+            })
+          }
+          setEditKeywordInput('')
+        } else {
+          const currentKeywords = newCategory.keywords ? newCategory.keywords.split(',').map(k => k.trim()).filter(k => k) : []
+          if (!currentKeywords.includes(keyword)) {
+            setNewCategory({
+              ...newCategory,
+              keywords: [...currentKeywords, keyword].join(', ')
+            })
+          }
+          setKeywordInput('')
+        }
+      }
+    }
+  }
+
+  const handleRemoveKeyword = (keywordToRemove, isEdit = false) => {
+    if (isEdit) {
+      const keywords = editCategoryForm.keywords.split(',').map(k => k.trim()).filter(k => k !== keywordToRemove)
+      setEditCategoryForm({
+        ...editCategoryForm,
+        keywords: keywords.join(', ')
+      })
+    } else {
+      const keywords = newCategory.keywords.split(',').map(k => k.trim()).filter(k => k !== keywordToRemove)
+      setNewCategory({
+        ...newCategory,
+        keywords: keywords.join(', ')
+      })
+    }
+  }
 
   const handleAddCategory = () => {
     if (!newCategory.name.trim()) return
@@ -57,6 +105,7 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
     }
 
     setNewCategory({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0, needWant: 'need' })
+    setKeywordInput('')
   }
 
   const handleDeleteCategory = (categoryId) => {
@@ -97,11 +146,13 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
     onUpdateCategories(updatedCategories)
     setEditingCategory(null)
     setEditCategoryForm({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0, needWant: 'need' })
+    setEditKeywordInput('')
   }
 
   const handleCancelCategoryEdit = () => {
     setEditingCategory(null)
     setEditCategoryForm({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0, needWant: 'need' })
+    setEditKeywordInput('')
   }
 
   const handleUpdateBudget = (categoryId) => {
@@ -189,22 +240,44 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
                           className="input-color"
                         />
                       </div>
-                      <input
-                        type="text"
-                        placeholder="Keywords for auto-categorization (comma separated, e.g., walmart, safeway, kroger)"
-                        value={newCategory.keywords}
-                        onChange={(e) => setNewCategory({ ...newCategory, keywords: e.target.value })}
-                        className="input-keywords"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Budget amount (optional)"
-                        value={newCategory.budgeted}
-                        onChange={(e) => setNewCategory({ ...newCategory, budgeted: e.target.value })}
-                        className="input-budget"
-                        min="0"
-                        step="0.01"
-                      />
+                      <div className="keywords-input-container">
+                        <label>Keywords for auto-categorization</label>
+                        <div className="keywords-tags">
+                          {newCategory.keywords && newCategory.keywords.split(',').map(k => k.trim()).filter(k => k).map((keyword, idx) => (
+                            <span key={idx} className="keyword-tag">
+                              {keyword}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveKeyword(keyword, false)}
+                                className="keyword-remove"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                          <input
+                            type="text"
+                            placeholder="Type keyword and press Enter or comma"
+                            value={keywordInput}
+                            onChange={(e) => setKeywordInput(e.target.value)}
+                            onKeyDown={(e) => handleAddKeyword(e, false)}
+                            className="keyword-input"
+                          />
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="new-budget">Budget Amount (optional)</label>
+                        <input
+                          id="new-budget"
+                          type="number"
+                          placeholder="0.00"
+                          value={newCategory.budgeted}
+                          onChange={(e) => setNewCategory({ ...newCategory, budgeted: e.target.value })}
+                          className="input-budget"
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
                       <div className="need-want-selector">
                         <label>
                           <input
@@ -262,22 +335,44 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
                             className="input-color"
                           />
                         </div>
-                        <input
-                          type="text"
-                          placeholder="Keywords (comma separated)"
-                          value={editCategoryForm.keywords}
-                          onChange={(e) => setEditCategoryForm({ ...editCategoryForm, keywords: e.target.value })}
-                          className="input-keywords"
-                        />
-                        <input
-                          type="number"
-                          placeholder="Budget amount"
-                          value={editCategoryForm.budgeted}
-                          onChange={(e) => setEditCategoryForm({ ...editCategoryForm, budgeted: e.target.value })}
-                          className="input-budget"
-                          min="0"
-                          step="0.01"
-                        />
+                        <div className="keywords-input-container">
+                          <label>Keywords</label>
+                          <div className="keywords-tags">
+                            {editCategoryForm.keywords && editCategoryForm.keywords.split(',').map(k => k.trim()).filter(k => k).map((keyword, idx) => (
+                              <span key={idx} className="keyword-tag">
+                                {keyword}
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveKeyword(keyword, true)}
+                                  className="keyword-remove"
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                            <input
+                              type="text"
+                              placeholder="Type keyword and press Enter or comma"
+                              value={editKeywordInput}
+                              onChange={(e) => setEditKeywordInput(e.target.value)}
+                              onKeyDown={(e) => handleAddKeyword(e, true)}
+                              className="keyword-input"
+                            />
+                          </div>
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="edit-budget">Budget Amount</label>
+                          <input
+                            id="edit-budget"
+                            type="number"
+                            placeholder="0.00"
+                            value={editCategoryForm.budgeted}
+                            onChange={(e) => setEditCategoryForm({ ...editCategoryForm, budgeted: e.target.value })}
+                            className="input-budget"
+                            min="0"
+                            step="0.01"
+                          />
+                        </div>
                         <div className="need-want-selector">
                           <label>
                             <input

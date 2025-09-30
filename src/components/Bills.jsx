@@ -272,13 +272,6 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange, categories })
         </button>
       </div>
 
-      <div className="yearly-summary">
-        <div className="summary-card">
-          <h3>Total Bills for {selectedYear}</h3>
-          <p className="amount">{formatCurrency(yearlyTotal)}</p>
-        </div>
-      </div>
-
       <div className="monthly-breakdown">
         <h2>Monthly Breakdown</h2>
         <div className="months-grid">
@@ -296,17 +289,6 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange, categories })
               )}
             </div>
           ))}
-        </div>
-      </div>
-
-      <div className="bills-summary">
-        <div className="summary-card total-bills">
-          <h3>Total Bills</h3>
-          <p className="amount">{formatCurrency(totalAmount)}</p>
-        </div>
-        <div className="summary-card unpaid-bills">
-          <h3>Unpaid Bills</h3>
-          <p className="amount">{formatCurrency(unpaidAmount)}</p>
         </div>
       </div>
 
