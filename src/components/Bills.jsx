@@ -214,8 +214,8 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
   const sortedBills = useMemo(() => {
     return generateRecurringBills
       .filter(bill => {
-        const dueDate = new Date(bill.occurrenceDate)
-        return dueDate.getFullYear() === selectedYear
+        const [year] = bill.occurrenceDate.split('-').map(Number)
+        return year === selectedYear
       })
       .sort((a, b) => {
         if (a.isPaid !== b.isPaid) return a.isPaid ? 1 : -1
@@ -225,8 +225,8 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
 
   const currentMonthBills = useMemo(() => {
     return sortedBills.filter(bill => {
-      const billDate = new Date(bill.occurrenceDate)
-      return billDate.getMonth() === selectedMonth && billDate.getFullYear() === selectedYear
+      const [year, month] = bill.occurrenceDate.split('-').map(Number)
+      return month - 1 === selectedMonth && year === selectedYear
     })
   }, [sortedBills, selectedMonth, selectedYear])
 
