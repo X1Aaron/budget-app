@@ -223,6 +223,15 @@
   border-left: 4px solid #10b981;
 }
 
+.transactions-table tbody tr.uncategorized {
+  background: #fef3c7;
+  border-left: 4px solid #f59e0b;
+}
+
+.transactions-table tbody tr.uncategorized:hover {
+  background: #fde68a;
+}
+
 .transactions-table td {
   padding: 1rem;
 }
@@ -271,6 +280,15 @@
   background: white;
   cursor: pointer;
   outline: none;
+}
+
+.transaction-category.uncategorized-label {
+  font-weight: 600;
+  color: #92400e;
+}
+
+.warning-icon {
+  font-size: 0.9rem;
 }
 
 .transaction-amount {

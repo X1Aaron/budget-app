@@ -177,11 +177,12 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
                 const originalIndex = transactions.findIndex(t => t === transaction)
                 const color = getCategoryColor(transaction.category, categories)
                 const isEditing = editingIndex === originalIndex
+                const isUncategorized = !transaction.category || transaction.category === 'Uncategorized'
 
                 return (
                   <tr
                     key={originalIndex}
-                    className={'transaction-row ' + (transaction.amount < 0 ? 'expense' : 'income')}
+                    className={'transaction-row ' + (transaction.amount < 0 ? 'expense' : 'income') + (isUncategorized ? ' uncategorized' : '')}
                   >
                     <td className="transaction-date">{transaction.date}</td>
                     <td className="transaction-description">{transaction.description}</td>
@@ -204,12 +205,13 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
                         </select>
                       ) : (
                         <span
-                          className="transaction-category editable"
+                          className={'transaction-category editable' + (isUncategorized ? ' uncategorized-label' : '')}
                           onClick={() => setEditingIndex(originalIndex)}
                           style={{ color }}
                         >
                           <span className="category-dot" style={{ backgroundColor: color }}></span>
                           {transaction.category || 'Uncategorized'}
+                          {isUncategorized && <span className="warning-icon"> ⚠️</span>}
                         </span>
                       )}
                     </td>
