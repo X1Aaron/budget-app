@@ -118,44 +118,6 @@ function Spending({
 
   return (
     <div className="spending">
-      <div className="starting-balance-section">
-        <div className="starting-balance-header">
-          <h3>Starting Balance</h3>
-          {!editingStartingBalance ? (
-            <div className="starting-balance-display">
-              <span className="starting-balance-value">{formatCurrency(currentStartingBalance)}</span>
-              <button
-                className="edit-balance-btn"
-                onClick={() => setEditingStartingBalance(true)}
-              >
-                Edit
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleStartingBalanceSubmit} className="starting-balance-form">
-              <input
-                type="number"
-                name="startingBalance"
-                step="0.01"
-                defaultValue={currentStartingBalance}
-                placeholder="Enter starting balance"
-                className="starting-balance-input"
-                autoFocus
-              />
-              <div className="balance-form-buttons">
-                <button type="submit" className="save-balance-btn">Save</button>
-                <button
-                  type="button"
-                  className="cancel-balance-btn"
-                  onClick={() => setEditingStartingBalance(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
-      </div>
       {monthlyTransactions.length === 0 ? (
         <div className="spending-empty">
           <p>No transactions for {monthNames[selectedMonth]} {selectedYear}.</p>
@@ -166,6 +128,40 @@ function Spending({
         <div className="transactions-header">
           <h2>Transactions{filterCategory !== 'all' && ` - ${filterCategory}`}</h2>
           <div className="header-controls">
+            {!editingStartingBalance ? (
+              <div className="starting-balance-display">
+                <span className="starting-balance-label">Starting Balance:</span>
+                <span className="starting-balance-value">{formatCurrency(currentStartingBalance)}</span>
+                <button
+                  className="edit-balance-btn"
+                  onClick={() => setEditingStartingBalance(true)}
+                >
+                  Edit
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleStartingBalanceSubmit} className="starting-balance-form">
+                <input
+                  type="number"
+                  name="startingBalance"
+                  step="0.01"
+                  defaultValue={currentStartingBalance}
+                  placeholder="Enter starting balance"
+                  className="starting-balance-input"
+                  autoFocus
+                />
+                <div className="balance-form-buttons">
+                  <button type="submit" className="save-balance-btn">Save</button>
+                  <button
+                    type="button"
+                    className="cancel-balance-btn"
+                    onClick={() => setEditingStartingBalance(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
             <select
               id="category-filter"
               value={filterCategory}
