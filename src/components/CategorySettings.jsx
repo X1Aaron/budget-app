@@ -9,7 +9,8 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
     name: '',
     color: '#6b7280',
     type: 'expense',
-    keywords: ''
+    keywords: '',
+    budgeted: 0
   })
   const [newRule, setNewRule] = useState({
     pattern: '',
@@ -17,6 +18,8 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
     matchType: 'contains'
   })
   const [editingRuleId, setEditingRuleId] = useState(null)
+  const [editingCategoryId, setEditingCategoryId] = useState(null)
+  const [editBudget, setEditBudget] = useState('')
 
   const handleAddCategory = () => {
     if (!newCategory.name.trim()) return
@@ -26,11 +29,12 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
       name: newCategory.name,
       color: newCategory.color,
       type: newCategory.type,
-      keywords: newCategory.keywords.split(',').map(k => k.trim()).filter(k => k)
+      keywords: newCategory.keywords.split(',').map(k => k.trim()).filter(k => k),
+      budgeted: parseFloat(newCategory.budgeted) || 0
     }
 
     onUpdateCategories([...categories, category])
-    setNewCategory({ name: '', color: '#6b7280', type: 'expense', keywords: '' })
+    setNewCategory({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0 })
   }
 
   const handleDeleteCategory = (categoryId) => {
@@ -107,6 +111,22 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
     })
 
     onUpdateRules(newRules)
+  }
+
+  const handleUpdateBudget = (categoryId) => {
+    const budget = parseFloat(editBudget)
+    if (isNaN(budget) || budget < 0) return
+
+    const updatedCategories = categories.map(cat => {
+      if (cat.id === categoryId) {
+        return { ...cat, budgeted: budget }
+      }
+      return cat
+    })
+
+    onUpdateCategories(updatedCategories)
+    setEditingCategoryId(null)
+    setEditBudget('')
   }
 
   const handleReapplyRules = () => {
@@ -202,6 +222,15 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
                         onChange={(e) => setNewCategory({ ...newCategory, keywords: e.target.value })}
                         className="input-keywords"
                       />
+                      <input
+                        type="number"
+                        placeholder="Budget amount (optional)"
+                        value={newCategory.budgeted}
+                        onChange={(e) => setNewCategory({ ...newCategory, budgeted: e.target.value })}
+                        className="input-budget"
+                        min="0"
+                        step="0.01"
+                      />
                       <button className="add-btn" onClick={handleAddCategory}>Add Category</button>
                     </div>
                     <p className="help-text">
@@ -234,6 +263,30 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
                                 <strong>Keywords:</strong> {category.keywords.join(', ')}
                               </div>
                             )}
+                            <div className="category-budget">
+                              {editingCategoryId === category.id ? (
+                                <div className="budget-edit-inline">
+                                  <input
+                                    type="number"
+                                    value={editBudget}
+                                    onChange={(e) => setEditBudget(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleUpdateBudget(category.id)}
+                                    min="0"
+                                    step="0.01"
+                                    autoFocus
+                                  />
+                                  <button onClick={() => handleUpdateBudget(category.id)}>✓</button>
+                                  <button onClick={() => { setEditingCategoryId(null); setEditBudget(''); }}>✗</button>
+                                </div>
+                              ) : (
+                                <div className="budget-display" onClick={() => {
+                                  setEditingCategoryId(category.id);
+                                  setEditBudget((category.budgeted || 0).toString());
+                                }}>
+                                  <strong>Budget:</strong> ${(category.budgeted || 0).toFixed(2)} <span className="edit-icon">✏️</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}

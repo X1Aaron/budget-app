@@ -257,11 +257,17 @@
 
 .category-item {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   padding: 0.75rem 1rem;
   background: #f9fafb;
   border-radius: 6px;
   border-left: 4px solid;
+  gap: 0.5rem;
+}
+
+.category-header-row {
+  display: flex;
+  align-items: center;
   gap: 0.75rem;
 }
 
@@ -274,12 +280,41 @@
 
 .category-name {
   flex: 1;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.category-amounts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-left: 1.75rem;
+}
+
+.amount-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.amount-label {
+  color: #6b7280;
   font-weight: 500;
 }
 
-.category-amount {
+.amount-value {
   font-weight: 600;
-  margin-left: auto;
+  color: #111827;
+}
+
+.amount-value.over-budget {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.amount-value.under-budget {
+  color: #10b981;
+  font-weight: 700;
 }
 
 .category-item.expense .category-amount {

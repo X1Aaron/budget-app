@@ -216,15 +216,42 @@ function Overview({
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([category, amount]) => {
               const color = getCategoryColor(category, categories)
+              const categoryObj = categories.find(cat => cat.name === category)
+              const budgeted = categoryObj?.budgeted || 0
+              const spent = Math.abs(amount)
+              const difference = budgeted - spent
+              const isOverBudget = difference < 0
+
               return (
                 <div
                   key={category}
                   className={'category-item ' + (amount < 0 ? 'expense' : 'income')}
                   style={{ borderLeftColor: color }}
                 >
-                  <div className="category-color-dot" style={{ backgroundColor: color }}></div>
-                  <span className="category-name">{category}</span>
-                  <span className="category-amount">{formatCurrency(amount)}</span>
+                  <div className="category-header-row">
+                    <div className="category-color-dot" style={{ backgroundColor: color }}></div>
+                    <span className="category-name">{category}</span>
+                  </div>
+                  <div className="category-amounts">
+                    <div className="amount-row">
+                      <span className="amount-label">Spent:</span>
+                      <span className="amount-value">{formatCurrency(spent)}</span>
+                    </div>
+                    {budgeted > 0 && (
+                      <>
+                        <div className="amount-row">
+                          <span className="amount-label">Budgeted:</span>
+                          <span className="amount-value">{formatCurrency(budgeted)}</span>
+                        </div>
+                        <div className="amount-row">
+                          <span className="amount-label">Difference:</span>
+                          <span className={'amount-value ' + (isOverBudget ? 'over-budget' : 'under-budget')}>
+                            {formatCurrency(Math.abs(difference))} {isOverBudget ? 'over' : 'remaining'}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               )
             })}

@@ -136,6 +136,7 @@
 }
 
 .add-form input[type="text"],
+.add-form input[type="number"],
 .add-form select {
   padding: 0.6rem;
   border: 1px solid #d1d5db;
@@ -144,6 +145,7 @@
 }
 
 .add-form input[type="text"]:focus,
+.add-form input[type="number"]:focus,
 .add-form select:focus {
   outline: none;
   border-color: #3b82f6;
@@ -315,6 +317,74 @@
 
 .category-keywords strong {
   color: #374151;
+}
+
+.category-budget {
+  margin-top: 0.25rem;
+}
+
+.budget-display {
+  cursor: pointer;
+  padding: 0.25rem 0;
+  color: #374151;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.2s;
+}
+
+.budget-display:hover {
+  color: #3b82f6;
+}
+
+.budget-display .edit-icon {
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+.budget-display strong {
+  color: #6b7280;
+}
+
+.budget-edit-inline {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.budget-edit-inline input {
+  padding: 0.4rem;
+  border: 1px solid #3b82f6;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  width: 100px;
+}
+
+.budget-edit-inline button {
+  padding: 0.3rem 0.6rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.budget-edit-inline button:first-of-type {
+  background: #10b981;
+  color: white;
+}
+
+.budget-edit-inline button:first-of-type:hover {
+  background: #059669;
+}
+
+.budget-edit-inline button:last-of-type {
+  background: #ef4444;
+  color: white;
+}
+
+.budget-edit-inline button:last-of-type:hover {
+  background: #dc2626;
 }
 
 .rules-info {
