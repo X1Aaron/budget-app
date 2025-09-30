@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import './AutoCategorization.css'
 
-function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMerchantMapping, onDeleteCategoryMapping, onImportRules }) {
+function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMerchantMapping, onDeleteCategoryMapping }) {
   const combinedMappings = useMemo(() => {
     const allDescriptions = new Set([
       ...Object.keys(merchantMappings),
@@ -14,45 +14,6 @@ function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMercha
       category: categoryMappings[description] || '-'
     }))
   }, [merchantMappings, categoryMappings])
-
-  const handleExport = () => {
-    const exportData = {
-      merchantMappings,
-      categoryMappings,
-      exportedAt: new Date().toISOString()
-    }
-
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `auto-categorization-rules-${new Date().toISOString().split('T')[0]}.json`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-  }
-
-  const handleImport = (event) => {
-    const file = event.target.files[0]
-    if (!file) return
-
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      try {
-        const importedData = JSON.parse(e.target.result)
-        if (importedData.merchantMappings && importedData.categoryMappings) {
-          onImportRules(importedData.merchantMappings, importedData.categoryMappings)
-        } else {
-          alert('Invalid file format. Please select a valid auto-categorization rules file.')
-        }
-      } catch (error) {
-        alert('Error reading file: ' + error.message)
-      }
-    }
-    reader.readAsText(file)
-    event.target.value = '' // Reset input
-  }
 
   return (
     <div className="auto-categorization">
@@ -112,21 +73,6 @@ function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMercha
               </tbody>
             </table>
           )}
-        </div>
-
-        <div className="import-export-section">
-          <button className="export-btn" onClick={handleExport}>
-            Export Rules
-          </button>
-          <label className="import-btn">
-            Import Rules
-            <input
-              type="file"
-              accept=".json"
-              onChange={handleImport}
-              style={{ display: 'none' }}
-            />
-          </label>
         </div>
       </div>
     </div>

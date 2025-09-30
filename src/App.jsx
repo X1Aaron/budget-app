@@ -257,11 +257,30 @@ function App() {
       <header className="app-header">
         <div className="header-top">
           <h1>Budget Tracker</h1>
-          <MonthYearSelector
-            selectedYear={selectedYear}
-            selectedMonth={selectedMonth}
-            onDateChange={handleDateChange}
-          />
+          <div className="header-controls">
+            <MonthYearSelector
+              selectedYear={selectedYear}
+              selectedMonth={selectedMonth}
+              onDateChange={handleDateChange}
+            />
+            <div className="header-actions">
+              <ImportButton
+                activeSection={activeSection}
+                onImportTransactions={handleImportTransactions}
+                onImportCategories={handleImportCategories}
+                onImportRules={handleImportRules}
+                onImportBills={(importedBills) => setBills(importedBills)}
+              />
+              <ExportButton
+                activeSection={activeSection}
+                transactions={transactions}
+                categories={categories}
+                merchantMappings={merchantMappings}
+                categoryMappings={categoryMappings}
+                bills={bills}
+              />
+            </div>
+          </div>
         </div>
         <nav className="app-nav">
           <button
@@ -353,20 +372,14 @@ function App() {
             categoryMappings={categoryMappings}
             onDeleteMerchantMapping={handleDeleteMerchantMapping}
             onDeleteCategoryMapping={handleDeleteCategoryMapping}
-            onImportRules={handleImportRules}
           />
         ) : (
           <div className="settings-section">
             <h2>Settings</h2>
             <div className="settings-group">
-              <h3>Import/Export Data</h3>
+              <h3>Import CSV</h3>
               <div className="settings-buttons">
                 <CSVImport onImport={handleImport} />
-                <ImportButton
-                  onImportTransactions={handleImportTransactions}
-                  onImportCategories={handleImportCategories}
-                />
-                <ExportButton transactions={transactions} categories={categories} />
               </div>
             </div>
           </div>
