@@ -246,7 +246,6 @@ function Spending({
                             })
                             setEditingIndex(null)
                           }}
-                          onBlur={() => setEditingIndex(null)}
                           autoFocus
                         >
                           <option value="Uncategorized">Uncategorized</option>
