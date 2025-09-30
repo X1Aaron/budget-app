@@ -65,6 +65,11 @@ export const autoCategorize = (description, amount, existingCategory, customRule
     }
   }
 
+  // Default: positive amounts are Income, negative amounts are Uncategorized
+  if (amount > 0) {
+    return { category: 'Income', wasAutoCategorized: true }
+  }
+
   return { category: 'Uncategorized', wasAutoCategorized: false }
 }
 
