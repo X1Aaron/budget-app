@@ -4,15 +4,10 @@ import './Bills.css'
 function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange, categories }) {
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState(null)
-  const getDefaultDueDate = () => {
-    const date = new Date(selectedYear, selectedMonth, 15)
-    return date.toISOString().split('T')[0]
-  }
-
   const [formData, setFormData] = useState({
     name: '',
     amount: '',
-    dueDate: getDefaultDueDate(),
+    dueDate: '',
     frequency: 'monthly',
     category: '',
     paidDates: []
@@ -24,7 +19,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
     setFormData({
       name: '',
       amount: '',
-      dueDate: getDefaultDueDate(),
+      dueDate: '',
       frequency: 'monthly',
       category: '',
       paidDates: []
@@ -58,7 +53,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
     setFormData({
       name: '',
       amount: '',
-      dueDate: getDefaultDueDate(),
+      dueDate: '',
       frequency: 'monthly',
       category: '',
       paidDates: []
@@ -89,7 +84,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
     setFormData({
       name: '',
       amount: '',
-      dueDate: getDefaultDueDate(),
+      dueDate: '',
       frequency: 'monthly',
       category: '',
       paidDates: []
@@ -134,7 +129,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
     setFormData({
       name: '',
       amount: '',
-      dueDate: getDefaultDueDate(),
+      dueDate: '',
       frequency: 'monthly',
       category: '',
       paidDates: []
