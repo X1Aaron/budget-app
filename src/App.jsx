@@ -139,26 +139,15 @@ function App() {
           >
             Bills
           </button>
+          <button
+            className={'nav-btn' + (activeSection === 'settings' ? ' active' : '')}
+            onClick={() => setActiveSection('settings')}
+          >
+            Settings
+          </button>
         </nav>
       </header>
       <main className="app-main">
-        <CSVImport onImport={handleImport} />
-        <div className="settings-buttons">
-          <CategorySettings
-            categories={categories}
-            rules={rules}
-            onUpdateCategories={setCategories}
-            onUpdateRules={setRules}
-            transactions={transactions}
-            onUpdateTransactions={setTransactions}
-          />
-          <ImportButton
-            onImportTransactions={handleImportTransactions}
-            onImportCategories={handleImportCategories}
-            onImportRules={handleImportRules}
-          />
-          <ExportButton transactions={transactions} categories={categories} rules={rules} />
-        </div>
         {activeSection === 'overview' ? (
           <Overview
             transactions={transactions}
@@ -179,13 +168,40 @@ function App() {
             onDateChange={handleDateChange}
             onUpdateTransaction={handleUpdateTransaction}
           />
-        ) : (
+        ) : activeSection === 'bills' ? (
           <Bills
             bills={bills}
             onUpdateBills={setBills}
             selectedYear={selectedYear}
             onYearChange={setSelectedYear}
           />
+        ) : (
+          <div className="settings-section">
+            <h2>Settings</h2>
+            <div className="settings-group">
+              <h3>Import/Export Data</h3>
+              <div className="settings-buttons">
+                <CSVImport onImport={handleImport} />
+                <ImportButton
+                  onImportTransactions={handleImportTransactions}
+                  onImportCategories={handleImportCategories}
+                  onImportRules={handleImportRules}
+                />
+                <ExportButton transactions={transactions} categories={categories} rules={rules} />
+              </div>
+            </div>
+            <div className="settings-group">
+              <h3>Categories & Rules</h3>
+              <CategorySettings
+                categories={categories}
+                rules={rules}
+                onUpdateCategories={setCategories}
+                onUpdateRules={setRules}
+                transactions={transactions}
+                onUpdateTransactions={setTransactions}
+              />
+            </div>
+          </div>
         )}
       </main>
     </div>
