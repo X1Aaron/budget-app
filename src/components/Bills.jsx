@@ -146,7 +146,8 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
 
         for (let year = startYear; year <= endYear; year++) {
           if (bill.frequency === 'yearly') {
-            const occurrenceDate = new Date(year, billMonth, billDay).toISOString().split('T')[0]
+            const date = new Date(year, billMonth, billDay)
+            const occurrenceDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
             if (new Date(occurrenceDate) >= startDate) {
               recurringBills.push({
                 ...bill,
@@ -156,7 +157,8 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
             }
           } else if (bill.frequency === 'monthly') {
             for (let month = 0; month < 12; month++) {
-              const occurrenceDate = new Date(year, month, billDay).toISOString().split('T')[0]
+              const date = new Date(year, month, billDay)
+              const occurrenceDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
               if (new Date(occurrenceDate) >= startDate) {
                 recurringBills.push({
                   ...bill,
@@ -169,7 +171,8 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
             for (let quarter = 0; quarter < 4; quarter++) {
               const month = billMonth + (quarter * 3)
               if (month < 12) {
-                const occurrenceDate = new Date(year, month, billDay).toISOString().split('T')[0]
+                const date = new Date(year, month, billDay)
+                const occurrenceDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
                 if (new Date(occurrenceDate) >= startDate) {
                   recurringBills.push({
                     ...bill,
@@ -185,7 +188,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
             const endDate = new Date(endYear + 1, 0, 1)
 
             while (currentDate < endDate) {
-              const occurrenceDate = currentDate.toISOString().split('T')[0]
+              const occurrenceDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`
               recurringBills.push({
                 ...bill,
                 occurrenceDate,
