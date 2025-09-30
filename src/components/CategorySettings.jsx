@@ -3,7 +3,6 @@ import './CategorySettings.css'
 import { autoCategorize } from '../utils/categories'
 
 function CategorySettings({ categories, onUpdateCategories, transactions, onUpdateTransactions }) {
-  const [isOpen, setIsOpen] = useState(false)
   const [newCategory, setNewCategory] = useState({
     name: '',
     color: '#6b7280',
@@ -200,19 +199,7 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
 
   return (
     <div className="category-settings">
-      <button className="settings-btn" onClick={() => setIsOpen(!isOpen)}>
-        Category Settings
-      </button>
-
-      {isOpen && (
-        <div className="settings-modal">
-          <div className="settings-modal-content">
-            <div className="modal-header">
-              <h2>Category Settings</h2>
-              <button className="close-btn" onClick={() => setIsOpen(false)}>×</button>
-            </div>
-
-            <div className="modal-body">
+      <div className="category-settings-content">
                   <div className="add-section">
                     <h3>Add Category</h3>
                     <div className="add-form">
@@ -505,10 +492,7 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
                       </p>
                     </div>
                   )}
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   )
 }

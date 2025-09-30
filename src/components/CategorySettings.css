@@ -1,120 +1,12 @@
 .category-settings {
-  position: relative;
-}
-
-.settings-btn {
-  padding: 0.6rem 1.2rem;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.settings-btn:hover {
-  background: #2563eb;
-}
-
-.settings-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 1rem;
-}
-
-.settings-modal-content {
-  background: white;
-  border-radius: 12px;
   width: 100%;
-  max-width: 900px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.category-settings-content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 2rem;
-  border-bottom: 2px solid #e2e8f0;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-}
-
-.modal-header h2 {
-  margin: 0;
-  color: #0f172a;
-  font-size: 1.75rem;
-  font-weight: 800;
-  letter-spacing: -0.025em;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  color: #6b7280;
-  cursor: pointer;
-  padding: 0;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.close-btn:hover {
-  background: #f3f4f6;
-  color: #111827;
-}
-
-.modal-tabs {
-  display: flex;
-  border-bottom: 2px solid #e5e7eb;
-  background: #f9fafb;
-}
-
-.tab-btn {
-  flex: 1;
-  padding: 1rem;
-  background: none;
-  border: none;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #6b7280;
-  cursor: pointer;
-  border-bottom: 3px solid transparent;
-  transition: all 0.2s;
-}
-
-.tab-btn:hover {
-  color: #111827;
-  background: #f3f4f6;
-}
-
-.tab-btn.active {
-  color: #3b82f6;
-  border-bottom-color: #3b82f6;
-  background: white;
-}
-
-.modal-body {
-  padding: 2rem;
-  overflow-y: auto;
-  flex: 1;
 }
 
 .add-section {
@@ -795,13 +687,7 @@
 }
 
 @media (max-width: 768px) {
-  .settings-modal-content {
-    max-width: 100%;
-    max-height: 100vh;
-    border-radius: 0;
-  }
-
-  .modal-body {
+  .category-settings-content {
     padding: 1rem;
   }
 

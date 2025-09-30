@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import './Overview.css'
 import { getCategoryColor } from '../utils/categories'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, ReferenceLine } from 'recharts'
 
 function Overview({
   transactions,
@@ -326,6 +326,7 @@ function Overview({
               formatter={(value) => [`$${value.toLocaleString()}`, 'Balance']}
               labelFormatter={(label) => `Date: ${label}`}
             />
+            <ReferenceLine y={0} stroke="#e74c3c" strokeWidth={2} strokeDasharray="3 3" />
             <Line
               type="monotone"
               dataKey="balance"
