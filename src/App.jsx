@@ -27,10 +27,18 @@ function App() {
     const saved = localStorage.getItem('categories')
     return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES
   })
+  const [startingBalances, setStartingBalances] = useState(() => {
+    const saved = localStorage.getItem('startingBalances')
+    return saved ? JSON.parse(saved) : {}
+  })
 
   useEffect(() => {
     localStorage.setItem('categories', JSON.stringify(categories))
   }, [categories])
+
+  useEffect(() => {
+    localStorage.setItem('startingBalances', JSON.stringify(startingBalances))
+  }, [startingBalances])
 
   useEffect(() => {
     localStorage.setItem('bills', JSON.stringify(bills))
@@ -106,6 +114,14 @@ function App() {
     }))
   }
 
+  const handleUpdateStartingBalance = (year, month, balance) => {
+    const key = `${year}-${month}`
+    setStartingBalances(prev => ({
+      ...prev,
+      [key]: balance
+    }))
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -164,6 +180,8 @@ function App() {
             selectedMonth={selectedMonth}
             onDateChange={handleDateChange}
             onUpdateTransaction={handleUpdateTransaction}
+            startingBalances={startingBalances}
+            onUpdateStartingBalance={handleUpdateStartingBalance}
           />
         ) : activeSection === 'bills' ? (
           <Bills

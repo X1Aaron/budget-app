@@ -8,11 +8,14 @@ function Spending({
   selectedYear,
   selectedMonth,
   onDateChange,
-  onUpdateTransaction
+  onUpdateTransaction,
+  startingBalances,
+  onUpdateStartingBalance
 }) {
   const [editingIndex, setEditingIndex] = useState(null)
   const [filterCategory, setFilterCategory] = useState('all')
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
+  const [editingStartingBalance, setEditingStartingBalance] = useState(false)
 
   const handleSort = (key) => {
     let direction = 'asc'
@@ -36,9 +39,15 @@ function Spending({
     return filtered.sort((a, b) => new Date(a.date) - new Date(b.date))
   }, [transactions, selectedYear, selectedMonth])
 
+  // Get starting balance for the current month
+  const currentStartingBalance = useMemo(() => {
+    const key = `${selectedYear}-${selectedMonth}`
+    return startingBalances[key] || 0
+  }, [startingBalances, selectedYear, selectedMonth])
+
   // Calculate running balance for each transaction
   const transactionsWithBalance = useMemo(() => {
-    let runningBalance = 0
+    let runningBalance = currentStartingBalance
     return monthlyTransactions.map(t => {
       runningBalance += t.amount
       return {
@@ -46,7 +55,7 @@ function Spending({
         runningBalance: runningBalance
       }
     })
-  }, [monthlyTransactions])
+  }, [monthlyTransactions, currentStartingBalance])
 
   const filteredTransactions = useMemo(() => {
     let filtered = filterCategory === 'all'
@@ -97,8 +106,56 @@ function Spending({
     }).format(amount)
   }
 
+  const handleStartingBalanceSubmit = (e) => {
+    e.preventDefault()
+    const formData = new FormData(e.target)
+    const balance = parseFloat(formData.get('startingBalance'))
+    if (!isNaN(balance)) {
+      onUpdateStartingBalance(selectedYear, selectedMonth, balance)
+      setEditingStartingBalance(false)
+    }
+  }
+
   return (
     <div className="spending">
+      <div className="starting-balance-section">
+        <div className="starting-balance-header">
+          <h3>Starting Balance</h3>
+          {!editingStartingBalance ? (
+            <div className="starting-balance-display">
+              <span className="starting-balance-value">{formatCurrency(currentStartingBalance)}</span>
+              <button
+                className="edit-balance-btn"
+                onClick={() => setEditingStartingBalance(true)}
+              >
+                Edit
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleStartingBalanceSubmit} className="starting-balance-form">
+              <input
+                type="number"
+                name="startingBalance"
+                step="0.01"
+                defaultValue={currentStartingBalance}
+                placeholder="Enter starting balance"
+                className="starting-balance-input"
+                autoFocus
+              />
+              <div className="balance-form-buttons">
+                <button type="submit" className="save-balance-btn">Save</button>
+                <button
+                  type="button"
+                  className="cancel-balance-btn"
+                  onClick={() => setEditingStartingBalance(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
       {monthlyTransactions.length === 0 ? (
         <div className="spending-empty">
           <p>No transactions for {monthNames[selectedMonth]} {selectedYear}.</p>
