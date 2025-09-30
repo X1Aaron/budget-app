@@ -20,7 +20,9 @@
       "Bash(ssh-keygen:*)",
       "Bash(cat:*)",
       "Bash(ssh:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(chmod:*)",
+      "Bash(./push.sh:*)"
     ],
     "deny": [],
     "ask": []
