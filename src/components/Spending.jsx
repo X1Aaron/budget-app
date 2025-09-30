@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import './Spending.css'
 import { getCategoryColor } from '../utils/categories'
 
@@ -233,10 +233,9 @@ function Spending({
                 const isUncategorized = !transaction.category || transaction.category === 'Uncategorized'
 
                 return (
-                  <>
+                  <React.Fragment key={originalIndex}>
                     <tr
-                      key={originalIndex}
-                      className={'transaction-row ' + (transaction.amount < 0 ? 'expense' : 'income') + (isUncategorized ? ' uncategorized' : '') + (isExpanded ? ' expanded' : '')}
+                      className={`transaction-row ${transaction.amount < 0 ? 'expense' : 'income'}${isUncategorized ? ' uncategorized' : ''}${isExpanded ? ' expanded' : ''}`}
                       onClick={() => setExpandedIndex(isExpanded ? null : originalIndex)}
                     >
                       <td className="transaction-date">{transaction.date}</td>
@@ -336,7 +335,7 @@ function Spending({
                         </td>
                       </tr>
                     )}
-                  </>
+                  </React.Fragment>
                 )
               })}
             </tbody>

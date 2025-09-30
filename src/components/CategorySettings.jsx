@@ -34,9 +34,9 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
 
     const averages = {}
 
-    // Get the last 3 months including current month
+    // Get the previous 3 months (not including current month)
     const months = []
-    for (let i = 0; i < 3; i++) {
+    for (let i = 1; i <= 3; i++) {
       let month = selectedMonth - i
       let year = selectedYear
       if (month < 0) {
