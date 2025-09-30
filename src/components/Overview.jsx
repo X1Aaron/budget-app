@@ -237,20 +237,16 @@ function Overview({
                       <span className="amount-label">Spent:</span>
                       <span className="amount-value">{formatCurrency(spent)}</span>
                     </div>
-                    {budgeted > 0 && (
-                      <>
-                        <div className="amount-row">
-                          <span className="amount-label">Budgeted:</span>
-                          <span className="amount-value">{formatCurrency(budgeted)}</span>
-                        </div>
-                        <div className="amount-row">
-                          <span className="amount-label">Difference:</span>
-                          <span className={'amount-value ' + (isOverBudget ? 'over-budget' : 'under-budget')}>
-                            {formatCurrency(Math.abs(difference))} {isOverBudget ? 'over' : 'remaining'}
-                          </span>
-                        </div>
-                      </>
-                    )}
+                    <div className="amount-row">
+                      <span className="amount-label">Budgeted:</span>
+                      <span className="amount-value">{formatCurrency(budgeted)}</span>
+                    </div>
+                    <div className="amount-row">
+                      <span className="amount-label">Difference:</span>
+                      <span className={'amount-value ' + (isOverBudget ? 'over-budget' : 'under-budget')}>
+                        {formatCurrency(Math.abs(difference))} {isOverBudget ? 'over' : 'remaining'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               )
