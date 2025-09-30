@@ -175,32 +175,30 @@ function Spending({
         </div>
       ) : (
         <>
-          <div className="spending-filters">
-        <label htmlFor="category-filter">Filter by category:</label>
-        <select
-          id="category-filter"
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          className="category-filter-select"
-        >
-          <option value="all">All Categories</option>
-          {availableCategories.map(cat => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
-        {filterCategory !== 'all' && (
-          <button className="clear-filter-btn" onClick={() => setFilterCategory('all')}>
-            Clear Filter
-          </button>
-        )}
-      </div>
-
       <div className="transactions-section">
         <div className="transactions-header">
           <h2>Transactions{filterCategory !== 'all' && ` - ${filterCategory}`}</h2>
-          <span className="transaction-count">
-            {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? 's' : ''}
-          </span>
+          <div className="header-controls">
+            <select
+              id="category-filter"
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="category-filter-select"
+            >
+              <option value="all">All Categories</option>
+              {availableCategories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+            {filterCategory !== 'all' && (
+              <button className="clear-filter-btn" onClick={() => setFilterCategory('all')}>
+                Clear Filter
+              </button>
+            )}
+            <span className="transaction-count">
+              {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? 's' : ''}
+            </span>
+          </div>
         </div>
         <div className="transactions-table-container">
           <table className="transactions-table">

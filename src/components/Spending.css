@@ -168,9 +168,16 @@
   color: #333;
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .transaction-count {
   color: #666;
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .transactions-table-container {
