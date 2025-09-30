@@ -413,6 +413,81 @@
   }
 }
 
+.categories-table-container {
+  overflow-x: auto;
+}
+
+.categories-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.categories-table thead {
+  background: #f3f4f6;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.categories-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.categories-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.15s;
+}
+
+.categories-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.categories-table td {
+  padding: 1rem;
+}
+
+.category-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.spent-cell {
+  color: #111827;
+  font-weight: 500;
+}
+
+.budget-cell {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.remaining-cell {
+  font-weight: 600;
+}
+
+.remaining-cell.over-budget {
+  color: #ef4444;
+}
+
+.remaining-cell.under-budget {
+  color: #10b981;
+}
+
+.progress-cell {
+  min-width: 150px;
+}
+
+.no-budget-text {
+  color: #9ca3af;
+  font-style: italic;
+}
+
 .cash-flow-section {
   background: white;
   padding: 1.5rem;

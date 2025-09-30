@@ -237,7 +237,7 @@ function Spending({
                       {isEditing ? (
                         <select
                           className="category-select"
-                          value={transaction.category}
+                          value={transaction.category || 'Uncategorized'}
                           onChange={(e) => {
                             onUpdateTransaction(originalIndex, {
                               ...transaction,
@@ -246,10 +246,10 @@ function Spending({
                             })
                             setEditingIndex(null)
                           }}
-                          onBlur={() => setTimeout(() => setEditingIndex(null), 200)}
+                          onBlur={() => setEditingIndex(null)}
                           autoFocus
                         >
-                          <option value="Uncategorized">Select category</option>
+                          <option value="Uncategorized">Uncategorized</option>
                           {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
                             <option key={cat.id} value={cat.name}>{cat.name}</option>
                           ))}
