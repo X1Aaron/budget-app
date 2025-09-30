@@ -15,18 +15,6 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
 
   const cashRegisterSound = useMemo(() => new Audio('/cash-register.mp3'), [])
 
-  const handleOpenAddForm = () => {
-    setFormData({
-      name: '',
-      amount: '',
-      dueDate: '',
-      frequency: 'monthly',
-      category: '',
-      paidDates: []
-    })
-    setIsAdding(true)
-  }
-
   const handleAddBill = () => {
     console.log('handleAddBill called with formData:', formData)
 
@@ -287,7 +275,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
         <div className="bills-header">
           <h2>Bills</h2>
           {!isAdding && (
-            <button className="add-bill-btn" onClick={handleOpenAddForm}>
+            <button className="add-bill-btn" onClick={() => setIsAdding(true)}>
               + Add Bill
             </button>
           )}
