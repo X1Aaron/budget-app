@@ -192,7 +192,11 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
                           className="category-select"
                           value={transaction.category}
                           onChange={(e) => {
-                            onUpdateTransaction(originalIndex, { ...transaction, category: e.target.value })
+                            onUpdateTransaction(originalIndex, {
+                              ...transaction,
+                              category: e.target.value,
+                              autoCategorized: false
+                            })
                             setEditingIndex(null)
                           }}
                           onBlur={() => setTimeout(() => setEditingIndex(null), 200)}
@@ -211,6 +215,7 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
                         >
                           <span className="category-dot" style={{ backgroundColor: color }}></span>
                           {transaction.category || 'Uncategorized'}
+                          {transaction.autoCategorized && <span className="auto-icon" title="Auto-categorized"> 🤖</span>}
                           {isUncategorized && <span className="warning-icon"> ⚠️</span>}
                         </span>
                       )}

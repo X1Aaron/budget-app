@@ -41,10 +41,14 @@ function App() {
   }, [transactions])
 
   const handleImport = (importedTransactions) => {
-    const categorizedTransactions = importedTransactions.map(t => ({
-      ...t,
-      category: autoCategorize(t.description, t.amount, t.category, rules)
-    }))
+    const categorizedTransactions = importedTransactions.map(t => {
+      const result = autoCategorize(t.description, t.amount, t.category, rules)
+      return {
+        ...t,
+        category: result.category,
+        autoCategorized: result.wasAutoCategorized
+      }
+    })
     setTransactions(categorizedTransactions)
   }
 
@@ -55,10 +59,14 @@ function App() {
   }
 
   const handleImportTransactions = (importedTransactions) => {
-    const categorizedTransactions = importedTransactions.map(t => ({
-      ...t,
-      category: autoCategorize(t.description, t.amount, t.category, rules)
-    }))
+    const categorizedTransactions = importedTransactions.map(t => {
+      const result = autoCategorize(t.description, t.amount, t.category, rules)
+      return {
+        ...t,
+        category: result.category,
+        autoCategorized: result.wasAutoCategorized
+      }
+    })
     setTransactions(categorizedTransactions)
   }
 

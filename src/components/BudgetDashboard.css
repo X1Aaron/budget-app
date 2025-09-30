@@ -291,6 +291,11 @@
   font-size: 0.9rem;
 }
 
+.auto-icon {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
 .transaction-amount {
   font-size: 1rem;
   text-align: right;

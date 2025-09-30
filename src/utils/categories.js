@@ -31,15 +31,16 @@ const matchesRule = (description, rule) => {
 }
 
 export const autoCategorize = (description, amount, existingCategory, customRules = []) => {
+  // If already has a valid category, keep it and mark as not auto-categorized
   if (existingCategory && existingCategory !== 'Uncategorized') {
-    return existingCategory
+    return { category: existingCategory, wasAutoCategorized: false }
   }
 
   // First check custom rules (sorted by priority)
   const sortedRules = [...customRules].sort((a, b) => a.priority - b.priority)
   for (const rule of sortedRules) {
     if (matchesRule(description, rule)) {
-      return rule.category
+      return { category: rule.category, wasAutoCategorized: true }
     }
   }
 
@@ -52,19 +53,19 @@ export const autoCategorize = (description, amount, existingCategory, customRule
     if (category.type === 'income' && amount > 0) {
       for (const keyword of category.keywords) {
         if (desc.includes(keyword)) {
-          return category.name
+          return { category: category.name, wasAutoCategorized: true }
         }
       }
     } else if (category.type === 'expense' && amount < 0) {
       for (const keyword of category.keywords) {
         if (desc.includes(keyword)) {
-          return category.name
+          return { category: category.name, wasAutoCategorized: true }
         }
       }
     }
   }
 
-  return 'Uncategorized'
+  return { category: 'Uncategorized', wasAutoCategorized: false }
 }
 
 export const getCategoryColor = (categoryName, categories = DEFAULT_CATEGORIES) => {
