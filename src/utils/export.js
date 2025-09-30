@@ -5,12 +5,18 @@ export const exportTransactionsToCSV = (transactions) => {
   const headers = ['date', 'description', 'amount', 'category']
   const csvContent = [
     headers.join(','),
-    ...transactions.map(t => 
+    ...transactions.map(t =>
       [t.date, `"${t.description}"`, t.amount, t.category].join(',')
     )
   ].join('\n')
 
   downloadFile(csvContent, 'transactions.csv', 'text/csv')
+}
+
+// Export transactions to JSON
+export const exportTransactionsToJSON = (transactions) => {
+  const jsonContent = JSON.stringify(transactions, null, 2)
+  downloadFile(jsonContent, 'transactions.json', 'application/json')
 }
 
 // Export categories to JSON
@@ -19,10 +25,38 @@ export const exportCategoriesToJSON = (categories) => {
   downloadFile(jsonContent, 'categories.json', 'application/json')
 }
 
+// Export categories to CSV
+export const exportCategoriesToCSV = (categories) => {
+  const headers = ['id', 'name', 'color', 'type', 'keywords']
+  const csvContent = [
+    headers.join(','),
+    ...categories.map(cat =>
+      [cat.id, `"${cat.name}"`, cat.color, cat.type, `"${cat.keywords.join(', ')}"`].join(',')
+    )
+  ].join('\n')
+
+  downloadFile(csvContent, 'categories.csv', 'text/csv')
+}
+
 // Export auto-categorization rules to JSON
 export const exportRulesToJSON = (rules) => {
   const jsonContent = JSON.stringify(rules, null, 2)
   downloadFile(jsonContent, 'categorization-rules.json', 'application/json')
+}
+
+// Export auto-categorization rules to CSV
+export const exportRulesToCSV = (rules) => {
+  if (rules.length === 0) return
+
+  const headers = ['pattern', 'category', 'matchType', 'caseSensitive', 'priority']
+  const csvContent = [
+    headers.join(','),
+    ...rules.map(rule =>
+      [`"${rule.pattern}"`, rule.category, rule.matchType, rule.caseSensitive, rule.priority].join(',')
+    )
+  ].join('\n')
+
+  downloadFile(csvContent, 'categorization-rules.csv', 'text/csv')
 }
 
 // Helper function to trigger download

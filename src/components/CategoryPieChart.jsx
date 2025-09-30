@@ -57,9 +57,12 @@ function CategoryPieChart({ categoryBreakdown, categories }) {
             ))}
           </Pie>
           <Tooltip content={<CustomTooltip />} />
-          <Legend 
+          <Legend
             iconType="circle"
-            formatter={(value, entry) => value + ' (' + formatCurrency(entry.value) + ')'}
+            formatter={(value, entry) => {
+              const amount = entry.payload ? entry.payload.value : entry.value
+              return value + ' (' + formatCurrency(amount) + ')'
+            }}
           />
         </PieChart>
       </ResponsiveContainer>
