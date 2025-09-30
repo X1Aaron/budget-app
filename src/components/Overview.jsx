@@ -228,25 +228,23 @@ function Overview({
                   className={'category-item ' + (amount < 0 ? 'expense' : 'income')}
                   style={{ borderLeftColor: color }}
                 >
-                  <div className="category-header-row">
+                  <div className="category-name-row">
                     <div className="category-color-dot" style={{ backgroundColor: color }}></div>
                     <span className="category-name">{category}</span>
                   </div>
-                  <div className="category-amounts">
-                    <div className="amount-row">
-                      <span className="amount-label">Spent:</span>
-                      <span className="amount-value">{formatCurrency(spent)}</span>
-                    </div>
-                    <div className="amount-row">
-                      <span className="amount-label">Budgeted:</span>
-                      <span className="amount-value">{formatCurrency(budgeted)}</span>
-                    </div>
-                    <div className="amount-row">
-                      <span className="amount-label">Difference:</span>
-                      <span className={'amount-value ' + (isOverBudget ? 'over-budget' : 'under-budget')}>
-                        {formatCurrency(Math.abs(difference))} {isOverBudget ? 'over' : 'remaining'}
-                      </span>
-                    </div>
+                  <div className="category-detail-row">
+                    <span className="detail-label">Amount Spent</span>
+                    <span className="detail-value">{formatCurrency(spent)}</span>
+                  </div>
+                  <div className="category-detail-row">
+                    <span className="detail-label">Budgeted Amount</span>
+                    <span className="detail-value">{formatCurrency(budgeted)}</span>
+                  </div>
+                  <div className="category-detail-row">
+                    <span className="detail-label">Difference</span>
+                    <span className={'detail-value ' + (isOverBudget ? 'over-budget' : 'under-budget')}>
+                      {formatCurrency(Math.abs(difference))} {isOverBudget ? 'over' : 'remaining'}
+                    </span>
                   </div>
                 </div>
               )
