@@ -12,11 +12,13 @@ function CSVImport({ onImport }) {
     }
 
     const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
-    
+
     const dateIndex = headers.findIndex(h => h.includes('date'))
     const descIndex = headers.findIndex(h => h.includes('desc'))
     const amountIndex = headers.findIndex(h => h.includes('amount'))
     const categoryIndex = headers.findIndex(h => h.includes('category') || h.includes('cat'))
+    const needWantIndex = headers.findIndex(h => h.includes('need') || h.includes('want'))
+    const autoCategorizedIndex = headers.findIndex(h => h.includes('auto'))
 
     if (dateIndex === -1 || descIndex === -1 || amountIndex === -1) {
       throw new Error('CSV must have columns for: date, description, and amount')
@@ -31,7 +33,9 @@ function CSVImport({ onImport }) {
         date: values[dateIndex],
         description: values[descIndex],
         amount: parseFloat(values[amountIndex]),
-        category: categoryIndex !== -1 ? values[categoryIndex] : 'Uncategorized'
+        category: categoryIndex !== -1 ? values[categoryIndex] : 'Uncategorized',
+        needWant: needWantIndex !== -1 ? values[needWantIndex] : undefined,
+        autoCategorized: autoCategorizedIndex !== -1 ? (values[autoCategorizedIndex] === 'true') : false
       }
 
       if (!isNaN(transaction.amount)) {
@@ -76,7 +80,7 @@ function CSVImport({ onImport }) {
       <div className="import-card">
         <h2>Import Transactions</h2>
         <p className="import-description">
-          Upload a CSV file with columns: date, description, amount, category (optional)
+          Upload a CSV file with columns: date, description, amount, category (optional), needWant (optional)
         </p>
         
         <div className="file-input-wrapper">
@@ -98,10 +102,11 @@ function CSVImport({ onImport }) {
         <div className="example-format">
           <strong>Example CSV format:</strong>
           <pre>
-date,description,amount,category
-2024-01-01,Salary,3000,Income
-2024-01-02,Groceries,-150,Food
-2024-01-03,Rent,-1200,Housing
+date,description,amount,category,needWant
+2024-01-01,Salary,3000,Income,
+2024-01-02,Groceries,-150,Food,need
+2024-01-03,Rent,-1200,Housing,need
+2024-01-04,Movie tickets,-50,Entertainment,want
           </pre>
         </div>
       </div>

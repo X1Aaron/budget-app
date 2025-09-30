@@ -2,11 +2,11 @@
 export const exportTransactionsToCSV = (transactions) => {
   if (transactions.length === 0) return
 
-  const headers = ['date', 'description', 'amount', 'category']
+  const headers = ['date', 'description', 'amount', 'category', 'needWant', 'autoCategorized']
   const csvContent = [
     headers.join(','),
     ...transactions.map(t =>
-      [t.date, `"${t.description}"`, t.amount, t.category].join(',')
+      [t.date, `"${t.description}"`, t.amount, t.category, t.needWant || '', t.autoCategorized || false].join(',')
     )
   ].join('\n')
 
