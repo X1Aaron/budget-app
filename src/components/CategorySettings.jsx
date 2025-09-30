@@ -240,56 +240,74 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
 
                   <div className="list-section">
                     <h3>Your Categories ({categories.length})</h3>
-                    <div className="categories-grid">
-                      {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(category => (
-                        <div key={category.id} className="category-card">
-                          <div className="category-header">
-                            <div className="category-color" style={{ backgroundColor: category.color }}></div>
-                            <span className="category-name">{category.name}</span>
-                            {category.id !== 'uncategorized' && (
-                              <button
-                                className="delete-btn"
-                                onClick={() => handleDeleteCategory(category.id)}
-                                title="Delete category"
-                              >
-                                ×
-                              </button>
-                            )}
-                          </div>
-                          <div className="category-info">
-                            <span className="category-type-badge">{category.type}</span>
-                            {category.keywords && category.keywords.length > 0 && (
-                              <div className="category-keywords">
-                                <strong>Keywords:</strong> {category.keywords.join(', ')}
-                              </div>
-                            )}
-                            <div className="category-budget">
-                              {editingCategoryId === category.id ? (
-                                <div className="budget-edit-inline">
-                                  <input
-                                    type="number"
-                                    value={editBudget}
-                                    onChange={(e) => setEditBudget(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleUpdateBudget(category.id)}
-                                    min="0"
-                                    step="0.01"
-                                    autoFocus
-                                  />
-                                  <button onClick={() => handleUpdateBudget(category.id)}>✓</button>
-                                  <button onClick={() => { setEditingCategoryId(null); setEditBudget(''); }}>✗</button>
-                                </div>
-                              ) : (
-                                <div className="budget-display" onClick={() => {
-                                  setEditingCategoryId(category.id);
-                                  setEditBudget((category.budgeted || 0).toString());
-                                }}>
-                                  <strong>Budget:</strong> ${(category.budgeted || 0).toFixed(2)} <span className="edit-icon">✏️</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                    <div className="categories-table-wrapper">
+                      <table className="categories-table">
+                        <thead>
+                          <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Budget</th>
+                            <th>Keywords</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(category => (
+                            <tr key={category.id}>
+                              <td className="color-cell">
+                                <div className="category-color" style={{ backgroundColor: category.color }}></div>
+                              </td>
+                              <td className="name-cell">{category.name}</td>
+                              <td className="type-cell">
+                                <span className="category-type-badge">{category.type}</span>
+                              </td>
+                              <td className="budget-cell">
+                                {editingCategoryId === category.id ? (
+                                  <div className="budget-edit-inline">
+                                    <input
+                                      type="number"
+                                      value={editBudget}
+                                      onChange={(e) => setEditBudget(e.target.value)}
+                                      onKeyDown={(e) => e.key === 'Enter' && handleUpdateBudget(category.id)}
+                                      min="0"
+                                      step="0.01"
+                                      autoFocus
+                                    />
+                                    <button onClick={() => handleUpdateBudget(category.id)}>✓</button>
+                                    <button onClick={() => { setEditingCategoryId(null); setEditBudget(''); }}>✗</button>
+                                  </div>
+                                ) : (
+                                  <div className="budget-display" onClick={() => {
+                                    setEditingCategoryId(category.id);
+                                    setEditBudget((category.budgeted || 0).toString());
+                                  }}>
+                                    ${(category.budgeted || 0).toFixed(2)}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="keywords-cell">
+                                {category.keywords && category.keywords.length > 0 ? (
+                                  category.keywords.join(', ')
+                                ) : (
+                                  <span className="no-keywords">—</span>
+                                )}
+                              </td>
+                              <td className="actions-cell">
+                                {category.id !== 'uncategorized' && (
+                                  <button
+                                    className="delete-btn"
+                                    onClick={() => handleDeleteCategory(category.id)}
+                                    title="Delete category"
+                                  >
+                                    ×
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </>
