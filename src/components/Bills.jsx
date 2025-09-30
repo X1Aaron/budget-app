@@ -224,10 +224,16 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
   }, [generateRecurringBills, selectedYear])
 
   const currentMonthBills = useMemo(() => {
-    return sortedBills.filter(bill => {
+    console.log('Filtering bills for month:', selectedMonth, 'year:', selectedYear)
+    console.log('sortedBills:', sortedBills)
+    const filtered = sortedBills.filter(bill => {
       const [year, month] = bill.occurrenceDate.split('-').map(Number)
-      return month - 1 === selectedMonth && year === selectedYear
+      const matches = month - 1 === selectedMonth && year === selectedYear
+      console.log(`Bill ${bill.name}: occurrenceDate=${bill.occurrenceDate}, month=${month}, year=${year}, matches=${matches}`)
+      return matches
     })
+    console.log('currentMonthBills:', filtered)
+    return filtered
   }, [sortedBills, selectedMonth, selectedYear])
 
   const totalAmount = useMemo(() => {

@@ -22,7 +22,8 @@
       "Bash(ssh:*)",
       "Bash(npm install:*)",
       "Bash(chmod:*)",
-      "Bash(./push.sh:*)"
+      "Bash(./push.sh:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

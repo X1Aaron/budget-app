@@ -23,6 +23,11 @@ function App() {
     const saved = localStorage.getItem('bills')
     return saved ? JSON.parse(saved) : []
   })
+
+  const handleUpdateBills = (updatedBills) => {
+    console.log('handleUpdateBills called with:', updatedBills)
+    setBills(updatedBills)
+  }
   const [categories, setCategories] = useState(() => {
     const saved = localStorage.getItem('categories')
     return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES
@@ -187,7 +192,7 @@ function App() {
         ) : activeSection === 'bills' ? (
           <Bills
             bills={bills}
-            onUpdateBills={setBills}
+            onUpdateBills={handleUpdateBills}
             selectedYear={selectedYear}
             selectedMonth={selectedMonth}
             onDateChange={handleDateChange}
