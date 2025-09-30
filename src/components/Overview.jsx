@@ -14,8 +14,7 @@ function Overview({
   monthlyStartingBalances,
   onDateChange,
   onUpdateBudget,
-  onUpdateStartingBalance,
-  currentBalance = 0
+  onUpdateStartingBalance
 }) {
   const [isEditingBudget, setIsEditingBudget] = useState(false)
   const [budgetInput, setBudgetInput] = useState('')
@@ -181,9 +180,24 @@ function Overview({
       }
     })
 
+    // Group transactions by day
+    const dailyTransactions = {}
+    monthlyTransactions.forEach(t => {
+      const day = new Date(t.date).getDate()
+      if (!dailyTransactions[day]) {
+        dailyTransactions[day] = 0
+      }
+      dailyTransactions[day] += t.amount
+    })
+
     // Calculate cumulative cash flow for each day
-    let balance = currentBalance
+    const key = `${selectedYear}-${selectedMonth}`
+    let balance = monthlyStartingBalances[key] || 0
     for (let day = 1; day <= daysInMonth; day++) {
+      // Add transactions for this day (income is positive, expenses are negative)
+      const transactionsAmount = dailyTransactions[day] || 0
+      balance += transactionsAmount
+
       // Subtract bills due on this day
       const billsToday = monthlyBills.filter(b => b.day === day)
       const billsAmount = billsToday.reduce((sum, b) => sum + b.amount, 0)
@@ -197,7 +211,7 @@ function Overview({
     }
 
     return data
-  }, [bills, currentBalance, selectedYear, selectedMonth])
+  }, [bills, monthlyStartingBalances, selectedYear, selectedMonth, monthlyTransactions])
 
   const categorySpendingData = useMemo(() => {
     // Group transactions by day and category
