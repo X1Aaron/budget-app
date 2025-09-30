@@ -148,7 +148,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
           if (bill.frequency === 'yearly') {
             const date = new Date(year, billMonth, billDay)
             const occurrenceDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-            if (new Date(occurrenceDate) >= startDate) {
+            if (date >= startDate) {
               recurringBills.push({
                 ...bill,
                 occurrenceDate,
@@ -159,7 +159,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
             for (let month = 0; month < 12; month++) {
               const date = new Date(year, month, billDay)
               const occurrenceDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-              if (new Date(occurrenceDate) >= startDate) {
+              if (date >= startDate) {
                 recurringBills.push({
                   ...bill,
                   occurrenceDate,
@@ -173,7 +173,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
               if (month < 12) {
                 const date = new Date(year, month, billDay)
                 const occurrenceDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-                if (new Date(occurrenceDate) >= startDate) {
+                if (date >= startDate) {
                   recurringBills.push({
                     ...bill,
                     occurrenceDate,
