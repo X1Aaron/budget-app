@@ -26,22 +26,6 @@ function Spending({
     setSortConfig({ key, direction })
   }
 
-  const handlePreviousMonth = () => {
-    if (selectedMonth === 0) {
-      onDateChange(selectedYear - 1, 11)
-    } else {
-      onDateChange(selectedYear, selectedMonth - 1)
-    }
-  }
-
-  const handleNextMonth = () => {
-    if (selectedMonth === 11) {
-      onDateChange(selectedYear + 1, 0)
-    } else {
-      onDateChange(selectedYear, selectedMonth + 1)
-    }
-  }
-
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
@@ -137,18 +121,6 @@ function Spending({
 
   return (
     <div className="spending">
-      <div className="month-selector">
-        <button className="month-nav-btn" onClick={handlePreviousMonth}>
-          ←
-        </button>
-        <h2 className="month-display">
-          {monthNames[selectedMonth]} {selectedYear}
-        </h2>
-        <button className="month-nav-btn" onClick={handleNextMonth}>
-          →
-        </button>
-      </div>
-
       <div className="starting-balance-display">
         <span className="balance-label">Starting Balance:</span>
         {isEditingStartingBalance ? (

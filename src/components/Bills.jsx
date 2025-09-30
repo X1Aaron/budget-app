@@ -1,10 +1,9 @@
 import { useState, useMemo } from 'react'
 import './Bills.css'
 
-function Bills({ bills, onUpdateBills, selectedYear, onYearChange, categories }) {
+function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange, categories }) {
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState(null)
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
   const [formData, setFormData] = useState({
     name: '',
     amount: '',
@@ -232,6 +231,10 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange, categories })
     })
   }, [sortedBills, selectedMonth, selectedYear])
 
+  const handleMonthClick = (month) => {
+    onDateChange(selectedYear, month)
+  }
+
   const totalAmount = useMemo(() => {
     return currentMonthBills.reduce((sum, bill) => sum + bill.amount, 0)
   }, [currentMonthBills])
@@ -262,16 +265,6 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange, categories })
 
   return (
     <div className="bills">
-      <div className="year-selector">
-        <button className="year-nav-btn" onClick={() => onYearChange(selectedYear - 1)}>
-          ← {selectedYear - 1}
-        </button>
-        <h2 className="year-display">{selectedYear}</h2>
-        <button className="year-nav-btn" onClick={() => onYearChange(selectedYear + 1)}>
-          {selectedYear + 1} →
-        </button>
-      </div>
-
       <div className="monthly-breakdown">
         <h2>Monthly Breakdown</h2>
         <div className="months-grid">
@@ -279,7 +272,7 @@ function Bills({ bills, onUpdateBills, selectedYear, onYearChange, categories })
             <div
               key={monthData.month}
               className={'month-card' + (monthData.total > 0 ? ' has-bills' : '') + (monthData.month === selectedMonth ? ' selected' : '')}
-              onClick={() => setSelectedMonth(monthData.month)}
+              onClick={() => handleMonthClick(monthData.month)}
               style={{ cursor: 'pointer' }}
             >
               <h3>{monthNames[monthData.month]}</h3>

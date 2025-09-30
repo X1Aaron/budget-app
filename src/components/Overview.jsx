@@ -254,22 +254,6 @@ function Overview({
     }
   }
 
-  const handlePreviousMonth = () => {
-    if (selectedMonth === 0) {
-      onDateChange(selectedYear - 1, 11)
-    } else {
-      onDateChange(selectedYear, selectedMonth - 1)
-    }
-  }
-
-  const handleNextMonth = () => {
-    if (selectedMonth === 11) {
-      onDateChange(selectedYear + 1, 0)
-    } else {
-      onDateChange(selectedYear, selectedMonth + 1)
-    }
-  }
-
   const handleSaveBudget = () => {
     const budget = parseFloat(budgetInput)
     if (!isNaN(budget) && budget >= 0) {
@@ -325,18 +309,6 @@ function Overview({
 
   return (
     <div className="overview">
-      <div className="month-selector">
-        <button className="month-nav-btn" onClick={handlePreviousMonth}>
-          ←
-        </button>
-        <h2 className="month-display">
-          {monthNames[selectedMonth]} {selectedYear}
-        </h2>
-        <button className="month-nav-btn" onClick={handleNextMonth}>
-          →
-        </button>
-      </div>
-
       <div className="summary-cards">
         <div className="summary-card income">
           <h3>Income</h3>

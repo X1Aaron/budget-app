@@ -7,6 +7,7 @@ import CSVImport from './components/CSVImport'
 import CategorySettings from './components/CategorySettings'
 import ExportButton from './components/ExportButton'
 import ImportButton from './components/ImportButton'
+import MonthYearSelector from './components/MonthYearSelector'
 import { DEFAULT_CATEGORIES, autoCategorize } from './utils/categories'
 
 function App() {
@@ -132,7 +133,14 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Budget Tracker</h1>
+        <div className="header-top">
+          <h1>Budget Tracker</h1>
+          <MonthYearSelector
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
+            onDateChange={handleDateChange}
+          />
+        </div>
         <nav className="app-nav">
           <button
             className={'nav-btn' + (activeSection === 'overview' ? ' active' : '')}
@@ -191,7 +199,8 @@ function App() {
             bills={bills}
             onUpdateBills={setBills}
             selectedYear={selectedYear}
-            onYearChange={setSelectedYear}
+            selectedMonth={selectedMonth}
+            onDateChange={handleDateChange}
             categories={categories}
           />
         ) : (
