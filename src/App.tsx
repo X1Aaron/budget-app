@@ -1,256 +1,267 @@
-import { useState, useEffect } from 'react'
-import './App.css'
-import Overview from './components/Overview'
-import Spending from './components/Spending'
-import Bills from './components/Bills'
-import CSVImport from './components/CSVImport'
-import CategorySettings from './components/CategorySettings'
-import AutoCategorization from './components/AutoCategorization'
-import ExportButton from './components/ExportButton'
-import ImportButton from './components/ImportButton'
-import MonthYearSelector from './components/MonthYearSelector'
-import { DEFAULT_CATEGORIES, autoCategorize, generateMerchantName } from './utils/categories'
+import { useState, useEffect } from 'react';
+import './App.css';
+import Overview from './components/Overview.jsx';
+import Spending from './components/Spending.jsx';
+import Bills from './components/Bills.jsx';
+import CSVImport from './components/CSVImport.jsx';
+import CategorySettings from './components/CategorySettings.jsx';
+import AutoCategorization from './components/AutoCategorization.jsx';
+import ExportButton from './components/ExportButton.jsx';
+import ImportButton from './components/ImportButton.jsx';
+import MonthYearSelector from './components/MonthYearSelector.jsx';
+import { DEFAULT_CATEGORIES, autoCategorize, generateMerchantName } from './utils/categories';
+import type {
+  Transaction,
+  Category,
+  Bill,
+  MonthlyBudget,
+  StartingBalance,
+  MerchantMapping,
+  CategoryMapping,
+  ActiveSection
+} from './types';
 
 function App() {
-  const [activeSection, setActiveSection] = useState('overview')
-  const [transactions, setTransactions] = useState([])
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
-  const [monthlyBudgets, setMonthlyBudgets] = useState(() => {
-    const saved = localStorage.getItem('monthlyBudgets')
-    return saved ? JSON.parse(saved) : {}
-  })
-  const [bills, setBills] = useState(() => {
-    const saved = localStorage.getItem('bills')
-    return saved ? JSON.parse(saved) : []
-  })
+  const [activeSection, setActiveSection] = useState<ActiveSection>('overview');
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
+  const [monthlyBudgets, setMonthlyBudgets] = useState<MonthlyBudget>(() => {
+    const saved = localStorage.getItem('monthlyBudgets');
+    return saved ? JSON.parse(saved) : {};
+  });
+  const [bills, setBills] = useState<Bill[]>(() => {
+    const saved = localStorage.getItem('bills');
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  const handleUpdateBills = (updatedBills) => {
-    console.log('handleUpdateBills called with:', updatedBills)
-    setBills(updatedBills)
-  }
-  const [categories, setCategories] = useState(() => {
-    const saved = localStorage.getItem('categories')
-    return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES
-  })
-  const [startingBalances, setStartingBalances] = useState(() => {
-    const saved = localStorage.getItem('startingBalances')
-    return saved ? JSON.parse(saved) : {}
-  })
-  const [merchantMappings, setMerchantMappings] = useState(() => {
-    const saved = localStorage.getItem('merchantMappings')
-    return saved ? JSON.parse(saved) : {}
-  })
-  const [categoryMappings, setCategoryMappings] = useState(() => {
-    const saved = localStorage.getItem('categoryMappings')
-    return saved ? JSON.parse(saved) : {}
-  })
+  const handleUpdateBills = (updatedBills: Bill[]) => {
+    console.log('handleUpdateBills called with:', updatedBills);
+    setBills(updatedBills);
+  };
 
-  useEffect(() => {
-    localStorage.setItem('categories', JSON.stringify(categories))
-  }, [categories])
+  const [categories, setCategories] = useState<Category[]>(() => {
+    const saved = localStorage.getItem('categories');
+    return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+  });
+  const [startingBalances, setStartingBalances] = useState<StartingBalance>(() => {
+    const saved = localStorage.getItem('startingBalances');
+    return saved ? JSON.parse(saved) : {};
+  });
+  const [merchantMappings, setMerchantMappings] = useState<MerchantMapping>(() => {
+    const saved = localStorage.getItem('merchantMappings');
+    return saved ? JSON.parse(saved) : {};
+  });
+  const [categoryMappings, setCategoryMappings] = useState<CategoryMapping>(() => {
+    const saved = localStorage.getItem('categoryMappings');
+    return saved ? JSON.parse(saved) : {};
+  });
 
   useEffect(() => {
-    localStorage.setItem('startingBalances', JSON.stringify(startingBalances))
-  }, [startingBalances])
+    localStorage.setItem('categories', JSON.stringify(categories));
+  }, [categories]);
 
   useEffect(() => {
-    localStorage.setItem('bills', JSON.stringify(bills))
-  }, [bills])
+    localStorage.setItem('startingBalances', JSON.stringify(startingBalances));
+  }, [startingBalances]);
 
   useEffect(() => {
-    localStorage.setItem('monthlyBudgets', JSON.stringify(monthlyBudgets))
-  }, [monthlyBudgets])
+    localStorage.setItem('bills', JSON.stringify(bills));
+  }, [bills]);
 
   useEffect(() => {
-    localStorage.setItem('merchantMappings', JSON.stringify(merchantMappings))
-  }, [merchantMappings])
+    localStorage.setItem('monthlyBudgets', JSON.stringify(monthlyBudgets));
+  }, [monthlyBudgets]);
 
   useEffect(() => {
-    localStorage.setItem('categoryMappings', JSON.stringify(categoryMappings))
-  }, [categoryMappings])
+    localStorage.setItem('merchantMappings', JSON.stringify(merchantMappings));
+  }, [merchantMappings]);
 
   useEffect(() => {
-    const saved = localStorage.getItem('transactions')
+    localStorage.setItem('categoryMappings', JSON.stringify(categoryMappings));
+  }, [categoryMappings]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('transactions');
     if (saved) {
-      setTransactions(JSON.parse(saved))
+      setTransactions(JSON.parse(saved));
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (transactions.length > 0) {
-      localStorage.setItem('transactions', JSON.stringify(transactions))
+      localStorage.setItem('transactions', JSON.stringify(transactions));
     }
-  }, [transactions])
+  }, [transactions]);
 
-  const handleImport = (importedTransactions, existingTransactions = transactions) => {
+  const handleImport = (importedTransactions: Transaction[], existingTransactions: Transaction[] = transactions) => {
     // Check for duplicate transactions
-    const duplicates = []
-    const newTransactions = []
+    const duplicates: Transaction[] = [];
+    const newTransactions: Transaction[] = [];
 
     importedTransactions.forEach(imported => {
       const isDuplicate = existingTransactions.some(existing =>
         existing.date === imported.date &&
         existing.description === imported.description &&
         existing.amount === imported.amount
-      )
+      );
 
       if (isDuplicate) {
-        duplicates.push(imported)
+        duplicates.push(imported);
       } else {
-        newTransactions.push(imported)
+        newTransactions.push(imported);
       }
-    })
+    });
 
     if (duplicates.length > 0) {
-      throw new Error(`Found ${duplicates.length} duplicate transaction${duplicates.length !== 1 ? 's' : ''} (same date, description, and amount). Import rejected to prevent duplicates.`)
+      throw new Error(`Found ${duplicates.length} duplicate transaction${duplicates.length !== 1 ? 's' : ''} (same date, description, and amount). Import rejected to prevent duplicates.`);
     }
 
     const categorizedTransactions = newTransactions.map(t => {
-      const result = autoCategorize(t.description, t.amount, t.category, categories)
+      const result = autoCategorize(t.description, t.amount, t.category, categories);
       return {
         ...t,
         category: result.category,
         autoCategorized: result.wasAutoCategorized,
         merchantName: t.merchantName || t.friendlyName || generateMerchantName(t.description),
         memo: t.memo || ''
-      }
-    })
-    setTransactions(categorizedTransactions)
-  }
+      };
+    });
+    setTransactions(categorizedTransactions);
+  };
 
-  const handleUpdateTransaction = (index, updatedTransaction, updateAllMatching = false) => {
-    const newTransactions = [...transactions]
-    const originalTransaction = transactions[index]
+  const handleUpdateTransaction = (index: number, updatedTransaction: Transaction, updateAllMatching: boolean = false) => {
+    const newTransactions = [...transactions];
+    const originalTransaction = transactions[index];
 
     // If updateAllMatching is true and merchantName was changed, update all transactions with same description
     if (updateAllMatching && updatedTransaction.merchantName !== originalTransaction.merchantName) {
-      const originalDescription = originalTransaction.description
-      const newMerchantName = updatedTransaction.merchantName
+      const originalDescription = originalTransaction.description;
+      const newMerchantName = updatedTransaction.merchantName;
 
       // Save merchant mapping
       setMerchantMappings(prev => ({
         ...prev,
-        [originalDescription]: newMerchantName
-      }))
+        [originalDescription]: newMerchantName || ''
+      }));
 
       for (let i = 0; i < newTransactions.length; i++) {
         if (newTransactions[i].description === originalDescription) {
-          newTransactions[i] = { ...newTransactions[i], merchantName: newMerchantName }
+          newTransactions[i] = { ...newTransactions[i], merchantName: newMerchantName };
         }
       }
     } else {
       // Check if category was changed
       if (updatedTransaction.category !== originalTransaction.category) {
-        const description = originalTransaction.description
+        const description = originalTransaction.description;
 
         // Save category mapping
         setCategoryMappings(prev => ({
           ...prev,
           [description]: updatedTransaction.category
-        }))
+        }));
       }
 
-      newTransactions[index] = updatedTransaction
+      newTransactions[index] = updatedTransaction;
     }
 
-    setTransactions(newTransactions)
-  }
+    setTransactions(newTransactions);
+  };
 
-  const handleImportTransactions = (importedTransactions) => {
+  const handleImportTransactions = (importedTransactions: Transaction[]) => {
     // Check for duplicate transactions
-    const duplicates = []
-    const newTransactions = []
+    const duplicates: Transaction[] = [];
+    const newTransactions: Transaction[] = [];
 
     importedTransactions.forEach(imported => {
       const isDuplicate = transactions.some(existing =>
         existing.date === imported.date &&
         existing.description === imported.description &&
         existing.amount === imported.amount
-      )
+      );
 
       if (isDuplicate) {
-        duplicates.push(imported)
+        duplicates.push(imported);
       } else {
-        newTransactions.push(imported)
+        newTransactions.push(imported);
       }
-    })
+    });
 
     if (duplicates.length > 0) {
-      throw new Error(`Found ${duplicates.length} duplicate transaction${duplicates.length !== 1 ? 's' : ''} (same date, description, and amount). Import rejected to prevent duplicates.`)
+      throw new Error(`Found ${duplicates.length} duplicate transaction${duplicates.length !== 1 ? 's' : ''} (same date, description, and amount). Import rejected to prevent duplicates.`);
     }
 
     const categorizedTransactions = newTransactions.map(t => {
-      const result = autoCategorize(t.description, t.amount, t.category, categories)
+      const result = autoCategorize(t.description, t.amount, t.category, categories);
       return {
         ...t,
         category: result.category,
         autoCategorized: result.wasAutoCategorized,
         merchantName: t.merchantName || t.friendlyName || generateMerchantName(t.description),
         memo: t.memo || ''
-      }
-    })
-    setTransactions(categorizedTransactions)
-  }
+      };
+    });
+    setTransactions(categorizedTransactions);
+  };
 
-  const handleImportCategories = (importedCategories) => {
+  const handleImportCategories = (importedCategories: Category[]) => {
     // Merge imported categories with existing ones, avoiding duplicates by name
-    const existingNames = new Set(categories.map(c => c.name.toLowerCase()))
+    const existingNames = new Set(categories.map(c => c.name.toLowerCase()));
     const newCategories = importedCategories.filter(
       c => !existingNames.has(c.name.toLowerCase())
-    )
-    setCategories([...categories, ...newCategories])
-  }
+    );
+    setCategories([...categories, ...newCategories]);
+  };
 
 
-  const handleDateChange = (year, month) => {
-    setSelectedYear(year)
-    setSelectedMonth(month)
-  }
+  const handleDateChange = (year: number, month: number) => {
+    setSelectedYear(year);
+    setSelectedMonth(month);
+  };
 
-  const handleUpdateBudget = (year, month, budget) => {
-    const key = `${year}-${month}`
+  const handleUpdateBudget = (year: number, month: number, budget: number) => {
+    const key = `${year}-${month}`;
     setMonthlyBudgets(prev => ({
       ...prev,
       [key]: budget
-    }))
-  }
+    }));
+  };
 
-  const handleUpdateStartingBalance = (year, month, balance) => {
-    const key = `${year}-${month}`
+  const handleUpdateStartingBalance = (year: number, month: number, balance: number) => {
+    const key = `${year}-${month}`;
     setStartingBalances(prev => ({
       ...prev,
       [key]: balance
-    }))
-  }
+    }));
+  };
 
-  const handleDeleteMerchantMapping = (description) => {
+  const handleDeleteMerchantMapping = (description: string) => {
     setMerchantMappings(prev => {
-      const updated = { ...prev }
-      delete updated[description]
-      return updated
-    })
-  }
+      const updated = { ...prev };
+      delete updated[description];
+      return updated;
+    });
+  };
 
-  const handleDeleteCategoryMapping = (description) => {
+  const handleDeleteCategoryMapping = (description: string) => {
     setCategoryMappings(prev => {
-      const updated = { ...prev }
-      delete updated[description]
-      return updated
-    })
-  }
+      const updated = { ...prev };
+      delete updated[description];
+      return updated;
+    });
+  };
 
-  const handleImportRules = (importedMerchantMappings, importedCategoryMappings) => {
+  const handleImportRules = (importedMerchantMappings: MerchantMapping, importedCategoryMappings: CategoryMapping) => {
     setMerchantMappings(prev => ({
       ...prev,
       ...importedMerchantMappings
-    }))
+    }));
     setCategoryMappings(prev => ({
       ...prev,
       ...importedCategoryMappings
-    }))
-    alert('Rules imported successfully!')
-  }
+    }));
+    alert('Rules imported successfully!');
+  };
 
   return (
     <div className="app">
@@ -269,7 +280,7 @@ function App() {
                 onImportTransactions={handleImportTransactions}
                 onImportCategories={handleImportCategories}
                 onImportRules={handleImportRules}
-                onImportBills={(importedBills) => setBills(importedBills)}
+                onImportBills={(importedBills: Bill[]) => setBills(importedBills)}
               />
               <ExportButton
                 activeSection={activeSection}
@@ -386,7 +397,7 @@ function App() {
         )}
       </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
