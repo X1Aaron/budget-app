@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import './Overview.css'
 import { getCategoryColor } from '../utils/categories'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts'
 
 function Overview({
   transactions,
@@ -416,7 +416,7 @@ function Overview({
             <Tooltip
               formatter={(value) => [`$${value.toLocaleString()}`, 'Spent']}
             />
-            <Bar dataKey="amount" fill="#8884d8">
+            <Bar dataKey="amount">
               {Object.entries(summary.categoryBreakdown)
                 .filter(([category, amount]) => amount < 0)
                 .map(([category, amount]) => ({
@@ -425,9 +425,8 @@ function Overview({
                 }))
                 .sort((a, b) => b.amount - a.amount)
                 .map((entry) => (
-                  <Bar
+                  <Cell
                     key={entry.category}
-                    dataKey="amount"
                     fill={getCategoryColor(entry.category, categories)}
                   />
                 ))}
