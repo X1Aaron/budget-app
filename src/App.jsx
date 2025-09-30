@@ -5,6 +5,7 @@ import CSVImport from './components/CSVImport'
 import CategoryManager from './components/CategoryManager'
 import AutoCategorizationRules from './components/AutoCategorizationRules'
 import ExportButton from './components/ExportButton'
+import ImportButton from './components/ImportButton'
 import { DEFAULT_CATEGORIES, autoCategorize } from './utils/categories'
 
 function App() {
@@ -53,6 +54,27 @@ function App() {
     setTransactions(newTransactions)
   }
 
+  const handleImportTransactions = (importedTransactions) => {
+    const categorizedTransactions = importedTransactions.map(t => ({
+      ...t,
+      category: autoCategorize(t.description, t.amount, t.category, rules)
+    }))
+    setTransactions(categorizedTransactions)
+  }
+
+  const handleImportCategories = (importedCategories) => {
+    // Merge imported categories with existing ones, avoiding duplicates by name
+    const existingNames = new Set(categories.map(c => c.name.toLowerCase()))
+    const newCategories = importedCategories.filter(
+      c => !existingNames.has(c.name.toLowerCase())
+    )
+    setCategories([...categories, ...newCategories])
+  }
+
+  const handleImportRules = (importedRules) => {
+    setRules(importedRules)
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -63,6 +85,11 @@ function App() {
         <div className="settings-buttons">
           <CategoryManager categories={categories} onUpdateCategories={setCategories} />
           <AutoCategorizationRules rules={rules} categories={categories} onUpdateRules={setRules} />
+          <ImportButton
+            onImportTransactions={handleImportTransactions}
+            onImportCategories={handleImportCategories}
+            onImportRules={handleImportRules}
+          />
           <ExportButton transactions={transactions} categories={categories} rules={rules} />
         </div>
         <BudgetDashboard
