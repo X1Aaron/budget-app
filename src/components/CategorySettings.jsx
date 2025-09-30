@@ -10,7 +10,8 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
     color: '#6b7280',
     type: 'expense',
     keywords: '',
-    budgeted: 0
+    budgeted: 0,
+    needWant: 'need'
   })
   const [newRule, setNewRule] = useState({
     pattern: '',
@@ -26,7 +27,8 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
     color: '#6b7280',
     type: 'expense',
     keywords: '',
-    budgeted: 0
+    budgeted: 0,
+    needWant: 'need'
   })
 
   const handleAddCategory = () => {
@@ -38,11 +40,12 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
       color: newCategory.color,
       type: newCategory.type,
       keywords: newCategory.keywords.split(',').map(k => k.trim()).filter(k => k),
-      budgeted: parseFloat(newCategory.budgeted) || 0
+      budgeted: parseFloat(newCategory.budgeted) || 0,
+      needWant: newCategory.needWant
     }
 
     onUpdateCategories([...categories, category])
-    setNewCategory({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0 })
+    setNewCategory({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0, needWant: 'need' })
   }
 
   const handleDeleteCategory = (categoryId) => {
@@ -57,7 +60,8 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
       color: category.color,
       type: category.type,
       keywords: (category.keywords || []).join(', '),
-      budgeted: category.budgeted || 0
+      budgeted: category.budgeted || 0,
+      needWant: category.needWant || 'need'
     })
   }
 
@@ -72,7 +76,8 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
           color: editCategoryForm.color,
           type: editCategoryForm.type,
           keywords: editCategoryForm.keywords.split(',').map(k => k.trim()).filter(k => k),
-          budgeted: parseFloat(editCategoryForm.budgeted) || 0
+          budgeted: parseFloat(editCategoryForm.budgeted) || 0,
+          needWant: editCategoryForm.needWant
         }
       }
       return cat
@@ -80,12 +85,12 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
 
     onUpdateCategories(updatedCategories)
     setEditingCategory(null)
-    setEditCategoryForm({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0 })
+    setEditCategoryForm({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0, needWant: 'need' })
   }
 
   const handleCancelCategoryEdit = () => {
     setEditingCategory(null)
-    setEditCategoryForm({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0 })
+    setEditCategoryForm({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0, needWant: 'need' })
   }
 
   const handleAddRule = () => {
@@ -277,6 +282,28 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
                         min="0"
                         step="0.01"
                       />
+                      <div className="need-want-selector">
+                        <label>
+                          <input
+                            type="radio"
+                            name="newCategoryNeedWant"
+                            value="need"
+                            checked={newCategory.needWant === 'need'}
+                            onChange={(e) => setNewCategory({ ...newCategory, needWant: e.target.value })}
+                          />
+                          Need
+                        </label>
+                        <label>
+                          <input
+                            type="radio"
+                            name="newCategoryNeedWant"
+                            value="want"
+                            checked={newCategory.needWant === 'want'}
+                            onChange={(e) => setNewCategory({ ...newCategory, needWant: e.target.value })}
+                          />
+                          Want
+                        </label>
+                      </div>
                       <button className="add-btn" onClick={handleAddCategory}>Add Category</button>
                     </div>
                     <p className="help-text">
@@ -328,6 +355,28 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
                           min="0"
                           step="0.01"
                         />
+                        <div className="need-want-selector">
+                          <label>
+                            <input
+                              type="radio"
+                              name="editCategoryNeedWant"
+                              value="need"
+                              checked={editCategoryForm.needWant === 'need'}
+                              onChange={(e) => setEditCategoryForm({ ...editCategoryForm, needWant: e.target.value })}
+                            />
+                            Need
+                          </label>
+                          <label>
+                            <input
+                              type="radio"
+                              name="editCategoryNeedWant"
+                              value="want"
+                              checked={editCategoryForm.needWant === 'want'}
+                              onChange={(e) => setEditCategoryForm({ ...editCategoryForm, needWant: e.target.value })}
+                            />
+                            Want
+                          </label>
+                        </div>
                         <div className="form-actions">
                           <button className="update-btn" onClick={handleUpdateCategory}>Update Category</button>
                           <button className="cancel-btn" onClick={handleCancelCategoryEdit}>Cancel</button>
@@ -345,6 +394,7 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
                             <th></th>
                             <th>Name</th>
                             <th>Type</th>
+                            <th>Need/Want</th>
                             <th>Budget</th>
                             <th>Keywords</th>
                             <th></th>
@@ -359,6 +409,15 @@ function CategorySettings({ categories, rules, onUpdateCategories, onUpdateRules
                               <td className="name-cell">{category.name}</td>
                               <td className="type-cell">
                                 <span className="category-type-badge">{category.type}</span>
+                              </td>
+                              <td className="need-want-cell">
+                                {category.needWant ? (
+                                  <span className={`need-want-badge ${category.needWant}`}>
+                                    {category.needWant === 'need' ? 'Need' : 'Want'}
+                                  </span>
+                                ) : (
+                                  <span className="no-keywords">—</span>
+                                )}
                               </td>
                               <td className="budget-cell">
                                 {editingCategoryId === category.id ? (

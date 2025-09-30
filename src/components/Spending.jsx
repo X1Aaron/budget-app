@@ -133,6 +133,11 @@ function Spending({
         </button>
       </div>
 
+      <div className="starting-balance-display">
+        <span className="balance-label">Starting Balance:</span>
+        <span className="balance-amount">{formatCurrency(currentStartingBalance)}</span>
+      </div>
+
       {monthlyTransactions.length === 0 ? (
         <div className="spending-empty">
           <p>No transactions for {monthNames[selectedMonth]} {selectedYear}.</p>
@@ -200,7 +205,6 @@ function Spending({
                     {sortConfig.key === 'runningBalance' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
                   </span>
                 </th>
-                <th>Need/Want</th>
               </tr>
             </thead>
             <tbody>
@@ -256,24 +260,6 @@ function Spending({
                     </td>
                     <td className={'transaction-balance ' + (transaction.runningBalance < 0 ? 'negative' : 'positive')}>
                       {formatCurrency(transaction.runningBalance)}
-                    </td>
-                    <td className="transaction-need-want">
-                      <div className="need-want-buttons">
-                        <button
-                          className={'need-btn' + (transaction.needWant === 'need' ? ' active' : '')}
-                          onClick={() => onUpdateTransaction(originalIndex, { ...transaction, needWant: 'need' })}
-                          title="Mark as Need"
-                        >
-                          Need
-                        </button>
-                        <button
-                          className={'want-btn' + (transaction.needWant === 'want' ? ' active' : '')}
-                          onClick={() => onUpdateTransaction(originalIndex, { ...transaction, needWant: 'want' })}
-                          title="Mark as Want"
-                        >
-                          Want
-                        </button>
-                      </div>
                     </td>
                   </tr>
                 )

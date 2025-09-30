@@ -2,11 +2,11 @@
 export const exportTransactionsToCSV = (transactions) => {
   if (transactions.length === 0) return
 
-  const headers = ['date', 'description', 'amount', 'category', 'needWant', 'autoCategorized']
+  const headers = ['date', 'description', 'amount', 'category', 'autoCategorized']
   const csvContent = [
     headers.join(','),
     ...transactions.map(t =>
-      [t.date, `"${t.description}"`, t.amount, t.category, t.needWant || '', t.autoCategorized || false].join(',')
+      [t.date, `"${t.description}"`, t.amount, t.category, t.autoCategorized || false].join(',')
     )
   ].join('\n')
 
@@ -27,11 +27,11 @@ export const exportCategoriesToJSON = (categories) => {
 
 // Export categories to CSV
 export const exportCategoriesToCSV = (categories) => {
-  const headers = ['id', 'name', 'color', 'type', 'keywords']
+  const headers = ['id', 'name', 'color', 'type', 'keywords', 'needWant', 'budgeted']
   const csvContent = [
     headers.join(','),
     ...categories.map(cat =>
-      [cat.id, `"${cat.name}"`, cat.color, cat.type, `"${cat.keywords.join(', ')}"`].join(',')
+      [cat.id, `"${cat.name}"`, cat.color, cat.type, `"${cat.keywords.join(', ')}"`, cat.needWant || '', cat.budgeted || 0].join(',')
     )
   ].join('\n')
 

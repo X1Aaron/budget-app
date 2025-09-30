@@ -49,8 +49,25 @@ function Overview({
       return acc
     }, {})
 
-    return { income, expenses, balance, categoryBreakdown }
-  }, [monthlyTransactions])
+    // Calculate necessary vs discretionary spending
+    const necessarySpending = monthlyTransactions
+      .filter(t => {
+        if (t.amount >= 0) return false
+        const category = categories.find(cat => cat.name === t.category)
+        return category?.needWant === 'need'
+      })
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+
+    const discretionarySpending = monthlyTransactions
+      .filter(t => {
+        if (t.amount >= 0) return false
+        const category = categories.find(cat => cat.name === t.category)
+        return category?.needWant === 'want'
+      })
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+
+    return { income, expenses, balance, categoryBreakdown, necessarySpending, discretionarySpending }
+  }, [monthlyTransactions, categories])
 
   const currentBudget = useMemo(() => {
     const key = `${selectedYear}-${selectedMonth}`
@@ -383,6 +400,17 @@ function Overview({
         <div className="summary-card balance">
           <h3>Difference</h3>
           <p className="amount">{formatCurrency(summary.balance)}</p>
+        </div>
+      </div>
+
+      <div className="summary-cards">
+        <div className="summary-card necessary">
+          <h3>Necessary Spending</h3>
+          <p className="amount">{formatCurrency(summary.necessarySpending)}</p>
+        </div>
+        <div className="summary-card discretionary">
+          <h3>Discretionary Spending</h3>
+          <p className="amount">{formatCurrency(summary.discretionarySpending)}</p>
         </div>
       </div>
 

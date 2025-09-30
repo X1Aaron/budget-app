@@ -47,6 +47,30 @@
   background: #2563eb;
 }
 
+.starting-balance-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.balance-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 1.1rem;
+}
+
+.balance-amount {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
 .spending-filters {
   display: flex;
   align-items: center;
@@ -248,44 +272,17 @@
   color: #ef4444;
 }
 
-.transaction-need-want {
-  text-align: center;
+.transaction-balance {
+  font-weight: 600;
+  text-align: right;
 }
 
-.need-want-buttons {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
+.transaction-balance.positive {
+  color: #10b981;
 }
 
-.need-btn,
-.want-btn {
-  padding: 0.25rem 0.75rem;
-  border: 2px solid transparent;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: #f3f4f6;
-  color: #6b7280;
-}
-
-.need-btn:hover,
-.want-btn:hover {
-  background: #e5e7eb;
-}
-
-.need-btn.active {
-  background: #10b981;
-  color: white;
-  border-color: #059669;
-}
-
-.want-btn.active {
-  background: #f59e0b;
-  color: white;
-  border-color: #d97706;
+.transaction-balance.negative {
+  color: #ef4444;
 }
 
 .transactions-total {
