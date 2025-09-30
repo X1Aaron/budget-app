@@ -32,7 +32,11 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
       amount: parseFloat(formData.amount)
     }
 
-    onUpdateBills([...bills, newBill])
+    console.log('Adding new bill:', newBill)
+    console.log('Current bills:', bills)
+    const updatedBills = [...bills, newBill]
+    console.log('Updated bills:', updatedBills)
+    onUpdateBills(updatedBills)
     setFormData({
       name: '',
       amount: '',
