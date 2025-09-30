@@ -1,22 +1,32 @@
 .auto-categorization {
-  padding: 20px;
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .auto-cat-header {
-  margin-bottom: 24px;
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
 .auto-cat-header h2 {
-  margin: 0 0 8px 0;
-  font-size: 24px;
-  color: #333;
+  margin: 0 0 0.75rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .auto-cat-description {
   margin: 0;
-  color: #666;
-  font-size: 14px;
-  line-height: 1.5;
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 700px;
+  margin: 0 auto;
 }
 
 .auto-cat-tabs {
@@ -51,88 +61,131 @@
 
 .auto-cat-content {
   background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f3f4f6;
 }
 
 .mappings-table-container {
   overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .mappings-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .mappings-table th {
   text-align: left;
-  padding: 12px;
-  background: #f5f5f5;
-  border-bottom: 2px solid #e0e0e0;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(to bottom, #ffffff, #f9fafb);
+  border-bottom: 2px solid #e5e7eb;
   font-weight: 600;
-  color: #333;
-  font-size: 14px;
+  color: #6b7280;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .mappings-table td {
-  padding: 12px;
-  border-bottom: 1px solid #e0e0e0;
-  font-size: 14px;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.95rem;
+}
+
+.mappings-table tbody tr {
+  transition: all 0.15s ease;
 }
 
 .mappings-table tbody tr:hover {
-  background: #f9f9f9;
+  background: #fafbfc;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .description-cell {
-  font-family: monospace;
-  color: #555;
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  color: #374151;
   max-width: 400px;
   word-break: break-word;
+  font-size: 0.875rem;
+  background: #f9fafb;
+  padding: 0.875rem 1rem !important;
+  border-radius: 6px;
 }
 
-.category-cell,
+.category-cell {
+  font-weight: 600;
+  color: #667eea;
+  font-size: 0.95rem;
+}
+
 .merchant-cell {
   font-weight: 500;
-  color: #333;
+  color: #111827;
+  font-size: 0.95rem;
 }
 
 .actions-cell {
   text-align: right;
-  width: 100px;
+  white-space: nowrap;
+  padding-left: 1.5rem !important;
 }
 
 .delete-btn {
-  padding: 6px 12px;
-  background: #f44336;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  transition: background 0.2s;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+  margin-left: 0.5rem;
 }
 
 .delete-btn:hover {
-  background: #d32f2f;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+  transform: translateY(-1px);
+}
+
+.delete-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
 }
 
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
-  color: #999;
+  padding: 5rem 2rem;
+  color: #9ca3af;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-radius: 12px;
+  border: 2px dashed #e5e7eb;
 }
 
 .empty-state p {
-  margin: 0 0 8px 0;
-  font-size: 16px;
+  margin: 0 0 0.75rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #6b7280;
 }
 
 .empty-hint {
-  font-size: 14px;
-  color: #bbb;
+  font-size: 0.95rem;
+  color: #9ca3af;
+  line-height: 1.5;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .import-export-section {
