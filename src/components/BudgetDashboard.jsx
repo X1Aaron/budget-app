@@ -22,7 +22,8 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
 
     const balance = income - expenses
 
-    const categoryBreakdown = filteredTransactions.reduce((acc, t) => {
+    // Always show all categories, not just filtered ones
+    const categoryBreakdown = transactions.reduce((acc, t) => {
       const category = t.category || 'Uncategorized'
       if (!acc[category]) {
         acc[category] = 0
@@ -32,7 +33,7 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
     }, {})
 
     return { income, expenses, balance, categoryBreakdown }
-  }, [filteredTransactions])
+  }, [filteredTransactions, transactions])
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
