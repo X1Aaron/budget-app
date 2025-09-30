@@ -228,13 +228,26 @@ function Overview({
                   className={'category-item ' + (amount < 0 ? 'expense' : 'income')}
                   style={{ borderLeftColor: color }}
                 >
-                  <div className="category-color-dot" style={{ backgroundColor: color }}></div>
-                  <span className="category-name">{category}</span>
-                  <span className="category-amount">Spent: {formatCurrency(spent)}</span>
-                  <span className="category-amount">Budgeted: {formatCurrency(budgeted)}</span>
-                  <span className={'category-amount ' + (isOverBudget ? 'over-budget' : 'under-budget')}>
-                    Difference: {formatCurrency(Math.abs(difference))} {isOverBudget ? 'over' : 'remaining'}
-                  </span>
+                  <div className="category-header-row">
+                    <div className="category-color-dot" style={{ backgroundColor: color }}></div>
+                    <span className="category-name">{category}</span>
+                  </div>
+                  <div className="category-amounts">
+                    <div className="amount-row">
+                      <span className="amount-label">Spent:</span>
+                      <span className="amount-value">{formatCurrency(spent)}</span>
+                    </div>
+                    <div className="amount-row">
+                      <span className="amount-label">Budgeted:</span>
+                      <span className="amount-value">{formatCurrency(budgeted)}</span>
+                    </div>
+                    <div className="amount-row">
+                      <span className="amount-label">Difference:</span>
+                      <span className={'amount-value ' + (isOverBudget ? 'over-budget' : 'under-budget')}>
+                        {formatCurrency(Math.abs(difference))} {isOverBudget ? 'over' : 'remaining'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               )
             })}
