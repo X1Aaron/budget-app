@@ -46,7 +46,7 @@ const parseCSV = (csvText, expectedHeaders) => {
 // Import transactions from CSV
 export const importTransactionsFromCSV = async (file) => {
   const text = await file.text()
-  const data = parseCSV(text, ['date', 'description', 'amount', 'category'])
+  const data = parseCSV(text, ['date', 'description', 'amount'])
 
   return data.map(row => ({
     id: Date.now() + Math.random(),
