@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import './Bills.css'
 
-function Bills({ bills, onUpdateBills }) {
+function Bills({ bills, onUpdateBills, selectedYear, onYearChange }) {
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [formData, setFormData] = useState({
@@ -94,20 +94,48 @@ function Bills({ bills, onUpdateBills }) {
     })
   }
 
-  const sortedBills = useMemo(() => {
-    return [...bills].sort((a, b) => {
-      if (a.isPaid !== b.isPaid) return a.isPaid ? 1 : -1
-      return new Date(a.dueDate) - new Date(b.dueDate)
+  const monthlyBillTotals = useMemo(() => {
+    const months = Array(12).fill(0).map((_, idx) => ({
+      month: idx,
+      total: 0,
+      bills: []
+    }))
+
+    bills.forEach(bill => {
+      const dueDate = new Date(bill.dueDate)
+      if (dueDate.getFullYear() === selectedYear) {
+        const monthIdx = dueDate.getMonth()
+        months[monthIdx].total += bill.amount
+        months[monthIdx].bills.push(bill)
+      }
     })
-  }, [bills])
+
+    return months
+  }, [bills, selectedYear])
+
+  const yearlyTotal = useMemo(() => {
+    return monthlyBillTotals.reduce((sum, month) => sum + month.total, 0)
+  }, [monthlyBillTotals])
+
+  const sortedBills = useMemo(() => {
+    return [...bills]
+      .filter(bill => {
+        const dueDate = new Date(bill.dueDate)
+        return dueDate.getFullYear() === selectedYear
+      })
+      .sort((a, b) => {
+        if (a.isPaid !== b.isPaid) return a.isPaid ? 1 : -1
+        return new Date(a.dueDate) - new Date(b.dueDate)
+      })
+  }, [bills, selectedYear])
 
   const totalAmount = useMemo(() => {
-    return bills.reduce((sum, bill) => sum + bill.amount, 0)
-  }, [bills])
+    return sortedBills.reduce((sum, bill) => sum + bill.amount, 0)
+  }, [sortedBills])
 
   const unpaidAmount = useMemo(() => {
-    return bills.filter(b => !b.isPaid).reduce((sum, bill) => sum + bill.amount, 0)
-  }, [bills])
+    return sortedBills.filter(b => !b.isPaid).reduce((sum, bill) => sum + bill.amount, 0)
+  }, [sortedBills])
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -124,8 +152,48 @@ function Bills({ bills, onUpdateBills }) {
     })
   }
 
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ]
+
   return (
     <div className="bills">
+      <div className="year-selector">
+        <button className="year-nav-btn" onClick={() => onYearChange(selectedYear - 1)}>
+          ← {selectedYear - 1}
+        </button>
+        <h2 className="year-display">{selectedYear}</h2>
+        <button className="year-nav-btn" onClick={() => onYearChange(selectedYear + 1)}>
+          {selectedYear + 1} →
+        </button>
+      </div>
+
+      <div className="yearly-summary">
+        <div className="summary-card">
+          <h3>Total Bills for {selectedYear}</h3>
+          <p className="amount">{formatCurrency(yearlyTotal)}</p>
+        </div>
+      </div>
+
+      <div className="monthly-breakdown">
+        <h2>Monthly Breakdown</h2>
+        <div className="months-grid">
+          {monthlyBillTotals.map((monthData) => (
+            <div
+              key={monthData.month}
+              className={'month-card' + (monthData.total > 0 ? ' has-bills' : '')}
+            >
+              <h3>{monthNames[monthData.month]}</h3>
+              <p className="month-total">{formatCurrency(monthData.total)}</p>
+              {monthData.bills.length > 0 && (
+                <p className="bill-count">{monthData.bills.length} bill{monthData.bills.length !== 1 ? 's' : ''}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="bills-summary">
         <div className="summary-card total-bills">
           <h3>Total Bills</h3>
@@ -139,7 +207,7 @@ function Bills({ bills, onUpdateBills }) {
 
       <div className="bills-section">
         <div className="bills-header">
-          <h2>Bills</h2>
+          <h2>Bills for {selectedYear}</h2>
           {!isAdding && (
             <button className="add-bill-btn" onClick={() => setIsAdding(true)}>
               + Add Bill

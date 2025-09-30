@@ -12,6 +12,12 @@ import { DEFAULT_CATEGORIES, autoCategorize } from './utils/categories'
 function App() {
   const [activeSection, setActiveSection] = useState('overview')
   const [transactions, setTransactions] = useState([])
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
+  const [monthlyBudgets, setMonthlyBudgets] = useState(() => {
+    const saved = localStorage.getItem('monthlyBudgets')
+    return saved ? JSON.parse(saved) : {}
+  })
   const [bills, setBills] = useState(() => {
     const saved = localStorage.getItem('bills')
     return saved ? JSON.parse(saved) : []
@@ -36,6 +42,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('bills', JSON.stringify(bills))
   }, [bills])
+
+  useEffect(() => {
+    localStorage.setItem('monthlyBudgets', JSON.stringify(monthlyBudgets))
+  }, [monthlyBudgets])
 
   useEffect(() => {
     const saved = localStorage.getItem('transactions')
@@ -93,6 +103,19 @@ function App() {
     setRules(importedRules)
   }
 
+  const handleDateChange = (year, month) => {
+    setSelectedYear(year)
+    setSelectedMonth(month)
+  }
+
+  const handleUpdateBudget = (year, month, budget) => {
+    const key = `${year}-${month}`
+    setMonthlyBudgets(prev => ({
+      ...prev,
+      [key]: budget
+    }))
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -137,15 +160,32 @@ function App() {
           <ExportButton transactions={transactions} categories={categories} rules={rules} />
         </div>
         {activeSection === 'overview' ? (
-          <Overview transactions={transactions} categories={categories} bills={bills} />
+          <Overview
+            transactions={transactions}
+            categories={categories}
+            bills={bills}
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
+            monthlyBudgets={monthlyBudgets}
+            onDateChange={handleDateChange}
+            onUpdateBudget={handleUpdateBudget}
+          />
         ) : activeSection === 'spending' ? (
           <Spending
             transactions={transactions}
             categories={categories}
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
+            onDateChange={handleDateChange}
             onUpdateTransaction={handleUpdateTransaction}
           />
         ) : (
-          <Bills bills={bills} onUpdateBills={setBills} />
+          <Bills
+            bills={bills}
+            onUpdateBills={setBills}
+            selectedYear={selectedYear}
+            onYearChange={setSelectedYear}
+          />
         )}
       </main>
     </div>

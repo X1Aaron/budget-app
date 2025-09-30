@@ -2,6 +2,135 @@
   padding: 1rem;
 }
 
+.year-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.year-display {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #111827;
+  min-width: 150px;
+  text-align: center;
+}
+
+.year-nav-btn {
+  padding: 0.6rem 1.2rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.year-nav-btn:hover {
+  background: #2563eb;
+}
+
+.yearly-summary {
+  margin-bottom: 2rem;
+}
+
+.yearly-summary .summary-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.yearly-summary .summary-card h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+.yearly-summary .summary-card .amount {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.monthly-breakdown {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.monthly-breakdown h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.months-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.month-card {
+  padding: 1rem;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.month-card.has-bills {
+  background: #dbeafe;
+  border-color: #3b82f6;
+}
+
+.month-card.has-bills:hover {
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+  transform: translateY(-2px);
+}
+
+.month-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.month-card.has-bills h3 {
+  color: #1e40af;
+  font-weight: 600;
+}
+
+.month-card .month-total {
+  margin: 0.5rem 0;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #111827;
+}
+
+.month-card.has-bills .month-total {
+  color: #1e3a8a;
+}
+
+.month-card .bill-count {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
 .bills-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

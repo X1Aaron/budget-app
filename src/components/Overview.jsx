@@ -1,21 +1,40 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import './Overview.css'
 import { getCategoryColor } from '../utils/categories'
 import CategoryPieChart from './CategoryPieChart'
 
-function Overview({ transactions, categories, bills = [] }) {
+function Overview({
+  transactions,
+  categories,
+  bills = [],
+  selectedYear,
+  selectedMonth,
+  monthlyBudgets,
+  onDateChange,
+  onUpdateBudget
+}) {
+  const [isEditingBudget, setIsEditingBudget] = useState(false)
+  const [budgetInput, setBudgetInput] = useState('')
+
+  const monthlyTransactions = useMemo(() => {
+    return transactions.filter(t => {
+      const date = new Date(t.date)
+      return date.getFullYear() === selectedYear && date.getMonth() === selectedMonth
+    })
+  }, [transactions, selectedYear, selectedMonth])
+
   const summary = useMemo(() => {
-    const income = transactions
+    const income = monthlyTransactions
       .filter(t => t.amount > 0)
       .reduce((sum, t) => sum + t.amount, 0)
 
-    const expenses = transactions
+    const expenses = monthlyTransactions
       .filter(t => t.amount < 0)
       .reduce((sum, t) => sum + Math.abs(t.amount), 0)
 
     const balance = income - expenses
 
-    const categoryBreakdown = transactions.reduce((acc, t) => {
+    const categoryBreakdown = monthlyTransactions.reduce((acc, t) => {
       const category = t.category || 'Uncategorized'
       if (!acc[category]) {
         acc[category] = 0
@@ -25,7 +44,12 @@ function Overview({ transactions, categories, bills = [] }) {
     }, {})
 
     return { income, expenses, balance, categoryBreakdown }
-  }, [transactions])
+  }, [monthlyTransactions])
+
+  const currentBudget = useMemo(() => {
+    const key = `${selectedYear}-${selectedMonth}`
+    return monthlyBudgets[key] || 0
+  }, [monthlyBudgets, selectedYear, selectedMonth])
 
   const upcomingBills = useMemo(() => {
     const today = new Date()
@@ -71,16 +95,86 @@ function Overview({ transactions, categories, bills = [] }) {
     }
   }
 
-  if (transactions.length === 0) {
-    return (
-      <div className="overview-empty">
-        <p>No transactions yet. Import a CSV file to get started.</p>
-      </div>
-    )
+  const handlePreviousMonth = () => {
+    if (selectedMonth === 0) {
+      onDateChange(selectedYear - 1, 11)
+    } else {
+      onDateChange(selectedYear, selectedMonth - 1)
+    }
   }
+
+  const handleNextMonth = () => {
+    if (selectedMonth === 11) {
+      onDateChange(selectedYear + 1, 0)
+    } else {
+      onDateChange(selectedYear, selectedMonth + 1)
+    }
+  }
+
+  const handleSaveBudget = () => {
+    const budget = parseFloat(budgetInput)
+    if (!isNaN(budget) && budget >= 0) {
+      onUpdateBudget(selectedYear, selectedMonth, budget)
+      setIsEditingBudget(false)
+    }
+  }
+
+  const handleEditBudget = () => {
+    setBudgetInput(currentBudget.toString())
+    setIsEditingBudget(true)
+  }
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ]
+
+  const remaining = currentBudget - summary.expenses
 
   return (
     <div className="overview">
+      <div className="month-selector">
+        <button className="month-nav-btn" onClick={handlePreviousMonth}>
+          ←
+        </button>
+        <h2 className="month-display">
+          {monthNames[selectedMonth]} {selectedYear}
+        </h2>
+        <button className="month-nav-btn" onClick={handleNextMonth}>
+          →
+        </button>
+      </div>
+
+      <div className="budget-section">
+        <div className="budget-card">
+          <h3>Monthly Budget</h3>
+          {isEditingBudget ? (
+            <div className="budget-edit">
+              <input
+                type="number"
+                value={budgetInput}
+                onChange={(e) => setBudgetInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSaveBudget()}
+                autoFocus
+              />
+              <button onClick={handleSaveBudget}>Save</button>
+              <button onClick={() => setIsEditingBudget(false)}>Cancel</button>
+            </div>
+          ) : (
+            <div className="budget-display" onClick={handleEditBudget}>
+              <p className="amount">{formatCurrency(currentBudget)}</p>
+              <span className="edit-hint">Click to edit</span>
+            </div>
+          )}
+        </div>
+        {currentBudget > 0 && (
+          <div className={'budget-card ' + (remaining >= 0 ? 'positive' : 'negative')}>
+            <h3>Remaining</h3>
+            <p className="amount">{formatCurrency(remaining)}</p>
+          </div>
+        )}
+      </div>
+
       <div className="summary-cards">
         <div className="summary-card income">
           <h3>Income</h3>
@@ -113,7 +207,7 @@ function Overview({ transactions, categories, bills = [] }) {
         </div>
       )}
 
-      <CategoryPieChart transactions={transactions} categories={categories} />
+      <CategoryPieChart transactions={monthlyTransactions} categories={categories} />
 
       <div className="categories-section">
         <h2>Categories</h2>

@@ -9,6 +9,135 @@
   font-size: 1.1rem;
 }
 
+.month-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.month-display {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #111827;
+  min-width: 250px;
+  text-align: center;
+}
+
+.month-nav-btn {
+  padding: 0.5rem 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.month-nav-btn:hover {
+  background: #2563eb;
+}
+
+.budget-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.budget-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.budget-card h3 {
+  margin: 0 0 0.5rem 0;
+  color: #666;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.budget-card .amount {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #3b82f6;
+}
+
+.budget-card.positive .amount {
+  color: #10b981;
+}
+
+.budget-card.negative .amount {
+  color: #ef4444;
+}
+
+.budget-display {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.budget-display:hover {
+  opacity: 0.8;
+}
+
+.budget-display .edit-hint {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.budget-edit {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.budget-edit input {
+  flex: 1;
+  min-width: 100px;
+  padding: 0.5rem;
+  border: 2px solid #3b82f6;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.budget-edit button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.budget-edit button:first-of-type {
+  background: #10b981;
+  color: white;
+}
+
+.budget-edit button:first-of-type:hover {
+  background: #059669;
+}
+
+.budget-edit button:last-of-type {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.budget-edit button:last-of-type:hover {
+  background: #d1d5db;
+}
+
 .summary-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

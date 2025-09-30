@@ -2,7 +2,14 @@ import { useMemo, useState } from 'react'
 import './Spending.css'
 import { getCategoryColor } from '../utils/categories'
 
-function Spending({ transactions, categories, onUpdateTransaction }) {
+function Spending({
+  transactions,
+  categories,
+  selectedYear,
+  selectedMonth,
+  onDateChange,
+  onUpdateTransaction
+}) {
   const [editingIndex, setEditingIndex] = useState(null)
   const [filterCategory, setFilterCategory] = useState('all')
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
@@ -15,10 +22,38 @@ function Spending({ transactions, categories, onUpdateTransaction }) {
     setSortConfig({ key, direction })
   }
 
+  const handlePreviousMonth = () => {
+    if (selectedMonth === 0) {
+      onDateChange(selectedYear - 1, 11)
+    } else {
+      onDateChange(selectedYear, selectedMonth - 1)
+    }
+  }
+
+  const handleNextMonth = () => {
+    if (selectedMonth === 11) {
+      onDateChange(selectedYear + 1, 0)
+    } else {
+      onDateChange(selectedYear, selectedMonth + 1)
+    }
+  }
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ]
+
+  const monthlyTransactions = useMemo(() => {
+    return transactions.filter(t => {
+      const date = new Date(t.date)
+      return date.getFullYear() === selectedYear && date.getMonth() === selectedMonth
+    })
+  }, [transactions, selectedYear, selectedMonth])
+
   const filteredTransactions = useMemo(() => {
     let filtered = filterCategory === 'all'
-      ? [...transactions]
-      : transactions.filter(t => t.category === filterCategory)
+      ? [...monthlyTransactions]
+      : monthlyTransactions.filter(t => t.category === filterCategory)
 
     if (sortConfig.key) {
       filtered.sort((a, b) => {
@@ -51,11 +86,11 @@ function Spending({ transactions, categories, onUpdateTransaction }) {
 
   const availableCategories = useMemo(() => {
     const categorySet = new Set()
-    transactions.forEach(t => {
+    monthlyTransactions.forEach(t => {
       categorySet.add(t.category || 'Uncategorized')
     })
     return Array.from(categorySet).sort()
-  }, [transactions])
+  }, [monthlyTransactions])
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -64,17 +99,27 @@ function Spending({ transactions, categories, onUpdateTransaction }) {
     }).format(amount)
   }
 
-  if (transactions.length === 0) {
-    return (
-      <div className="spending-empty">
-        <p>No transactions yet. Import a CSV file to get started.</p>
-      </div>
-    )
-  }
-
   return (
     <div className="spending">
-      <div className="spending-filters">
+      <div className="month-selector">
+        <button className="month-nav-btn" onClick={handlePreviousMonth}>
+          ←
+        </button>
+        <h2 className="month-display">
+          {monthNames[selectedMonth]} {selectedYear}
+        </h2>
+        <button className="month-nav-btn" onClick={handleNextMonth}>
+          →
+        </button>
+      </div>
+
+      {monthlyTransactions.length === 0 ? (
+        <div className="spending-empty">
+          <p>No transactions for {monthNames[selectedMonth]} {selectedYear}.</p>
+        </div>
+      ) : (
+        <>
+          <div className="spending-filters">
         <label htmlFor="category-filter">Filter by category:</label>
         <select
           id="category-filter"
@@ -215,7 +260,8 @@ function Spending({ transactions, categories, onUpdateTransaction }) {
             </span>
           </div>
         )}
-      </div>
+        </>
+      )}
     </div>
   )
 }
