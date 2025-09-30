@@ -1,0 +1,52 @@
+.pie-chart-container {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.pie-chart-container h2 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: #333;
+  text-align: center;
+}
+
+.custom-tooltip {
+  background: white;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 2px solid #667eea;
+}
+
+.tooltip-label {
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 0.25rem 0;
+}
+
+.tooltip-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #667eea;
+  margin: 0;
+}
+
+.recharts-legend-wrapper {
+  padding-top: 1rem;
+}
+
+.recharts-legend-item {
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .pie-chart-container {
+    padding: 1rem;
+  }
+
+  .recharts-legend-wrapper {
+    font-size: 0.85rem;
+  }
+}

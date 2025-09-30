@@ -4,6 +4,7 @@ import BudgetDashboard from './components/BudgetDashboard'
 import CSVImport from './components/CSVImport'
 import CategoryManager from './components/CategoryManager'
 import AutoCategorizationRules from './components/AutoCategorizationRules'
+import ExportButton from './components/ExportButton'
 import { DEFAULT_CATEGORIES, autoCategorize } from './utils/categories'
 
 function App() {
@@ -62,6 +63,7 @@ function App() {
         <div className="settings-buttons">
           <CategoryManager categories={categories} onUpdateCategories={setCategories} />
           <AutoCategorizationRules rules={rules} categories={categories} onUpdateRules={setRules} />
+          <ExportButton transactions={transactions} categories={categories} rules={rules} />
         </div>
         <BudgetDashboard
           transactions={transactions}

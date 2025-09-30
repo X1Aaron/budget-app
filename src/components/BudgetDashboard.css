@@ -159,53 +159,82 @@
   color: #666;
 }
 
-.transactions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-height: 500px;
+.transactions-table-container {
+  max-height: 600px;
   overflow-y: auto;
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
 }
 
-.transaction-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.transactions-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.transactions-table th {
   padding: 1rem;
-  background: #f9fafb;
-  border-radius: 8px;
-  border-left: 4px solid;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.transactions-table th.sortable {
+  cursor: pointer;
+  user-select: none;
   transition: background 0.2s;
 }
 
-.transaction-item:hover {
-  background: #f3f4f6;
+.transactions-table th.sortable:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.transaction-item.expense {
-  border-left-color: #ef4444;
+.sort-arrow {
+  display: inline-block;
+  min-width: 1rem;
+  font-weight: bold;
 }
 
-.transaction-item.income {
-  border-left-color: #10b981;
+.transactions-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.2s;
 }
 
-.transaction-info {
-  flex: 1;
+.transactions-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.transactions-table tbody tr.expense {
+  border-left: 4px solid #ef4444;
+}
+
+.transactions-table tbody tr.income {
+  border-left: 4px solid #10b981;
+}
+
+.transactions-table td {
+  padding: 1rem;
+}
+
+.transaction-date {
+  color: #666;
+  font-size: 0.9rem;
 }
 
 .transaction-description {
   font-weight: 500;
   color: #333;
-  margin-bottom: 0.25rem;
-}
-
-.transaction-meta {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.85rem;
-  color: #666;
-  align-items: center;
 }
 
 .transaction-category {
@@ -245,10 +274,21 @@
 }
 
 .transaction-amount {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #333;
-  margin-left: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.transaction-amount.positive {
+  color: #10b981;
+}
+
+.transaction-amount.negative {
+  color: #ef4444;
+}
+
+.transaction-category-cell {
+  min-width: 150px;
 }
 
 .transactions-total {
@@ -303,19 +343,27 @@
     width: 100%;
   }
 
-  .transaction-item {
-    flex-direction: column;
-    align-items: flex-start;
+  .transactions-table-container {
+    border-radius: 0;
   }
 
-  .transaction-amount {
-    margin-left: 0;
-    margin-top: 0.5rem;
-    align-self: flex-end;
+  .transactions-table {
+    font-size: 0.85rem;
   }
 
-  .transaction-meta {
-    flex-direction: column;
-    gap: 0.25rem;
+  .transactions-table th,
+  .transactions-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .transaction-description {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .transaction-category-cell {
+    min-width: 100px;
   }
 }

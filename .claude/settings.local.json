@@ -19,7 +19,8 @@
       "Read(//home/aaron/.ssh/**)",
       "Bash(ssh-keygen:*)",
       "Bash(cat:*)",
-      "Bash(ssh:*)"
+      "Bash(ssh:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []

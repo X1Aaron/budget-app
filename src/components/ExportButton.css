@@ -1,0 +1,104 @@
+.export-button-container {
+  position: relative;
+  display: inline-block;
+}
+
+.export-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.export-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
+}
+
+.dropdown-arrow {
+  font-size: 0.75rem;
+  transition: transform 0.2s;
+}
+
+.export-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 999;
+}
+
+.export-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  min-width: 280px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.export-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border: none;
+  background: white;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: left;
+}
+
+.export-menu-item:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.export-menu-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.export-menu-item:not(:last-child) {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.menu-icon {
+  font-size: 1.5rem;
+}
+
+.menu-text {
+  flex: 1;
+}
+
+.menu-title {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.menu-subtitle {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .export-menu {
+    left: 0;
+    right: 0;
+    min-width: auto;
+  }
+}

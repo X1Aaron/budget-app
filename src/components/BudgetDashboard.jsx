@@ -1,15 +1,50 @@
 import { useMemo, useState } from 'react'
 import './BudgetDashboard.css'
 import { getCategoryColor } from '../utils/categories'
+import CategoryPieChart from './CategoryPieChart'
 
 function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
   const [editingIndex, setEditingIndex] = useState(null)
   const [filterCategory, setFilterCategory] = useState('all')
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
+
+  const handleSort = (key) => {
+    let direction = 'asc'
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc'
+    }
+    setSortConfig({ key, direction })
+  }
 
   const filteredTransactions = useMemo(() => {
-    if (filterCategory === 'all') return transactions
-    return transactions.filter(t => t.category === filterCategory)
-  }, [transactions, filterCategory])
+    let filtered = filterCategory === 'all'
+      ? [...transactions]
+      : transactions.filter(t => t.category === filterCategory)
+
+    if (sortConfig.key) {
+      filtered.sort((a, b) => {
+        let aVal = a[sortConfig.key]
+        let bVal = b[sortConfig.key]
+
+        if (sortConfig.key === 'amount') {
+          aVal = parseFloat(aVal)
+          bVal = parseFloat(bVal)
+        } else if (sortConfig.key === 'date') {
+          aVal = new Date(aVal)
+          bVal = new Date(bVal)
+        } else {
+          aVal = String(aVal).toLowerCase()
+          bVal = String(bVal).toLowerCase()
+        }
+
+        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1
+        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1
+        return 0
+      })
+    }
+
+    return filtered
+  }, [transactions, filterCategory, sortConfig])
 
   const filteredTotal = useMemo(() => {
     return filteredTransactions.reduce((sum, t) => sum + t.amount, 0)
@@ -72,6 +107,8 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
         </div>
       </div>
 
+      <CategoryPieChart categoryBreakdown={summary.categoryBreakdown} categories={categories} />
+
       <div className="categories-section">
         <h2>Categories</h2>
         <div className="categories-list">
@@ -105,55 +142,84 @@ function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
             </button>
           )}
         </div>
-        <div className="transactions-list">
-          {filteredTransactions.map((transaction, filteredIndex) => {
-            const originalIndex = transactions.findIndex(t => t === transaction)
-            const color = getCategoryColor(transaction.category, categories)
-            const isEditing = editingIndex === originalIndex
+        <div className="transactions-table-container">
+          <table className="transactions-table">
+            <thead>
+              <tr>
+                <th onClick={() => handleSort('date')} className="sortable">
+                  Date
+                  <span className="sort-arrow">
+                    {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
+                  </span>
+                </th>
+                <th onClick={() => handleSort('description')} className="sortable">
+                  Description
+                  <span className="sort-arrow">
+                    {sortConfig.key === 'description' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
+                  </span>
+                </th>
+                <th onClick={() => handleSort('category')} className="sortable">
+                  Category
+                  <span className="sort-arrow">
+                    {sortConfig.key === 'category' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
+                  </span>
+                </th>
+                <th onClick={() => handleSort('amount')} className="sortable">
+                  Amount
+                  <span className="sort-arrow">
+                    {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTransactions.map((transaction, filteredIndex) => {
+                const originalIndex = transactions.findIndex(t => t === transaction)
+                const color = getCategoryColor(transaction.category, categories)
+                const isEditing = editingIndex === originalIndex
 
-            return (
-              <div
-                key={originalIndex}
-                className={'transaction-item ' + (transaction.amount < 0 ? 'expense' : 'income')}
-                style={{ borderLeftColor: color }}
-              >
-                <div className="transaction-info">
-                  <div className="transaction-description">{transaction.description}</div>
-                  <div className="transaction-meta">
-                    <span className="transaction-date">{transaction.date}</span>
-                    {isEditing ? (
-                      <select
-                        className="category-select"
-                        value={transaction.category}
-                        onChange={(e) => {
-                          onUpdateTransaction(originalIndex, { ...transaction, category: e.target.value })
-                          setEditingIndex(null)
-                        }}
-                        onBlur={() => setTimeout(() => setEditingIndex(null), 200)}
-                        autoFocus
-                      >
-                        {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
-                          <option key={cat.id} value={cat.name}>{cat.name}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <span
-                        className="transaction-category editable"
-                        onClick={() => setEditingIndex(originalIndex)}
-                        style={{ color }}
-                      >
-                        <span className="category-dot" style={{ backgroundColor: color }}></span>
-                        {transaction.category || 'Uncategorized'}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="transaction-amount">
-                  {formatCurrency(transaction.amount)}
-                </div>
-              </div>
-            )
-          })}
+                return (
+                  <tr
+                    key={originalIndex}
+                    className={'transaction-row ' + (transaction.amount < 0 ? 'expense' : 'income')}
+                  >
+                    <td className="transaction-date">{transaction.date}</td>
+                    <td className="transaction-description">{transaction.description}</td>
+                    <td className="transaction-category-cell">
+                      {isEditing ? (
+                        <select
+                          className="category-select"
+                          value={transaction.category}
+                          onChange={(e) => {
+                            onUpdateTransaction(originalIndex, { ...transaction, category: e.target.value })
+                            setEditingIndex(null)
+                          }}
+                          onBlur={() => setTimeout(() => setEditingIndex(null), 200)}
+                          autoFocus
+                        >
+                          {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
+                            <option key={cat.id} value={cat.name}>{cat.name}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span
+                          className="transaction-category editable"
+                          onClick={() => setEditingIndex(originalIndex)}
+                          style={{ color }}
+                        >
+                          <span className="category-dot" style={{ backgroundColor: color }}></span>
+                          {transaction.category || 'Uncategorized'}
+                        </span>
+                      )}
+                    </td>
+                    <td className={'transaction-amount ' + (transaction.amount < 0 ? 'negative' : 'positive')}>
+                      {formatCurrency(transaction.amount)}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
         </div>
         {filterCategory !== 'all' && (
           <div className="transactions-total">
