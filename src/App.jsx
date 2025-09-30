@@ -5,6 +5,7 @@ import Spending from './components/Spending'
 import Bills from './components/Bills'
 import CSVImport from './components/CSVImport'
 import CategorySettings from './components/CategorySettings'
+import AutoCategorization from './components/AutoCategorization'
 import ExportButton from './components/ExportButton'
 import ImportButton from './components/ImportButton'
 import MonthYearSelector from './components/MonthYearSelector'
@@ -36,6 +37,14 @@ function App() {
     const saved = localStorage.getItem('startingBalances')
     return saved ? JSON.parse(saved) : {}
   })
+  const [merchantMappings, setMerchantMappings] = useState(() => {
+    const saved = localStorage.getItem('merchantMappings')
+    return saved ? JSON.parse(saved) : {}
+  })
+  const [categoryMappings, setCategoryMappings] = useState(() => {
+    const saved = localStorage.getItem('categoryMappings')
+    return saved ? JSON.parse(saved) : {}
+  })
 
   useEffect(() => {
     localStorage.setItem('categories', JSON.stringify(categories))
@@ -52,6 +61,14 @@ function App() {
   useEffect(() => {
     localStorage.setItem('monthlyBudgets', JSON.stringify(monthlyBudgets))
   }, [monthlyBudgets])
+
+  useEffect(() => {
+    localStorage.setItem('merchantMappings', JSON.stringify(merchantMappings))
+  }, [merchantMappings])
+
+  useEffect(() => {
+    localStorage.setItem('categoryMappings', JSON.stringify(categoryMappings))
+  }, [categoryMappings])
 
   useEffect(() => {
     const saved = localStorage.getItem('transactions')
@@ -104,11 +121,18 @@ function App() {
 
   const handleUpdateTransaction = (index, updatedTransaction, updateAllMatching = false) => {
     const newTransactions = [...transactions]
+    const originalTransaction = transactions[index]
 
     // If updateAllMatching is true and merchantName was changed, update all transactions with same description
-    if (updateAllMatching && updatedTransaction.merchantName !== transactions[index].merchantName) {
-      const originalDescription = transactions[index].description
+    if (updateAllMatching && updatedTransaction.merchantName !== originalTransaction.merchantName) {
+      const originalDescription = originalTransaction.description
       const newMerchantName = updatedTransaction.merchantName
+
+      // Save merchant mapping
+      setMerchantMappings(prev => ({
+        ...prev,
+        [originalDescription]: newMerchantName
+      }))
 
       for (let i = 0; i < newTransactions.length; i++) {
         if (newTransactions[i].description === originalDescription) {
@@ -116,6 +140,17 @@ function App() {
         }
       }
     } else {
+      // Check if category was changed
+      if (updatedTransaction.category !== originalTransaction.category) {
+        const description = originalTransaction.description
+
+        // Save category mapping
+        setCategoryMappings(prev => ({
+          ...prev,
+          [description]: updatedTransaction.category
+        }))
+      }
+
       newTransactions[index] = updatedTransaction
     }
 
@@ -189,6 +224,22 @@ function App() {
     }))
   }
 
+  const handleDeleteMerchantMapping = (description) => {
+    setMerchantMappings(prev => {
+      const updated = { ...prev }
+      delete updated[description]
+      return updated
+    })
+  }
+
+  const handleDeleteCategoryMapping = (description) => {
+    setCategoryMappings(prev => {
+      const updated = { ...prev }
+      delete updated[description]
+      return updated
+    })
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -224,6 +275,12 @@ function App() {
             onClick={() => setActiveSection('categories')}
           >
             Categories
+          </button>
+          <button
+            className={'nav-btn' + (activeSection === 'auto-categorization' ? ' active' : '')}
+            onClick={() => setActiveSection('auto-categorization')}
+          >
+            Auto Categorization
           </button>
           <button
             className={'nav-btn' + (activeSection === 'settings' ? ' active' : '')}
@@ -278,6 +335,13 @@ function App() {
               selectedMonth={selectedMonth}
             />
           </div>
+        ) : activeSection === 'auto-categorization' ? (
+          <AutoCategorization
+            merchantMappings={merchantMappings}
+            categoryMappings={categoryMappings}
+            onDeleteMerchantMapping={handleDeleteMerchantMapping}
+            onDeleteCategoryMapping={handleDeleteCategoryMapping}
+          />
         ) : (
           <div className="settings-section">
             <h2>Settings</h2>

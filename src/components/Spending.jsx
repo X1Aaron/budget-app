@@ -275,15 +275,25 @@ function Spending({
                         {formatCurrency(transaction.amount)}
                       </td>
                       <td className="transaction-category-cell" onClick={(e) => e.stopPropagation()}>
-                        <span
-                          className={'transaction-category editable' + (isUncategorized ? ' uncategorized-label' : '')}
+                        <select
+                          className={'transaction-category-select' + (isUncategorized ? ' uncategorized-label' : '')}
+                          value={transaction.category || 'Uncategorized'}
+                          onChange={(e) => {
+                            onUpdateTransaction(originalIndex, {
+                              ...transaction,
+                              category: e.target.value,
+                              autoCategorized: false
+                            })
+                          }}
                           style={{ color }}
                         >
-                          <span className="category-dot" style={{ backgroundColor: color }}></span>
-                          {transaction.category || 'Uncategorized'}
-                          {transaction.autoCategorized && <span className="auto-icon" title="Auto-categorized"> 🤖</span>}
-                          {isUncategorized && <span className="warning-icon"> ⚠️</span>}
-                        </span>
+                          <option value="Uncategorized">Uncategorized</option>
+                          {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
+                            <option key={cat.id} value={cat.name}>{cat.name}</option>
+                          ))}
+                        </select>
+                        {transaction.autoCategorized && <span className="auto-icon" title="Auto-categorized"> 🤖</span>}
+                        {isUncategorized && <span className="warning-icon"> ⚠️</span>}
                       </td>
                       <td className={'transaction-balance ' + (transaction.runningBalance < 0 ? 'negative' : 'positive')}>
                         {formatCurrency(transaction.runningBalance)}
