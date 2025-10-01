@@ -190,7 +190,7 @@ function SpendingAndBills({
     if (existingBill) {
       // Uncheck - remove the bill
       if (confirm(`Remove "${existingBill.billName || existingBill.description}" from bills?`)) {
-        onUpdateTransactions(transactions.filter(t => t.id !== existingBill.id))
+        onUpdateTransactions(prevTransactions => prevTransactions.filter(t => t.id !== existingBill.id))
       }
     } else {
       // Check - open modal to configure bill
@@ -246,7 +246,7 @@ function SpendingAndBills({
         memo: formData.memo || '',
         autoCategorized: false
       }
-      onUpdateTransactions([...transactions, newTransaction])
+      onUpdateTransactions(prevTransactions => [...prevTransactions, newTransaction])
     } else {
       const newBill = {
         id: `bill-${Date.now()}`,
@@ -264,7 +264,7 @@ function SpendingAndBills({
         paidDates: [],
         payments: []
       }
-      onUpdateTransactions([...transactions, newBill])
+      onUpdateTransactions(prevTransactions => [...prevTransactions, newBill])
     }
 
     // Reset form and close modal
@@ -288,7 +288,7 @@ function SpendingAndBills({
   }
 
   const handleTogglePaid = (billOccurrence) => {
-    const updatedTransactions = transactions.map(transaction => {
+    onUpdateTransactions(prevTransactions => prevTransactions.map(transaction => {
       if (transaction.isBill && transaction.id === billOccurrence.billId) {
         const payments = transaction.payments || []
         const existingPayment = payments.find(p => p.occurrenceDate === billOccurrence.occurrenceDate)
@@ -312,8 +312,7 @@ function SpendingAndBills({
         }
       }
       return transaction
-    })
-    onUpdateTransactions(updatedTransactions)
+    }))
   }
 
   // Summary stats
