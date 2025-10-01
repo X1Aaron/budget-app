@@ -26,8 +26,8 @@
 }
 
 .header-top {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   margin-bottom: 1.5rem;
   max-width: 1400px;
@@ -41,6 +41,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  justify-self: end;
 }
 
 .header-actions {

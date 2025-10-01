@@ -352,14 +352,14 @@ function Overview({
               </tr>
             </thead>
             <tbody>
-              {Object.entries(summary.categoryBreakdown)
-                .filter(([category, amount]) => amount < 0 && category !== 'Income')
-                .sort(([a], [b]) => a.localeCompare(b))
-                .map(([category, amount]) => {
+              {categories
+                .filter(cat => cat.budgeted > 0)
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((categoryObj) => {
+                  const category = categoryObj.name
                   const color = getCategoryColor(category, categories)
-                  const categoryObj = categories.find(cat => cat.name === category)
-                  const budgeted = categoryObj?.budgeted || 0
-                  const spent = Math.abs(amount)
+                  const budgeted = categoryObj.budgeted || 0
+                  const spent = Math.abs(summary.categoryBreakdown[category] || 0)
                   const difference = budgeted - spent
                   const isOverBudget = difference < 0
 

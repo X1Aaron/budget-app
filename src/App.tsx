@@ -288,12 +288,12 @@ function App() {
       <header className="app-header">
         <div className="header-top">
           <h1>Budget Tracker</h1>
+          <MonthYearSelector
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
+            onDateChange={handleDateChange}
+          />
           <div className="header-controls">
-            <MonthYearSelector
-              selectedYear={selectedYear}
-              selectedMonth={selectedMonth}
-              onDateChange={handleDateChange}
-            />
             <div className="header-actions">
               <ImportButton
                 activeSection={activeSection}
