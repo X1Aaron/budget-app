@@ -20,37 +20,19 @@ function SpendingAndBills({
   const [filterCategory, setFilterCategory] = useState('all')
   const [filterType, setFilterType] = useState('all') // all, bills-only, transactions-only, unpaid-bills
   const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'asc' })
-  const [billFormData, setBillFormData] = useState(null)
-  const [billModalOpen, setBillModalOpen] = useState(false)
-  const [addTransactionModalOpen, setAddTransactionModalOpen] = useState(false)
-  const [transactionFormData, setTransactionFormData] = useState({
+  const [addModalOpen, setAddModalOpen] = useState(false)
+  const [addType, setAddType] = useState('transaction') // 'transaction' or 'bill'
+  const [formData, setFormData] = useState({
     date: '',
     description: '',
     amount: '',
     category: '',
-    memo: ''
+    memo: '',
+    // Bill-specific fields
+    frequency: 'monthly'
   })
-  const [addDropdownOpen, setAddDropdownOpen] = useState(false)
-  const addDropdownRef = useRef(null)
 
   const cashRegisterSound = useMemo(() => new Audio('/cash-register.mp3'), [])
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (addDropdownRef.current && !addDropdownRef.current.contains(event.target)) {
-        setAddDropdownOpen(false)
-      }
-    }
-
-    if (addDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [addDropdownOpen])
 
   const handleSort = (key) => {
     let direction = 'asc'
@@ -211,106 +193,84 @@ function SpendingAndBills({
       }
     } else {
       // Check - open modal to configure bill
-      setBillFormData({
-        name: transaction.merchantName || transaction.description,
+      const today = new Date()
+      const currentDate = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
+      setFormData({
+        date: transaction.date,
+        description: transaction.merchantName || transaction.description,
         amount: Math.abs(transaction.amount),
-        dueDate: transaction.date,
-        frequency: 'monthly',
         category: transaction.category || '',
         memo: transaction.memo || '',
+        frequency: 'monthly',
         sourceDescription: transaction.description,
         sourceTransactionIndex: originalIndex
       })
-      setBillModalOpen(true)
+      setAddType('bill')
+      setAddModalOpen(true)
     }
   }
 
-  const handleSaveBill = () => {
-    if (!billFormData.name || !billFormData.amount || !billFormData.dueDate) {
-      alert('Please fill in all required fields')
-      return
-    }
-
-    const newBill = {
-      id: Date.now(),
-      name: billFormData.name,
-      amount: parseFloat(billFormData.amount),
-      dueDate: billFormData.dueDate,
-      frequency: billFormData.frequency,
-      category: billFormData.category,
-      memo: billFormData.memo,
-      sourceDescription: billFormData.sourceDescription,
-      paidDates: [billFormData.dueDate]
-    }
-
-    onUpdateBills([...bills, newBill])
-    setBillModalOpen(false)
-    setBillFormData(null)
-  }
-
-  const handleAddTransaction = () => {
-    if (!transactionFormData.date || !transactionFormData.description || !transactionFormData.amount) {
-      alert('Please fill in all required fields')
-      return
-    }
-
-    const newTransaction = {
-      id: Date.now(),
-      date: transactionFormData.date,
-      description: transactionFormData.description,
-      merchantName: transactionFormData.description,
-      amount: parseFloat(transactionFormData.amount),
-      category: transactionFormData.category || 'Uncategorized',
-      memo: transactionFormData.memo || '',
-      autoCategorized: false
-    }
-
-    // Add to transactions array
-    onUpdateTransaction(transactions.length, newTransaction)
-
-    // Reset form and close modal
-    setTransactionFormData({
-      date: '',
-      description: '',
-      amount: '',
-      category: '',
-      memo: ''
-    })
-    setAddTransactionModalOpen(false)
-  }
-
-  const handleOpenAddBillModal = () => {
+  const handleOpenAddModal = () => {
     // Pre-fill with current month's date
     const today = new Date()
     const currentDate = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 
-    setBillFormData({
-      name: '',
-      amount: '',
-      dueDate: currentDate,
-      frequency: 'monthly',
-      category: '',
-      memo: '',
-      paidDates: []
-    })
-    setBillModalOpen(true)
-    setAddDropdownOpen(false)
-  }
-
-  const handleOpenAddTransactionModal = () => {
-    // Pre-fill with current month's date
-    const today = new Date()
-    const currentDate = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
-
-    setTransactionFormData({
+    setFormData({
       date: currentDate,
       description: '',
       amount: '',
       category: '',
-      memo: ''
+      memo: '',
+      frequency: 'monthly'
     })
-    setAddTransactionModalOpen(true)
-    setAddDropdownOpen(false)
+    setAddType('transaction')
+    setAddModalOpen(true)
+  }
+
+  const handleSaveForm = () => {
+    if (!formData.date || !formData.description || !formData.amount) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    if (addType === 'transaction') {
+      const newTransaction = {
+        id: Date.now(),
+        date: formData.date,
+        description: formData.description,
+        merchantName: formData.description,
+        amount: parseFloat(formData.amount),
+        category: formData.category || 'Uncategorized',
+        memo: formData.memo || '',
+        autoCategorized: false
+      }
+      onUpdateTransaction(transactions.length, newTransaction)
+    } else {
+      const newBill = {
+        id: Date.now(),
+        name: formData.description,
+        amount: parseFloat(formData.amount),
+        dueDate: formData.date,
+        frequency: formData.frequency,
+        category: formData.category,
+        memo: formData.memo,
+        sourceDescription: formData.sourceDescription,
+        paidDates: [formData.date]
+      }
+      onUpdateBills([...bills, newBill])
+    }
+
+    // Reset form and close modal
+    setFormData({
+      date: '',
+      description: '',
+      amount: '',
+      category: '',
+      memo: '',
+      frequency: 'monthly'
+    })
+    setAddModalOpen(false)
   }
 
   const isTransactionABill = (transaction) => {
@@ -368,19 +328,43 @@ function SpendingAndBills({
 
   return (
     <div className="spending-and-bills">
-      {/* Bill Configuration Modal */}
-      {billModalOpen && billFormData && (
-        <div className="bill-modal-backdrop" onClick={() => setBillModalOpen(false)}>
+      {/* Unified Add Modal */}
+      {addModalOpen && (
+        <div className="bill-modal-backdrop" onClick={() => setAddModalOpen(false)}>
           <div className="bill-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Add Recurring Bill</h3>
+            <div className="modal-header-with-toggle">
+              <h3>Add New</h3>
+              <div className="type-toggle">
+                <button
+                  className={`toggle-btn ${addType === 'transaction' ? 'active' : ''}`}
+                  onClick={() => setAddType('transaction')}
+                >
+                  Transaction
+                </button>
+                <button
+                  className={`toggle-btn ${addType === 'bill' ? 'active' : ''}`}
+                  onClick={() => setAddType('bill')}
+                >
+                  Bill
+                </button>
+              </div>
+            </div>
             <div className="bill-modal-form">
               <div className="form-group">
-                <label>Bill Name *</label>
+                <label>{addType === 'bill' ? 'Due Date' : 'Date'} *</label>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>{addType === 'bill' ? 'Bill Name' : 'Description'} *</label>
                 <input
                   type="text"
-                  value={billFormData.name}
-                  onChange={(e) => setBillFormData({ ...billFormData, name: e.target.value })}
-                  placeholder="e.g., Netflix Subscription"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder={addType === 'bill' ? 'e.g., Netflix Subscription' : 'e.g., Grocery Store'}
                 />
               </div>
               <div className="form-group">
@@ -388,110 +372,35 @@ function SpendingAndBills({
                 <input
                   type="number"
                   step="0.01"
-                  value={billFormData.amount}
-                  onChange={(e) => setBillFormData({ ...billFormData, amount: e.target.value })}
+                  value={formData.amount}
+                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                  placeholder={addType === 'transaction' ? 'Use negative for expenses' : ''}
                 />
               </div>
-              <div className="form-group">
-                <label>Due Date *</label>
-                <input
-                  type="date"
-                  value={billFormData.dueDate}
-                  onChange={(e) => setBillFormData({ ...billFormData, dueDate: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Frequency *</label>
-                <select
-                  value={billFormData.frequency}
-                  onChange={(e) => setBillFormData({ ...billFormData, frequency: e.target.value })}
-                >
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                  <option value="quarterly">Quarterly</option>
-                  <option value="yearly">Yearly</option>
-                  <option value="one-time">One-time</option>
-                </select>
-              </div>
+              {addType === 'bill' && (
+                <div className="form-group">
+                  <label>Frequency *</label>
+                  <select
+                    value={formData.frequency}
+                    onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
+                  >
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                    <option value="one-time">One-time</option>
+                  </select>
+                </div>
+              )}
               <div className="form-group">
                 <label>Category</label>
                 <select
-                  value={billFormData.category}
-                  onChange={(e) => setBillFormData({ ...billFormData, category: e.target.value })}
-                >
-                  <option value="">Select a category</option>
-                  {categories && categories
-                    .filter(cat => cat.type === 'expense' || cat.type === 'both')
-                    .map(cat => (
-                      <option key={cat.id} value={cat.name}>
-                        {cat.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Memo</label>
-                <textarea
-                  value={billFormData.memo}
-                  onChange={(e) => setBillFormData({ ...billFormData, memo: e.target.value })}
-                  placeholder="Optional note"
-                  rows="2"
-                />
-              </div>
-            </div>
-            <div className="bill-modal-actions">
-              <button className="cancel-btn" onClick={() => setBillModalOpen(false)}>
-                Cancel
-              </button>
-              <button className="save-btn" onClick={handleSaveBill}>
-                Add Bill
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Transaction Modal */}
-      {addTransactionModalOpen && (
-        <div className="bill-modal-backdrop" onClick={() => setAddTransactionModalOpen(false)}>
-          <div className="bill-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Add Transaction</h3>
-            <div className="bill-modal-form">
-              <div className="form-group">
-                <label>Date *</label>
-                <input
-                  type="date"
-                  value={transactionFormData.date}
-                  onChange={(e) => setTransactionFormData({ ...transactionFormData, date: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Description *</label>
-                <input
-                  type="text"
-                  value={transactionFormData.description}
-                  onChange={(e) => setTransactionFormData({ ...transactionFormData, description: e.target.value })}
-                  placeholder="e.g., Grocery Store"
-                />
-              </div>
-              <div className="form-group">
-                <label>Amount *</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={transactionFormData.amount}
-                  onChange={(e) => setTransactionFormData({ ...transactionFormData, amount: e.target.value })}
-                  placeholder="Use negative for expenses"
-                />
-              </div>
-              <div className="form-group">
-                <label>Category</label>
-                <select
-                  value={transactionFormData.category}
-                  onChange={(e) => setTransactionFormData({ ...transactionFormData, category: e.target.value })}
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 >
                   <option value="">Select a category</option>
                   {categories && [...categories]
+                    .filter(cat => addType === 'bill' ? (cat.type === 'expense' || cat.type === 'both') : true)
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map(cat => (
                       <option key={cat.id} value={cat.name}>
@@ -503,19 +412,19 @@ function SpendingAndBills({
               <div className="form-group">
                 <label>Memo</label>
                 <textarea
-                  value={transactionFormData.memo}
-                  onChange={(e) => setTransactionFormData({ ...transactionFormData, memo: e.target.value })}
+                  value={formData.memo}
+                  onChange={(e) => setFormData({ ...formData, memo: e.target.value })}
                   placeholder="Optional note"
                   rows="2"
                 />
               </div>
             </div>
             <div className="bill-modal-actions">
-              <button className="cancel-btn" onClick={() => setAddTransactionModalOpen(false)}>
+              <button className="cancel-btn" onClick={() => setAddModalOpen(false)}>
                 Cancel
               </button>
-              <button className="save-btn" onClick={handleAddTransaction}>
-                Add Transaction
+              <button className="save-btn" onClick={handleSaveForm}>
+                Add {addType === 'bill' ? 'Bill' : 'Transaction'}
               </button>
             </div>
           </div>
@@ -527,30 +436,12 @@ function SpendingAndBills({
           <h2>Spending & Bills - {monthNames[selectedMonth]} {selectedYear}</h2>
           <div className="header-controls">
             <div className="action-buttons">
-              <div className="add-button-container" ref={addDropdownRef}>
-                <button
-                  className="action-btn add-unified-btn"
-                  onClick={() => setAddDropdownOpen(!addDropdownOpen)}
-                >
-                  + Add
-                </button>
-                {addDropdownOpen && (
-                  <div className="add-dropdown-menu">
-                    <button
-                      className="dropdown-item"
-                      onClick={handleOpenAddTransactionModal}
-                    >
-                      💵 Add Transaction
-                    </button>
-                    <button
-                      className="dropdown-item"
-                      onClick={handleOpenAddBillModal}
-                    >
-                      📋 Add Bill
-                    </button>
-                  </div>
-                )}
-              </div>
+              <button
+                className="action-btn add-unified-btn"
+                onClick={handleOpenAddModal}
+              >
+                + Add
+              </button>
             </div>
             <div className="starting-balance-display">
               <span className="starting-balance-label">Starting Balance:</span>

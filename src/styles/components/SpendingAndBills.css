@@ -32,6 +32,49 @@
   color: #374151;
 }
 
+/* Modal Header with Toggle */
+.modal-header-with-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.modal-header-with-toggle h3 {
+  margin: 0;
+}
+
+.type-toggle {
+  display: flex;
+  gap: 0.5rem;
+  background: #f3f4f6;
+  padding: 0.25rem;
+  border-radius: 8px;
+}
+
+.type-toggle .toggle-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6b7280;
+}
+
+.type-toggle .toggle-btn:hover {
+  color: #374151;
+  background: #e5e7eb;
+}
+
+.type-toggle .toggle-btn.active {
+  background: white;
+  color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .bill-modal-form {
   display: flex;
   flex-direction: column;
