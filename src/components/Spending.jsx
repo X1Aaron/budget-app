@@ -10,12 +10,16 @@ function Spending({
   selectedMonth,
   onDateChange,
   onUpdateTransaction,
-  accountStartingBalance
+  accountStartingBalance,
+  bills,
+  onUpdateBills
 }) {
   const [expandedIndex, setExpandedIndex] = useState(null)
   const [editingMerchantIndex, setEditingMerchantIndex] = useState(null)
   const [filterCategory, setFilterCategory] = useState('all')
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
+  const [billModalOpen, setBillModalOpen] = useState(false)
+  const [billFormData, setBillFormData] = useState(null)
 
   const handleSort = (key) => {
     let direction = 'asc'
@@ -110,9 +114,154 @@ function Spending({
     }).format(amount)
   }
 
+  const handleBillCheckbox = (transaction, originalIndex) => {
+    // Check if this transaction is already a bill (by matching description)
+    const existingBill = bills.find(b =>
+      b.sourceDescription === transaction.description ||
+      b.name === (transaction.merchantName || transaction.description)
+    )
+
+    if (existingBill) {
+      // Uncheck - remove the bill
+      if (confirm(`Remove "${existingBill.name}" from bills?`)) {
+        onUpdateBills(bills.filter(b => b.id !== existingBill.id))
+      }
+    } else {
+      // Check - open modal to configure bill
+      const transactionDate = new Date(transaction.date)
+      setBillFormData({
+        name: transaction.merchantName || transaction.description,
+        amount: Math.abs(transaction.amount),
+        dueDate: transaction.date,
+        frequency: 'monthly',
+        category: transaction.category || '',
+        memo: transaction.memo || '',
+        sourceDescription: transaction.description,
+        sourceTransactionIndex: originalIndex
+      })
+      setBillModalOpen(true)
+    }
+  }
+
+  const handleSaveBill = () => {
+    if (!billFormData.name || !billFormData.amount || !billFormData.dueDate) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    // Mark the source transaction date as paid
+    const paidDates = [billFormData.dueDate]
+
+    const newBill = {
+      id: Date.now(),
+      name: billFormData.name,
+      amount: parseFloat(billFormData.amount),
+      dueDate: billFormData.dueDate,
+      frequency: billFormData.frequency,
+      category: billFormData.category,
+      memo: billFormData.memo,
+      sourceDescription: billFormData.sourceDescription,
+      paidDates: paidDates
+    }
+
+    onUpdateBills([...bills, newBill])
+    setBillModalOpen(false)
+    setBillFormData(null)
+  }
+
+  const isTransactionABill = (transaction) => {
+    return bills.some(b =>
+      b.sourceDescription === transaction.description ||
+      b.name === (transaction.merchantName || transaction.description)
+    )
+  }
+
 
   return (
     <div className="spending">
+      {/* Bill Configuration Modal */}
+      {billModalOpen && billFormData && (
+        <div className="bill-modal-backdrop" onClick={() => setBillModalOpen(false)}>
+          <div className="bill-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Add Recurring Bill</h3>
+            <div className="bill-modal-form">
+              <div className="form-group">
+                <label>Bill Name *</label>
+                <input
+                  type="text"
+                  value={billFormData.name}
+                  onChange={(e) => setBillFormData({ ...billFormData, name: e.target.value })}
+                  placeholder="e.g., Netflix Subscription"
+                />
+              </div>
+              <div className="form-group">
+                <label>Amount *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={billFormData.amount}
+                  onChange={(e) => setBillFormData({ ...billFormData, amount: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Due Date *</label>
+                <input
+                  type="date"
+                  value={billFormData.dueDate}
+                  onChange={(e) => setBillFormData({ ...billFormData, dueDate: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Frequency *</label>
+                <select
+                  value={billFormData.frequency}
+                  onChange={(e) => setBillFormData({ ...billFormData, frequency: e.target.value })}
+                >
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="quarterly">Quarterly</option>
+                  <option value="yearly">Yearly</option>
+                  <option value="one-time">One-time</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Category</label>
+                <select
+                  value={billFormData.category}
+                  onChange={(e) => setBillFormData({ ...billFormData, category: e.target.value })}
+                >
+                  <option value="">Select a category</option>
+                  {categories && categories
+                    .filter(cat => cat.type === 'expense' || cat.type === 'both')
+                    .map(cat => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Memo</label>
+                <textarea
+                  value={billFormData.memo}
+                  onChange={(e) => setBillFormData({ ...billFormData, memo: e.target.value })}
+                  placeholder="Optional note"
+                  rows="2"
+                />
+              </div>
+            </div>
+            <div className="bill-modal-actions">
+              <button className="cancel-btn" onClick={() => setBillModalOpen(false)}>
+                Cancel
+              </button>
+              <button className="save-btn" onClick={handleSaveBill}>
+                Add Bill
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {monthlyTransactions.length === 0 ? (
         <div className="spending-empty">
           <p>No transactions for {monthNames[selectedMonth]} {selectedYear}.</p>
@@ -152,6 +301,7 @@ function Spending({
           <table className="transactions-table">
             <thead>
               <tr>
+                <th className="bill-checkbox-header">Bill</th>
                 <th onClick={() => handleSort('date')} className="sortable">
                   Date
                   <span className="sort-arrow">
@@ -202,6 +352,16 @@ function Spending({
                       className={`transaction-row ${transaction.amount < 0 ? 'expense' : 'income'}${isUncategorized ? ' uncategorized' : ''}${isExpanded ? ' expanded' : ''}`}
                       onClick={() => setExpandedIndex(isExpanded ? null : originalIndex)}
                     >
+                      <td className="bill-checkbox-cell" onClick={(e) => e.stopPropagation()}>
+                        {transaction.amount < 0 && (
+                          <input
+                            type="checkbox"
+                            checked={isTransactionABill(transaction)}
+                            onChange={() => handleBillCheckbox(transaction, originalIndex)}
+                            title="Mark as recurring bill"
+                          />
+                        )}
+                      </td>
                       <td className="transaction-date">{transaction.date}</td>
                       <td className="transaction-merchant-cell" onClick={(e) => e.stopPropagation()}>
                         {isEditingMerchant ? (
@@ -265,7 +425,7 @@ function Spending({
                     </tr>
                     {isExpanded && (
                       <tr key={`${originalIndex}-expanded`} className="transaction-expanded-row">
-                        <td colSpan="5" onClick={(e) => e.stopPropagation()}>
+                        <td colSpan="6" onClick={(e) => e.stopPropagation()}>
                           <div className="transaction-details">
                             <div className="detail-section">
                               <label className="detail-label">Description:</label>

@@ -11,64 +11,64 @@ interface TransactionTemplate {
 
 const demoTransactions: TransactionTemplate[] = [
   // Groceries - weekly shopping on weekends
-  { description: 'WHOLE FOODS MARKET #12345', category: 'Food & Dining', amountRange: [60, 90], frequency: 'weekly', preferredDays: [6, 0] },
-  { description: 'TRADER JOES #456', category: 'Food & Dining', amountRange: [40, 60], frequency: 'weekly', preferredDays: [6, 0] },
-  { description: 'SAFEWAY STORE 1234', category: 'Food & Dining', amountRange: [50, 80], frequency: 'weekly', preferredDays: [6, 0] },
-  { description: 'COSTCO WHOLESALE #789', category: 'Food & Dining', amountRange: [80, 120], frequency: 'biweekly', preferredDays: [6, 0] },
+  { description: 'WHOLE FOODS MARKET #12345', category: 'Groceries', amountRange: [60, 90], frequency: 'weekly', preferredDays: [6, 0] },
+  { description: 'TRADER JOES #456', category: 'Groceries', amountRange: [40, 60], frequency: 'weekly', preferredDays: [6, 0] },
+  { description: 'SAFEWAY STORE 1234', category: 'Groceries', amountRange: [50, 80], frequency: 'weekly', preferredDays: [6, 0] },
+  { description: 'COSTCO WHOLESALE #789', category: 'Groceries', amountRange: [80, 120], frequency: 'biweekly', preferredDays: [6, 0] },
 
   // Coffee & quick meals on weekdays - more frequent
-  { description: 'STARBUCKS STORE 12345', category: 'Food & Dining', amountRange: [5, 12], frequency: 'weekly', preferredDays: [1, 2, 3, 4, 5] },
-  { description: 'DUNKIN DONUTS #789', category: 'Food & Dining', amountRange: [4, 10], frequency: 'weekly', preferredDays: [1, 2, 3, 4, 5] },
-  { description: 'PEETS COFFEE', category: 'Food & Dining', amountRange: [5, 11], frequency: 'occasional', preferredDays: [1, 2, 3, 4, 5] },
+  { description: 'STARBUCKS STORE 12345', category: 'Dining Out', amountRange: [5, 12], frequency: 'weekly', preferredDays: [1, 2, 3, 4, 5] },
+  { description: 'DUNKIN DONUTS #789', category: 'Dining Out', amountRange: [4, 10], frequency: 'weekly', preferredDays: [1, 2, 3, 4, 5] },
+  { description: 'PEETS COFFEE', category: 'Dining Out', amountRange: [5, 11], frequency: 'occasional', preferredDays: [1, 2, 3, 4, 5] },
 
   // Dining out - more frequent eating out
-  { description: 'CHIPOTLE MEXICAN GRILL', category: 'Food & Dining', amountRange: [12, 18], frequency: 'weekly', preferredDays: [1, 2, 3, 4, 5] },
-  { description: 'PANERA BREAD #1234', category: 'Food & Dining', amountRange: [10, 15], frequency: 'weekly', preferredDays: [6, 0] },
-  { description: 'SUBWAY 12345', category: 'Food & Dining', amountRange: [8, 12], frequency: 'occasional', preferredDays: [1, 2, 3, 4, 5] },
-  { description: 'PIZZA HUT 12345', category: 'Food & Dining', amountRange: [20, 30], frequency: 'weekly', preferredDays: [5, 6] },
-  { description: 'OLIVE GARDEN #456', category: 'Food & Dining', amountRange: [35, 55], frequency: 'occasional', preferredDays: [5, 6, 0] },
-  { description: 'MCDONALDS F12345', category: 'Food & Dining', amountRange: [8, 12], frequency: 'weekly', preferredDays: [1, 2, 3, 4, 5] },
-  { description: 'TACO BELL #456', category: 'Food & Dining', amountRange: [7, 13], frequency: 'occasional', preferredDays: [1, 2, 3, 4, 5] },
-  { description: 'DOORDASH*VARIOUS', category: 'Food & Dining', amountRange: [25, 45], frequency: 'weekly', preferredDays: [1, 2, 3, 4, 5, 6, 0] },
-  { description: 'UBER EATS', category: 'Food & Dining', amountRange: [20, 40], frequency: 'occasional', preferredDays: [1, 2, 3, 4, 5, 6, 0] },
+  { description: 'CHIPOTLE MEXICAN GRILL', category: 'Dining Out', amountRange: [12, 18], frequency: 'weekly', preferredDays: [1, 2, 3, 4, 5] },
+  { description: 'PANERA BREAD #1234', category: 'Dining Out', amountRange: [10, 15], frequency: 'weekly', preferredDays: [6, 0] },
+  { description: 'SUBWAY 12345', category: 'Dining Out', amountRange: [8, 12], frequency: 'occasional', preferredDays: [1, 2, 3, 4, 5] },
+  { description: 'PIZZA HUT 12345', category: 'Dining Out', amountRange: [20, 30], frequency: 'weekly', preferredDays: [5, 6] },
+  { description: 'OLIVE GARDEN #456', category: 'Dining Out', amountRange: [35, 55], frequency: 'occasional', preferredDays: [5, 6, 0] },
+  { description: 'MCDONALDS F12345', category: 'Dining Out', amountRange: [8, 12], frequency: 'weekly', preferredDays: [1, 2, 3, 4, 5] },
+  { description: 'TACO BELL #456', category: 'Dining Out', amountRange: [7, 13], frequency: 'occasional', preferredDays: [1, 2, 3, 4, 5] },
+  { description: 'DOORDASH*VARIOUS', category: 'Dining Out', amountRange: [25, 45], frequency: 'weekly', preferredDays: [1, 2, 3, 4, 5, 6, 0] },
+  { description: 'UBER EATS', category: 'Dining Out', amountRange: [20, 40], frequency: 'occasional', preferredDays: [1, 2, 3, 4, 5, 6, 0] },
 
   // Gas - weekly fillups
-  { description: 'SHELL OIL 12345678', category: 'Transportation', amountRange: [45, 65], frequency: 'weekly' },
-  { description: 'CHEVRON 12345678', category: 'Transportation', amountRange: [45, 65], frequency: 'weekly' },
-  { description: 'EXXONMOBIL 12345', category: 'Transportation', amountRange: [40, 60], frequency: 'weekly' },
+  { description: 'SHELL OIL 12345678', category: 'Gas & Fuel', amountRange: [45, 65], frequency: 'weekly' },
+  { description: 'CHEVRON 12345678', category: 'Gas & Fuel', amountRange: [45, 65], frequency: 'weekly' },
+  { description: 'EXXONMOBIL 12345', category: 'Gas & Fuel', amountRange: [40, 60], frequency: 'weekly' },
 
   // Monthly subscriptions - realistic subscription creep
-  { description: 'NETFLIX.COM', category: 'Entertainment', amountRange: [22.99, 22.99], frequency: 'monthly' },
-  { description: 'SPOTIFY USA', category: 'Entertainment', amountRange: [11.99, 11.99], frequency: 'monthly' },
-  { description: 'HULU SUBSCRIPTION', category: 'Entertainment', amountRange: [17.99, 17.99], frequency: 'monthly' },
-  { description: 'AMAZON PRIME', category: 'Shopping', amountRange: [14.99, 14.99], frequency: 'monthly' },
-  { description: 'DISNEY PLUS', category: 'Entertainment', amountRange: [10.99, 10.99], frequency: 'monthly' },
-  { description: 'HBO MAX', category: 'Entertainment', amountRange: [15.99, 15.99], frequency: 'monthly' },
-  { description: 'PATREON MEMBERSHIP', category: 'Entertainment', amountRange: [5, 15], frequency: 'monthly' },
-  { description: 'AUDIBLE MEMBERSHIP', category: 'Entertainment', amountRange: [14.95, 14.95], frequency: 'monthly' },
-  { description: 'ICLOUD STORAGE', category: 'Bills & Fees', amountRange: [2.99, 2.99], frequency: 'monthly' },
+  { description: 'NETFLIX.COM', category: 'Subscriptions', amountRange: [22.99, 22.99], frequency: 'monthly' },
+  { description: 'SPOTIFY USA', category: 'Subscriptions', amountRange: [11.99, 11.99], frequency: 'monthly' },
+  { description: 'HULU SUBSCRIPTION', category: 'Subscriptions', amountRange: [17.99, 17.99], frequency: 'monthly' },
+  { description: 'AMAZON PRIME', category: 'Subscriptions', amountRange: [14.99, 14.99], frequency: 'monthly' },
+  { description: 'DISNEY PLUS', category: 'Subscriptions', amountRange: [10.99, 10.99], frequency: 'monthly' },
+  { description: 'HBO MAX', category: 'Subscriptions', amountRange: [15.99, 15.99], frequency: 'monthly' },
+  { description: 'PATREON MEMBERSHIP', category: 'Subscriptions', amountRange: [5, 15], frequency: 'monthly' },
+  { description: 'AUDIBLE MEMBERSHIP', category: 'Subscriptions', amountRange: [14.95, 14.95], frequency: 'monthly' },
+  { description: 'ICLOUD STORAGE', category: 'Subscriptions', amountRange: [2.99, 2.99], frequency: 'monthly' },
 
   // Occasional entertainment
   { description: 'AMC THEATRES #12345', category: 'Entertainment', amountRange: [25, 40], frequency: 'occasional', preferredDays: [5, 6, 0] },
-  { description: 'STEAM GAMES', category: 'Entertainment', amountRange: [20, 60], frequency: 'occasional' },
+  { description: 'STEAM GAMES', category: 'Gaming', amountRange: [20, 60], frequency: 'occasional' },
 
   // Shopping - more frequent purchases
-  { description: 'AMAZON.COM*123456789', category: 'Shopping', amountRange: [25, 80], frequency: 'weekly' },
-  { description: 'TARGET STORE T-2345', category: 'Shopping', amountRange: [30, 60], frequency: 'weekly', preferredDays: [6, 0] },
-  { description: 'WAL-MART #1234', category: 'Shopping', amountRange: [25, 50], frequency: 'occasional' },
-  { description: 'BEST BUY #12345', category: 'Shopping', amountRange: [40, 150], frequency: 'occasional' },
-  { description: 'ETSY.COM', category: 'Shopping', amountRange: [15, 45], frequency: 'occasional' },
-  { description: 'SHEIN.COM', category: 'Shopping', amountRange: [20, 60], frequency: 'occasional' },
+  { description: 'AMAZON.COM*123456789', category: 'General Shopping', amountRange: [25, 80], frequency: 'weekly' },
+  { description: 'TARGET STORE T-2345', category: 'General Shopping', amountRange: [30, 60], frequency: 'weekly', preferredDays: [6, 0] },
+  { description: 'WAL-MART #1234', category: 'General Shopping', amountRange: [25, 50], frequency: 'occasional' },
+  { description: 'BEST BUY #12345', category: 'Electronics', amountRange: [40, 150], frequency: 'occasional' },
+  { description: 'ETSY.COM', category: 'General Shopping', amountRange: [15, 45], frequency: 'occasional' },
+  { description: 'SHEIN.COM', category: 'Clothing', amountRange: [20, 60], frequency: 'occasional' },
 
   // Healthcare - occasional
   { description: 'WALGREENS #12345', category: 'Healthcare', amountRange: [15, 30], frequency: 'occasional' },
   { description: 'CVS/PHARMACY #12345', category: 'Healthcare', amountRange: [20, 40], frequency: 'occasional' },
 
-  // Personal Care
+  // Personal Care & Fitness
   { description: 'SUPERCUTS #456', category: 'Personal Care', amountRange: [20, 35], frequency: 'occasional' },
   { description: 'ULTA BEAUTY', category: 'Personal Care', amountRange: [25, 60], frequency: 'occasional' },
   { description: 'SEPHORA', category: 'Personal Care', amountRange: [30, 80], frequency: 'occasional' },
-  { description: 'PLANET FITNESS', category: 'Personal Care', amountRange: [24.99, 24.99], frequency: 'monthly' },
+  { description: 'PLANET FITNESS', category: 'Fitness & Gym', amountRange: [24.99, 24.99], frequency: 'monthly' },
 ];
 
 function getRandomAmount(range: [number, number]): number {
@@ -126,16 +126,16 @@ function getRandomDay(): number {
 
 // Demo bill templates
 const demoBillTemplates = [
-  { name: 'Electric Bill', category: 'Bills & Fees', amountRange: [80, 150], frequency: 'monthly' as const },
-  { name: 'Water Bill', category: 'Bills & Fees', amountRange: [40, 80], frequency: 'monthly' as const },
-  { name: 'Internet Service', category: 'Bills & Fees', amountRange: [60, 120], frequency: 'monthly' as const },
-  { name: 'Phone Bill', category: 'Bills & Fees', amountRange: [50, 100], frequency: 'monthly' as const },
-  { name: 'Gym Membership', category: 'Personal Care', amountRange: [30, 80], frequency: 'monthly' as const },
-  { name: 'Streaming Service', category: 'Entertainment', amountRange: [10, 20], frequency: 'monthly' as const },
-  { name: 'Car Insurance', category: 'Transportation', amountRange: [100, 200], frequency: 'monthly' as const },
+  { name: 'Electric Bill', category: 'Utilities', amountRange: [80, 150], frequency: 'monthly' as const },
+  { name: 'Water Bill', category: 'Utilities', amountRange: [40, 80], frequency: 'monthly' as const },
+  { name: 'Internet Service', category: 'Utilities', amountRange: [60, 120], frequency: 'monthly' as const },
+  { name: 'Phone Bill', category: 'Phone', amountRange: [50, 100], frequency: 'monthly' as const },
+  { name: 'Gym Membership', category: 'Fitness & Gym', amountRange: [30, 80], frequency: 'monthly' as const },
+  { name: 'Streaming Service', category: 'Subscriptions', amountRange: [10, 20], frequency: 'monthly' as const },
+  { name: 'Car Insurance', category: 'Insurance', amountRange: [100, 200], frequency: 'monthly' as const },
   { name: 'Rent/Mortgage', category: 'Housing', amountRange: [1200, 2000], frequency: 'monthly' as const },
-  { name: 'Cloud Storage', category: 'Shopping', amountRange: [5, 15], frequency: 'monthly' as const },
-  { name: 'Credit Card Payment', category: 'Bills & Fees', amountRange: [100, 500], frequency: 'monthly' as const },
+  { name: 'Cloud Storage', category: 'Subscriptions', amountRange: [5, 15], frequency: 'monthly' as const },
+  { name: 'Credit Card Payment', category: 'Debt Payments', amountRange: [100, 500], frequency: 'monthly' as const },
 ];
 
 export function generateDemoData(): Transaction[] {
@@ -263,7 +263,7 @@ export function generateDemoData(): Transaction[] {
       date: getDateOnDay(year, month, 5, 1), // First Friday
       description: 'COMCAST INTERNET',
       amount: -70,
-      category: 'Bills & Fees',
+      category: 'Utilities',
       merchantName: 'Comcast',
       memo: '',
       autoCategorized: false
@@ -274,7 +274,7 @@ export function generateDemoData(): Transaction[] {
       date: getDateOnDay(year, month, 3, 2), // Second Wednesday
       description: 'VERIZON WIRELESS',
       amount: -55,
-      category: 'Bills & Fees',
+      category: 'Phone',
       merchantName: 'Verizon',
       memo: '',
       autoCategorized: false
@@ -288,7 +288,7 @@ export function generateDemoData(): Transaction[] {
       date: getDateOnDay(year, month, 2, 2), // Second Tuesday
       description: 'PG&E ELECTRIC',
       amount: -electricAmount,
-      category: 'Bills & Fees',
+      category: 'Utilities',
       merchantName: 'PG&E',
       memo: '',
       autoCategorized: false
@@ -299,7 +299,7 @@ export function generateDemoData(): Transaction[] {
       date: getDateOnDay(year, month, 4, 3), // Third Thursday
       description: 'CITY WATER UTILITY',
       amount: -45,
-      category: 'Bills & Fees',
+      category: 'Utilities',
       merchantName: 'City Water',
       memo: '',
       autoCategorized: false
@@ -310,7 +310,7 @@ export function generateDemoData(): Transaction[] {
       date: `${year}-${String(month + 1).padStart(2, '0')}-15`,
       description: 'GEICO AUTO INSURANCE',
       amount: -120,
-      category: 'Transportation',
+      category: 'Insurance',
       merchantName: 'GEICO',
       memo: '',
       autoCategorized: false
@@ -321,7 +321,7 @@ export function generateDemoData(): Transaction[] {
       date: `${year}-${String(month + 1).padStart(2, '0')}-10`,
       description: 'MOHELA STUDENT LOAN',
       amount: -285,
-      category: 'Bills & Fees',
+      category: 'Debt Payments',
       merchantName: 'MOHELA',
       memo: '',
       autoCategorized: false
@@ -333,7 +333,7 @@ export function generateDemoData(): Transaction[] {
       date: `${year}-${String(month + 1).padStart(2, '0')}-20`,
       description: 'CHASE CREDIT CARD PAYMENT',
       amount: -ccPayment,
-      category: 'Bills & Fees',
+      category: 'Debt Payments',
       merchantName: 'Chase',
       memo: '',
       autoCategorized: false

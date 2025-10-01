@@ -1,5 +1,121 @@
 .spending {
   padding: 1rem;
+  position: relative;
+}
+
+/* Bill Modal */
+.bill-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.bill-modal {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.bill-modal h3 {
+  margin: 0 0 1.5rem 0;
+  color: #374151;
+}
+
+.bill-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bill-modal-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bill-modal-form label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.bill-modal-form input,
+.bill-modal-form select,
+.bill-modal-form textarea {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.bill-modal-form textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.bill-modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.bill-modal-actions button {
+  padding: 0.5rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.bill-modal-actions .cancel-btn {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.bill-modal-actions .cancel-btn:hover {
+  background: #d1d5db;
+}
+
+.bill-modal-actions .save-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.bill-modal-actions .save-btn:hover {
+  background: #2563eb;
+}
+
+/* Bill checkbox in table */
+.bill-checkbox-header {
+  width: 50px;
+  text-align: center;
+  font-size: 0.85rem;
+  padding: 0.75rem 0.5rem;
+}
+
+.bill-checkbox-cell {
+  text-align: center;
+  padding: 0.75rem 0.5rem;
+}
+
+.bill-checkbox-cell input[type="checkbox"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
 }
 
 .spending-empty {
