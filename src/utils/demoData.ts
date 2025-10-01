@@ -2,60 +2,43 @@ import type { Transaction, Bill } from '../types';
 
 // Demo merchant data with realistic descriptions and categories
 const demoTransactions = [
-  // Groceries
-  { description: 'WHOLE FOODS MARKET #12345', category: 'Food & Dining', amountRange: [50, 150] },
-  { description: 'TRADER JOES #456', category: 'Food & Dining', amountRange: [30, 80] },
-  { description: 'SAFEWAY STORE 1234', category: 'Food & Dining', amountRange: [40, 120] },
-  { description: 'COSTCO WHOLESALE #789', category: 'Food & Dining', amountRange: [100, 300] },
-  { description: 'TARGET STORE T-2345', category: 'Food & Dining', amountRange: [25, 75] },
+  // Groceries - targeting ~$400-500/month (weekly shopping)
+  { description: 'WHOLE FOODS MARKET #12345', category: 'Food & Dining', amountRange: [60, 90] },
+  { description: 'TRADER JOES #456', category: 'Food & Dining', amountRange: [40, 60] },
+  { description: 'SAFEWAY STORE 1234', category: 'Food & Dining', amountRange: [50, 80] },
+  { description: 'COSTCO WHOLESALE #789', category: 'Food & Dining', amountRange: [80, 120] },
 
-  // Dining
-  { description: 'STARBUCKS STORE 12345', category: 'Food & Dining', amountRange: [5, 15] },
-  { description: 'CHIPOTLE MEXICAN GRILL', category: 'Food & Dining', amountRange: [10, 25] },
-  { description: 'PANERA BREAD #1234', category: 'Food & Dining', amountRange: [12, 30] },
-  { description: 'SUBWAY 12345', category: 'Food & Dining', amountRange: [8, 15] },
-  { description: 'OLIVE GARDEN #456', category: 'Food & Dining', amountRange: [30, 60] },
-  { description: 'PIZZA HUT 12345', category: 'Food & Dining', amountRange: [15, 35] },
-  { description: 'MCDONALDS F12345', category: 'Food & Dining', amountRange: [8, 20] },
-  { description: 'TACO BELL #12345', category: 'Food & Dining', amountRange: [10, 20] },
+  // Dining - targeting ~$300/month
+  { description: 'STARBUCKS STORE 12345', category: 'Food & Dining', amountRange: [5, 12] },
+  { description: 'CHIPOTLE MEXICAN GRILL', category: 'Food & Dining', amountRange: [12, 18] },
+  { description: 'PANERA BREAD #1234', category: 'Food & Dining', amountRange: [10, 15] },
+  { description: 'SUBWAY 12345', category: 'Food & Dining', amountRange: [8, 12] },
+  { description: 'PIZZA HUT 12345', category: 'Food & Dining', amountRange: [20, 30] },
+  { description: 'MCDONALDS F12345', category: 'Food & Dining', amountRange: [8, 12] },
 
-  // Transportation
-  { description: 'SHELL OIL 12345678', category: 'Transportation', amountRange: [40, 80] },
-  { description: 'CHEVRON 12345678', category: 'Transportation', amountRange: [35, 75] },
-  { description: 'UBER TRIP HELP.UBER.COM', category: 'Transportation', amountRange: [15, 40] },
-  { description: 'LYFT RIDE', category: 'Transportation', amountRange: [12, 35] },
-  { description: 'EXXONMOBIL 12345', category: 'Transportation', amountRange: [45, 85] },
+  // Transportation - targeting ~$250/month (gas)
+  { description: 'SHELL OIL 12345678', category: 'Transportation', amountRange: [45, 65] },
+  { description: 'CHEVRON 12345678', category: 'Transportation', amountRange: [45, 65] },
+  { description: 'EXXONMOBIL 12345', category: 'Transportation', amountRange: [40, 60] },
 
-  // Entertainment
+  // Entertainment - targeting ~$100/month
   { description: 'NETFLIX.COM', category: 'Entertainment', amountRange: [15, 20] },
   { description: 'SPOTIFY USA', category: 'Entertainment', amountRange: [10, 15] },
-  { description: 'AMAZON PRIME VIDEO', category: 'Entertainment', amountRange: [8, 15] },
-  { description: 'AMC THEATRES #12345', category: 'Entertainment', amountRange: [15, 50] },
-  { description: 'STEAM GAMES', category: 'Entertainment', amountRange: [20, 60] },
-  { description: 'APPLE.COM/BILL', category: 'Entertainment', amountRange: [5, 30] },
+  { description: 'AMC THEATRES #12345', category: 'Entertainment', amountRange: [25, 40] },
+  { description: 'STEAM GAMES', category: 'Entertainment', amountRange: [20, 40] },
 
-  // Shopping
-  { description: 'AMAZON.COM*123456789', category: 'Shopping', amountRange: [20, 150] },
-  { description: 'AMAZON MARKETPLACE', category: 'Shopping', amountRange: [15, 100] },
-  { description: 'WAL-MART #1234', category: 'Shopping', amountRange: [30, 120] },
-  { description: 'BEST BUY STORE #1234', category: 'Shopping', amountRange: [50, 300] },
-  { description: 'HOME DEPOT #1234', category: 'Shopping', amountRange: [40, 200] },
-  { description: 'MACYS #1234', category: 'Shopping', amountRange: [30, 150] },
+  // Shopping - targeting ~$200/month
+  { description: 'AMAZON.COM*123456789', category: 'Shopping', amountRange: [25, 80] },
+  { description: 'TARGET STORE T-2345', category: 'Shopping', amountRange: [30, 60] },
+  { description: 'WAL-MART #1234', category: 'Shopping', amountRange: [25, 50] },
 
-  // Utilities
-  { description: 'PG&E UTILITY PAYMENT', category: 'Bills & Fees', amountRange: [80, 150] },
-  { description: 'COMCAST CABLE COMM', category: 'Bills & Fees', amountRange: [60, 120] },
-  { description: 'AT&T WIRELESS', category: 'Bills & Fees', amountRange: [50, 100] },
-  { description: 'VERIZON WIRELESS', category: 'Bills & Fees', amountRange: [60, 110] },
+  // Healthcare - targeting ~$50/month
+  { description: 'WALGREENS #12345', category: 'Healthcare', amountRange: [15, 30] },
+  { description: 'CVS/PHARMACY #12345', category: 'Healthcare', amountRange: [20, 40] },
 
-  // Healthcare
-  { description: 'WALGREENS #12345', category: 'Healthcare', amountRange: [10, 50] },
-  { description: 'CVS/PHARMACY #12345', category: 'Healthcare', amountRange: [15, 60] },
-  { description: 'KAISER PERMANENTE', category: 'Healthcare', amountRange: [20, 100] },
-
-  // Income (positive amounts) - ~$1500/week = ~$6000/month for twice monthly paychecks
-  { description: 'PAYROLL DEPOSIT - ACME CORP', category: 'Income', amountRange: [2900, 3100] },
-  { description: 'DIRECT DEPOSIT PAYROLL', category: 'Income', amountRange: [2900, 3100] },
+  // Income (positive amounts) - ~$1500/week = ~$6000/month for weekly paychecks
+  { description: 'PAYROLL DEPOSIT - ACME CORP', category: 'Income', amountRange: [1400, 1600] },
+  { description: 'DIRECT DEPOSIT PAYROLL', category: 'Income', amountRange: [1400, 1600] },
 ];
 
 function getRandomAmount(range: [number, number]): number {
@@ -98,8 +81,8 @@ export function generateDemoData(): Transaction[] {
     const year = date.getFullYear();
     const month = date.getMonth();
 
-    // Generate 30-60 transactions per month
-    const transactionCount = Math.floor(Math.random() * 30) + 30;
+    // Generate 25-35 transactions per month
+    const transactionCount = Math.floor(Math.random() * 10) + 25;
 
     for (let i = 0; i < transactionCount; i++) {
       const template = demoTransactions[Math.floor(Math.random() * demoTransactions.length)];
@@ -119,35 +102,57 @@ export function generateDemoData(): Transaction[] {
     }
 
     // Add consistent bills every month
-    // Rent/Mortgage
+    // Rent/Mortgage - $1400/month
     transactions.push({
       date: getRandomDate(year, month),
       description: 'PROPERTY MANAGEMENT RENT',
-      amount: -1500,
+      amount: -1400,
       category: 'Housing',
       merchantName: 'Property Management',
       memo: 'Monthly rent',
       autoCategorized: false
     });
 
-    // Internet
+    // Internet - $70/month
     transactions.push({
       date: getRandomDate(year, month),
       description: 'COMCAST INTERNET',
-      amount: -79.99,
+      amount: -70,
       category: 'Bills & Fees',
       merchantName: 'Comcast',
       memo: '',
       autoCategorized: false
     });
 
-    // Phone
+    // Phone - $55/month
     transactions.push({
       date: getRandomDate(year, month),
       description: 'VERIZON WIRELESS',
-      amount: -85,
+      amount: -55,
       category: 'Bills & Fees',
       merchantName: 'Verizon',
+      memo: '',
+      autoCategorized: false
+    });
+
+    // Electric - $90/month
+    transactions.push({
+      date: getRandomDate(year, month),
+      description: 'PG&E ELECTRIC',
+      amount: -90,
+      category: 'Bills & Fees',
+      merchantName: 'PG&E',
+      memo: '',
+      autoCategorized: false
+    });
+
+    // Car Insurance - $120/month
+    transactions.push({
+      date: getRandomDate(year, month),
+      description: 'GEICO AUTO INSURANCE',
+      amount: -120,
+      category: 'Transportation',
+      merchantName: 'GEICO',
       memo: '',
       autoCategorized: false
     });
