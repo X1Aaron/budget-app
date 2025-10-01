@@ -1,4 +1,4 @@
-import type { Transaction } from '../types';
+import type { Transaction, Bill } from '../types';
 
 // Demo merchant data with realistic descriptions and categories
 const demoTransactions = [
@@ -53,9 +53,9 @@ const demoTransactions = [
   { description: 'CVS/PHARMACY #12345', category: 'Healthcare', amountRange: [15, 60] },
   { description: 'KAISER PERMANENTE', category: 'Healthcare', amountRange: [20, 100] },
 
-  // Income (negative amounts)
-  { description: 'PAYROLL DEPOSIT - ACME CORP', category: 'Income', amountRange: [-3000, -2500] },
-  { description: 'DIRECT DEPOSIT PAYROLL', category: 'Income', amountRange: [-3200, -2800] },
+  // Income (positive amounts)
+  { description: 'PAYROLL DEPOSIT - ACME CORP', category: 'Income', amountRange: [2500, 3000] },
+  { description: 'DIRECT DEPOSIT PAYROLL', category: 'Income', amountRange: [2800, 3200] },
 ];
 
 function getRandomAmount(range: [number, number]): number {
@@ -68,6 +68,24 @@ function getRandomDate(year: number, month: number): string {
   const day = Math.floor(Math.random() * daysInMonth) + 1;
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
+
+function getRandomDay(): number {
+  return Math.floor(Math.random() * 28) + 1; // 1-28 to ensure valid for all months
+}
+
+// Demo bill templates
+const demoBillTemplates = [
+  { name: 'Electric Bill', category: 'Utilities', amountRange: [80, 150], frequency: 'monthly' as const },
+  { name: 'Water Bill', category: 'Utilities', amountRange: [40, 80], frequency: 'monthly' as const },
+  { name: 'Internet Service', category: 'Utilities', amountRange: [60, 120], frequency: 'monthly' as const },
+  { name: 'Phone Bill', category: 'Utilities', amountRange: [50, 100], frequency: 'monthly' as const },
+  { name: 'Gym Membership', category: 'Healthcare', amountRange: [30, 80], frequency: 'monthly' as const },
+  { name: 'Streaming Service', category: 'Entertainment', amountRange: [10, 20], frequency: 'monthly' as const },
+  { name: 'Car Insurance', category: 'Transportation', amountRange: [100, 200], frequency: 'monthly' as const },
+  { name: 'Rent/Mortgage', category: 'Housing', amountRange: [1200, 2000], frequency: 'monthly' as const },
+  { name: 'Cloud Storage', category: 'Shopping', amountRange: [5, 15], frequency: 'monthly' as const },
+  { name: 'Credit Card Payment', category: 'Bills & Fees', amountRange: [100, 500], frequency: 'monthly' as const },
+];
 
 export function generateDemoData(): Transaction[] {
   const transactions: Transaction[] = [];
@@ -136,7 +154,7 @@ export function generateDemoData(): Transaction[] {
     transactions.push({
       date: `${year}-${String(month + 1).padStart(2, '0')}-15`,
       description: 'PAYROLL DEPOSIT - ACME CORP',
-      amount: -2800,
+      amount: 2800,
       category: 'Income',
       merchantName: 'ACME Corp',
       memo: 'Bi-weekly paycheck',
@@ -146,7 +164,7 @@ export function generateDemoData(): Transaction[] {
     transactions.push({
       date: `${year}-${String(month + 1).padStart(2, '0')}-${month === 1 ? '28' : '30'}`,
       description: 'PAYROLL DEPOSIT - ACME CORP',
-      amount: -2800,
+      amount: 2800,
       category: 'Income',
       merchantName: 'ACME Corp',
       memo: 'Bi-weekly paycheck',
@@ -158,4 +176,31 @@ export function generateDemoData(): Transaction[] {
   transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return transactions;
+}
+
+export function generateDemoBills(): Bill[] {
+  const bills: Bill[] = [];
+  const currentDate = new Date();
+
+  // Randomly select 5 bill templates
+  const shuffled = [...demoBillTemplates].sort(() => 0.5 - Math.random());
+  const selectedTemplates = shuffled.slice(0, 5);
+
+  selectedTemplates.forEach((template, index) => {
+    const amount = getRandomAmount(template.amountRange);
+    const dueDay = getRandomDay();
+
+    bills.push({
+      id: `demo-bill-${Date.now()}-${index}`,
+      name: template.name,
+      amount: amount,
+      dueDate: `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dueDay).padStart(2, '0')}` as any,
+      category: template.category,
+      frequency: template.frequency,
+      memo: 'Demo bill',
+      paidDates: []
+    } as any);
+  });
+
+  return bills;
 }

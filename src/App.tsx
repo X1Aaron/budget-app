@@ -10,7 +10,7 @@ import ExportButton from './components/ExportButton.jsx';
 import ImportButton from './components/ImportButton.jsx';
 import MonthYearSelector from './components/MonthYearSelector.jsx';
 import { DEFAULT_CATEGORIES, autoCategorize, generateMerchantName } from './utils/categories';
-import { generateDemoData } from './utils/demoData';
+import { generateDemoData, generateDemoBills } from './utils/demoData';
 import type {
   Transaction,
   Category,
@@ -265,9 +265,12 @@ function App() {
   };
 
   const handleImportDemoData = () => {
-    if (confirm('This will replace all existing transactions with demo data. Are you sure?')) {
+    if (confirm('This will replace all existing transactions and bills with demo data. Are you sure?')) {
       const demoTransactions = generateDemoData();
+      const demoBills = generateDemoBills();
+
       setTransactions(demoTransactions);
+      setBills(demoBills);
 
       // Set all category budgets to $1500 for demo data
       const updatedCategories = categories.map(cat => ({
@@ -276,7 +279,7 @@ function App() {
       }));
       setCategories(updatedCategories);
 
-      alert(`Successfully imported ${demoTransactions.length} demo transactions for the past 12 months!`);
+      alert(`Successfully imported ${demoTransactions.length} demo transactions and ${demoBills.length} demo bills for the past 12 months!`);
     }
   };
 

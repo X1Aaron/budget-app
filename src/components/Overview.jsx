@@ -210,7 +210,7 @@ function Overview({
 
   const categorySpendingData = useMemo(() => {
     return Object.entries(summary.categoryBreakdown)
-      .filter(([category, amount]) => amount < 0)
+      .filter(([category, amount]) => amount < 0 && category !== 'Income')
       .map(([category, amount]) => ({
         category,
         amount: Math.abs(amount)
@@ -353,7 +353,7 @@ function Overview({
             </thead>
             <tbody>
               {Object.entries(summary.categoryBreakdown)
-                .filter(([category, amount]) => amount < 0)
+                .filter(([category, amount]) => amount < 0 && category !== 'Income')
                 .sort(([a], [b]) => a.localeCompare(b))
                 .map(([category, amount]) => {
                   const color = getCategoryColor(category, categories)
