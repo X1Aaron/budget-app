@@ -402,12 +402,10 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
                   key={`${bill.id}-${bill.occurrenceDate}`}
                   className={'bill-item' + (bill.isPaid ? ' paid' : '')}
                 >
-                  <div className="bill-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={bill.isPaid}
-                      onChange={() => handleTogglePaid(bill.id, bill.occurrenceDate)}
-                    />
+                  <div className="bill-status-badge">
+                    <span className={bill.isPaid ? 'status-paid' : 'status-unpaid'}>
+                      {bill.isPaid ? '✓ PAID' : '○ UNPAID'}
+                    </span>
                   </div>
                   <div className="bill-info">
                     <div className="bill-name">
@@ -425,6 +423,13 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
                   </div>
                   <div className="bill-amount">{formatCurrency(bill.amount)}</div>
                   <div className="bill-actions">
+                    <button
+                      className="toggle-paid-btn"
+                      onClick={() => handleTogglePaid(bill.id, bill.occurrenceDate)}
+                      title={bill.isPaid ? 'Mark as Unpaid' : 'Mark as Paid'}
+                    >
+                      {bill.isPaid ? '↶' : '✓'}
+                    </button>
                     <button
                       className="edit-btn"
                       onClick={() => handleEditBill(bill)}

@@ -402,20 +402,38 @@
 }
 
 .bill-item.paid {
-  opacity: 0.6;
   background: #f0fdf4;
   border-color: #86efac;
 }
 
-.bill-item.paid .bill-name {
-  text-decoration: line-through;
-  color: #6b7280;
+.bill-status-badge {
+  display: flex;
+  align-items: center;
+  min-width: 90px;
 }
 
-.bill-checkbox input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
+.bill-status-badge span {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.status-paid {
+  background: #10b981;
+  color: white;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.status-unpaid {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
 }
 
 .bill-info {
@@ -479,6 +497,7 @@
   gap: 0.5rem;
 }
 
+.toggle-paid-btn,
 .edit-btn,
 .delete-btn {
   padding: 0.4rem 0.6rem;
@@ -488,6 +507,10 @@
   cursor: pointer;
   border-radius: 4px;
   transition: background 0.2s;
+}
+
+.toggle-paid-btn:hover {
+  background: #dbeafe;
 }
 
 .edit-btn:hover {
