@@ -38,11 +38,21 @@ function ImportButton({ activeSection, onImportTransactions, onImportCategories,
           break
         case 'auto-categorization':
           const text = await file.text()
-          const importedData = JSON.parse(text)
+          let importedData
+          try {
+            importedData = JSON.parse(text)
+          } catch (parseError) {
+            throw new Error('Invalid JSON file. Please ensure the file contains valid JSON data.')
+          }
+
+          if (!importedData || typeof importedData !== 'object') {
+            throw new Error('Invalid file format. Expected a JSON object.')
+          }
+
           if (importedData.merchantMappings && importedData.categoryMappings) {
             onImportRules(importedData.merchantMappings, importedData.categoryMappings)
           } else {
-            throw new Error('Invalid file format. Please select a valid auto-categorization rules file.')
+            throw new Error('Invalid file format. Please select a valid auto-categorization rules file exported from this app.')
           }
           break
         case 'bills':
