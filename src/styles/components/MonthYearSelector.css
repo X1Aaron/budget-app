@@ -15,8 +15,9 @@
 
 .calendar-today-btn {
   background: var(--bg-secondary);
-  padding: 8px 12px;
+  padding: 8px 16px;
   border-radius: 8px;
+  height: 48px;
 }
 
 .month-year-display {
