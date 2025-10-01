@@ -311,7 +311,7 @@
 }
 
 .stat-label {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: 500;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -352,7 +352,7 @@
 
 .progress-bar {
   height: 12px;
-  background: #f3f4f6;
+  background: var(--progress-bar-bg, #f3f4f6);
   border-radius: 6px;
   overflow: visible;
   position: relative;
@@ -384,10 +384,10 @@
   top: -3px;
   bottom: -3px;
   width: 3px;
-  background: #1f2937;
+  background: var(--text-primary);
   z-index: 10;
   border-radius: 2px;
-  box-shadow: 0 0 0 1px white;
+  box-shadow: 0 0 0 1px var(--card-bg);
 }
 
 .progress-labels {
@@ -398,18 +398,18 @@
 
 .progress-label {
   font-size: 0.7rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .progress-label.budget-marker {
-  color: #1f2937;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .progress-text {
   font-size: 0.9rem;
-  color: #1f2937;
+  color: var(--text-primary);
   font-weight: 700;
   white-space: nowrap;
   min-width: 50px;
@@ -473,7 +473,7 @@
 }
 
 .categories-table thead {
-  background: #f3f4f6;
+  background: var(--table-header-bg, #f3f4f6);
   border-bottom: 2px solid var(--border-color);
 }
 
@@ -481,7 +481,7 @@
   text-align: left;
   padding: 0.75rem 1rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -493,7 +493,7 @@
 }
 
 .categories-table tbody tr:hover {
-  background: #f9fafb;
+  background: var(--table-row-hover-bg, #f9fafb);
 }
 
 .categories-table td {
@@ -512,7 +512,7 @@
 }
 
 .budget-cell {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 

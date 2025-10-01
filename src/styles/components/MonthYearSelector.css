@@ -17,7 +17,8 @@
   background: var(--bg-secondary);
   padding: 8px 16px;
   border-radius: 8px;
-  height: 48px;
+  height: 32px;
+  width: 32px;
 }
 
 .month-year-display {
