@@ -416,6 +416,16 @@
   background: #d1fae5;
 }
 
+.bill-item.future {
+  opacity: 0.5;
+}
+
+.bill-item.future .bill-name,
+.bill-item.future .bill-amount,
+.bill-item.future .bill-date {
+  color: #9ca3af;
+}
+
 .bill-main {
   display: flex;
   align-items: center;

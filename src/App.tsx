@@ -16,7 +16,8 @@ import type {
   MonthlyBudget,
   MerchantMapping,
   CategoryMapping,
-  ActiveSection
+  ActiveSection,
+  BillMatchingSettings
 } from './types';
 
 function App() {
@@ -55,6 +56,17 @@ function App() {
     const saved = localStorage.getItem('categoryMappings');
     return saved ? JSON.parse(saved) : {};
   });
+  const [billMatchingSettings, setBillMatchingSettings] = useState<BillMatchingSettings>(() => {
+    const saved = localStorage.getItem('billMatchingSettings');
+    return saved ? JSON.parse(saved) : {
+      amountTolerance: 5,
+      dateWindowDays: 7,
+      minimumScore: 60,
+      requireDescriptionMatch: true,
+      requireAmountMatch: true,
+      requireDateWindow: true
+    };
+  });
 
   useEffect(() => {
     localStorage.setItem('categories', JSON.stringify(categories));
@@ -81,6 +93,10 @@ function App() {
   }, [categoryMappings]);
 
   useEffect(() => {
+    localStorage.setItem('billMatchingSettings', JSON.stringify(billMatchingSettings));
+  }, [billMatchingSettings]);
+
+  useEffect(() => {
     const saved = localStorage.getItem('transactions');
     if (saved) {
       setTransactions(JSON.parse(saved));
@@ -100,7 +116,8 @@ function App() {
         bills,
         transactions,
         selectedYear,
-        selectedMonth
+        selectedMonth,
+        billMatchingSettings
       );
 
       // Only update if there are actual changes
@@ -109,7 +126,7 @@ function App() {
         setBills(updatedBills);
       }
     }
-  }, [transactions, bills.length, selectedYear, selectedMonth]); // Depend on bills.length not bills to avoid infinite loop
+  }, [transactions, bills.length, selectedYear, selectedMonth, billMatchingSettings]); // Depend on bills.length not bills to avoid infinite loop
 
   const handleImport = (importedTransactions: Transaction[], existingTransactions: Transaction[] = transactions) => {
     // Check for duplicate transactions
@@ -410,6 +427,112 @@ function App() {
                 </p>
               </div>
             </div>
+            <div className="settings-group">
+              <h3>Bill Matching Criteria</h3>
+              <p className="settings-description">
+                Configure how transactions are automatically matched to bills. These settings control when a transaction is considered a payment for a bill. Changes apply immediately to all bill matching.
+              </p>
+              <div className="settings-buttons">
+                <div className="bill-matching-settings">
+                  <div className="setting-row">
+                    <label>Amount Tolerance ($)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={billMatchingSettings.amountTolerance}
+                      onChange={(e) => setBillMatchingSettings({
+                        ...billMatchingSettings,
+                        amountTolerance: parseFloat(e.target.value) || 0
+                      })}
+                      className="setting-input"
+                    />
+                    <p className="setting-help">How much the transaction amount can differ from the bill amount (e.g., 5 = within $5). <strong>Lower values</strong> = stricter matching, fewer false positives. <strong>Higher values</strong> = more flexible, catches bills with varying amounts.</p>
+                  </div>
+
+                  <div className="setting-row">
+                    <label>Date Window (Days)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="30"
+                      value={billMatchingSettings.dateWindowDays}
+                      onChange={(e) => setBillMatchingSettings({
+                        ...billMatchingSettings,
+                        dateWindowDays: parseInt(e.target.value) || 0
+                      })}
+                      className="setting-input"
+                    />
+                    <p className="setting-help">How many days before/after the due date to look for matching transactions. <strong>Smaller window</strong> = only matches transactions very close to due date. <strong>Larger window</strong> = catches early or late payments.</p>
+                  </div>
+
+                  <div className="setting-row">
+                    <label>Minimum Match Score (0-100)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={billMatchingSettings.minimumScore}
+                      onChange={(e) => setBillMatchingSettings({
+                        ...billMatchingSettings,
+                        minimumScore: parseInt(e.target.value) || 0
+                      })}
+                      className="setting-input"
+                    />
+                    <p className="setting-help">Controls overall match quality threshold. <strong>Higher scores (70-100)</strong> = very strict, only excellent matches. <strong>Lower scores (40-60)</strong> = more lenient, may include imperfect matches. Recommended: 60-80.</p>
+                  </div>
+
+                  <div className="setting-row checkbox-row">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={billMatchingSettings.requireDescriptionMatch}
+                        onChange={(e) => setBillMatchingSettings({
+                          ...billMatchingSettings,
+                          requireDescriptionMatch: e.target.checked
+                        })}
+                      />
+                      Require Description Match
+                    </label>
+                    <p className="setting-help">Transaction description must match bill name. <strong>Unchecked</strong> = allows matching by amount and date alone (not recommended, may cause incorrect matches).</p>
+                  </div>
+
+                  <div className="setting-row checkbox-row">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={billMatchingSettings.requireAmountMatch}
+                        onChange={(e) => setBillMatchingSettings({
+                          ...billMatchingSettings,
+                          requireAmountMatch: e.target.checked
+                        })}
+                      />
+                      Require Amount Match
+                    </label>
+                    <p className="setting-help">Transaction amount must be within tolerance. <strong>Unchecked</strong> = matches even if amounts differ significantly (useful for bills with variable amounts).</p>
+                  </div>
+
+                  <div className="setting-row checkbox-row">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={billMatchingSettings.requireDateWindow}
+                        onChange={(e) => setBillMatchingSettings({
+                          ...billMatchingSettings,
+                          requireDateWindow: e.target.checked
+                        })}
+                      />
+                      Require Date Window
+                    </label>
+                    <p className="setting-help">Transaction must be within date window of due date. <strong>Unchecked</strong> = matches transactions from any date (useful for finding missed historical payments).</p>
+                  </div>
+                </div>
+                <div className="settings-impact-note">
+                  <strong>Impact:</strong> Stricter settings (higher score, smaller tolerance, all requirements checked) reduce false matches but may miss legitimate payments. Looser settings increase automatic matching but may incorrectly mark bills as paid.
+                </div>
+              </div>
+            </div>
+
             <div className="settings-group">
               <h3>Demo Data</h3>
               <div className="settings-buttons">

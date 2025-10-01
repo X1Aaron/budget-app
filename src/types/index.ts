@@ -77,3 +77,12 @@ export type ActiveSection =
   | 'categories'
   | 'auto-categorization'
   | 'settings';
+
+export interface BillMatchingSettings {
+  amountTolerance: number; // Dollar amount tolerance for matching (e.g., 5 = within $5)
+  dateWindowDays: number; // Number of days before/after due date to look for matches (e.g., 7 = within 7 days)
+  minimumScore: number; // Minimum matching score (0-100) required for auto-match
+  requireDescriptionMatch: boolean; // Must have description match
+  requireAmountMatch: boolean; // Must have amount match (within tolerance)
+  requireDateWindow: boolean; // Must be within date window
+}

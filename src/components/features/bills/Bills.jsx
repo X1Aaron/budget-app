@@ -159,10 +159,21 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
 
 
   const sortedBills = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
     return generateRecurringBills
       .filter(bill => {
         const [year] = bill.occurrenceDate.split('-').map(Number)
         return year === selectedYear
+      })
+      .map(bill => {
+        const billDate = new Date(bill.occurrenceDate)
+        billDate.setHours(0, 0, 0, 0)
+        return {
+          ...bill,
+          isFuture: billDate > today
+        }
       })
       .sort((a, b) => {
         if (a.isPaid !== b.isPaid) return a.isPaid ? 1 : -1
@@ -349,7 +360,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
               {currentMonthBills.map((bill) => (
                 <div
                   key={`${bill.id}-${bill.occurrenceDate}`}
-                  className={'bill-item' + (bill.isPaid ? ' paid' : '')}
+                  className={'bill-item' + (bill.isPaid ? ' paid' : '') + (bill.isFuture ? ' future' : '')}
                 >
                   <div className="bill-main">
                     <div className="bill-check">

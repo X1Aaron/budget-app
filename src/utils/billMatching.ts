@@ -1,4 +1,4 @@
-import type { Transaction, Bill, BillPayment } from '../types';
+import type { Transaction, Bill, BillPayment, BillMatchingSettings } from '../types';
 
 export interface BillOccurrence {
   billId: string;
@@ -157,7 +157,8 @@ function getPaymentForOccurrence(bill: Bill, occurrenceDate: string): BillPaymen
 export function matchTransactionToBill(
   transaction: Transaction,
   transactionIndex: number,
-  billOccurrences: BillOccurrence[]
+  billOccurrences: BillOccurrence[],
+  settings: BillMatchingSettings
 ): TransactionBillMatch {
   // Only match expense transactions
   if (transaction.amount >= 0) {
@@ -207,9 +208,9 @@ export function matchTransactionToBill(
       matchDetails.descriptionMatch = true;
     }
 
-    // Check amount match (within $5 tolerance)
+    // Check amount match (within tolerance from settings)
     const amountDiff = Math.abs(transactionAmount - billOcc.billAmount);
-    if (amountDiff <= 5) {
+    if (amountDiff <= settings.amountTolerance) {
       score += 30;
       matchDetails.amountMatch = true;
       // Bonus for exact match
@@ -218,20 +219,25 @@ export function matchTransactionToBill(
       }
     }
 
-    // Check date proximity (within 7 days of due date)
+    // Check date proximity (within date window from settings)
     const billDueDate = new Date(billOcc.occurrenceDate);
     const daysDiff = Math.abs(
       (transactionDate.getTime() - billDueDate.getTime()) / (1000 * 60 * 60 * 24)
     );
     matchDetails.dateProximity = daysDiff;
 
-    if (daysDiff <= 7) {
+    if (daysDiff <= settings.dateWindowDays) {
       matchDetails.withinWindow = true;
       score += Math.max(0, 30 - daysDiff * 3); // Closer = higher score
     }
 
-    // Must have at least description match and be within date window to be valid
-    if (matchDetails.descriptionMatch && matchDetails.withinWindow && score > bestScore) {
+    // Check required criteria from settings
+    const meetsRequirements =
+      (!settings.requireDescriptionMatch || matchDetails.descriptionMatch) &&
+      (!settings.requireAmountMatch || matchDetails.amountMatch) &&
+      (!settings.requireDateWindow || matchDetails.withinWindow);
+
+    if (meetsRequirements && score > bestScore) {
       bestScore = score;
       bestMatch = billOcc;
       bestMatchDetails = matchDetails;
@@ -295,14 +301,15 @@ export function updateBillsWithTransactionMatches(
   bills: Bill[],
   transactions: Transaction[],
   year: number,
-  month: number
+  month: number,
+  settings: BillMatchingSettings
 ): Bill[] {
   const billOccurrences = generateBillOccurrences(bills, year, month);
 
   // Find all transaction matches
   const matches: TransactionBillMatch[] = transactions
-    .map((t, i) => matchTransactionToBill(t, i, billOccurrences))
-    .filter(m => m.matchedBill !== null && m.matchScore >= 60); // Only good matches
+    .map((t, i) => matchTransactionToBill(t, i, billOccurrences, settings))
+    .filter(m => m.matchedBill !== null && m.matchScore >= settings.minimumScore); // Use minimum score from settings
 
   // Update bills with payment info
   const updatedBills = bills.map(bill => {
