@@ -260,89 +260,82 @@ function App() {
   };
 
   const handleImportDemoData = () => {
-    if (confirm('This will replace all existing transactions and bills with demo data. Are you sure?')) {
-      const demoTransactions = generateDemoData();
-      const demoBills = generateDemoBills();
+    const demoTransactions = generateDemoData();
+    const demoBills = generateDemoBills();
 
-      setTransactions(demoTransactions);
-      setBills(demoBills);
-      setAccountStartingBalance(5000);
+    setTransactions(demoTransactions);
+    setBills(demoBills);
+    setAccountStartingBalance(5000);
 
-      // Calculate average monthly expenses per category from demo data
-      const categoryExpenses: { [category: string]: number[] } = {};
+    // Calculate average monthly expenses per category from demo data
+    const categoryExpenses: { [category: string]: number[] } = {};
 
-      demoTransactions.forEach(t => {
-        if (t.amount < 0) { // Only expenses
-          const category = t.category || 'Uncategorized';
-          if (!categoryExpenses[category]) {
-            categoryExpenses[category] = [];
-          }
-          categoryExpenses[category].push(Math.abs(t.amount));
+    demoTransactions.forEach(t => {
+      if (t.amount < 0) { // Only expenses
+        const category = t.category || 'Uncategorized';
+        if (!categoryExpenses[category]) {
+          categoryExpenses[category] = [];
         }
-      });
+        categoryExpenses[category].push(Math.abs(t.amount));
+      }
+    });
 
-      // Calculate total expenses per category and set realistic mixed budgets
-      const categoryTotals: { [category: string]: number } = {};
-      Object.keys(categoryExpenses).forEach(category => {
-        categoryTotals[category] = categoryExpenses[category].reduce((sum, amount) => sum + amount, 0) / 12; // Average per month
-      });
+    // Calculate total expenses per category and set realistic mixed budgets
+    const categoryTotals: { [category: string]: number } = {};
+    Object.keys(categoryExpenses).forEach(category => {
+      categoryTotals[category] = categoryExpenses[category].reduce((sum, amount) => sum + amount, 0) / 12; // Average per month
+    });
 
-      // Define realistic budget strategies for each category type
-      const budgetStrategies: { [category: string]: 'under' | 'on-target' | 'over' | 'tight' } = {
-        'Food & Dining': 'over',        // Often overspend on food/dining
-        'Housing': 'on-target',         // Fixed costs, usually on target
-        'Transportation': 'under',      // Good at staying under budget
-        'Shopping': 'over',             // Discretionary, often overspend
-        'Bills & Fees': 'on-target',    // Fixed costs, predictable
-        'Entertainment': 'tight',       // Set tight budget, slightly over
-        'Personal Care': 'under',       // Usually under budget
-        'Healthcare': 'on-target',      // Unpredictable but averages out
-        'Education': 'on-target',
-        'Uncategorized': 'over'
+    // Define realistic budget strategies for each category type
+    const budgetStrategies: { [category: string]: 'under' | 'on-target' | 'over' | 'tight' } = {
+      'Food & Dining': 'over',        // Often overspend on food/dining
+      'Housing': 'on-target',         // Fixed costs, usually on target
+      'Transportation': 'under',      // Good at staying under budget
+      'Shopping': 'over',             // Discretionary, often overspend
+      'Bills & Fees': 'on-target',    // Fixed costs, predictable
+      'Entertainment': 'tight',       // Set tight budget, slightly over
+      'Personal Care': 'under',       // Usually under budget
+      'Healthcare': 'on-target',      // Unpredictable but averages out
+      'Education': 'on-target',
+      'Uncategorized': 'over'
+    };
+
+    const updatedCategories = categories.map(cat => {
+      const avgExpense = categoryTotals[cat.name] || 0;
+      if (avgExpense === 0) return { ...cat, budgeted: 0 };
+
+      const strategy = budgetStrategies[cat.name] || 'on-target';
+      let budgetPercent: number;
+
+      switch (strategy) {
+        case 'under':
+          // Budget is 110-130% of actual (spending less than budgeted)
+          budgetPercent = 1.1 + Math.random() * 0.2;
+          break;
+        case 'on-target':
+          // Budget is 95-105% of actual (right on target)
+          budgetPercent = 0.95 + Math.random() * 0.1;
+          break;
+        case 'tight':
+          // Budget is 80-90% of actual (moderately over budget)
+          budgetPercent = 0.8 + Math.random() * 0.1;
+          break;
+        case 'over':
+          // Budget is 60-75% of actual (significantly over budget)
+          budgetPercent = 0.6 + Math.random() * 0.15;
+          break;
+        default:
+          budgetPercent = 1.0;
+      }
+
+      const budget = Math.round(avgExpense * budgetPercent);
+
+      return {
+        ...cat,
+        budgeted: budget
       };
-
-      const updatedCategories = categories.map(cat => {
-        const avgExpense = categoryTotals[cat.name] || 0;
-        if (avgExpense === 0) return { ...cat, budgeted: 0 };
-
-        const strategy = budgetStrategies[cat.name] || 'on-target';
-        let budgetPercent: number;
-
-        switch (strategy) {
-          case 'under':
-            // Budget is 110-130% of actual (spending less than budgeted)
-            budgetPercent = 1.1 + Math.random() * 0.2;
-            break;
-          case 'on-target':
-            // Budget is 95-105% of actual (right on target)
-            budgetPercent = 0.95 + Math.random() * 0.1;
-            break;
-          case 'tight':
-            // Budget is 80-90% of actual (moderately over budget)
-            budgetPercent = 0.8 + Math.random() * 0.1;
-            break;
-          case 'over':
-            // Budget is 60-75% of actual (significantly over budget)
-            budgetPercent = 0.6 + Math.random() * 0.15;
-            break;
-          default:
-            budgetPercent = 1.0;
-        }
-
-        const budget = Math.round(avgExpense * budgetPercent);
-
-        return {
-          ...cat,
-          budgeted: budget
-        };
-      });
-      setCategories(updatedCategories);
-
-      // Use setTimeout to ensure the alert shows after React has committed all state updates
-      setTimeout(() => {
-        alert(`Successfully imported ${demoTransactions.length} demo transactions and ${demoBills.length} demo bills for the past 12 months!`);
-      }, 0);
-    }
+    });
+    setCategories(updatedCategories);
   };
 
   return (
