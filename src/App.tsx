@@ -358,7 +358,6 @@ function App() {
           <Overview
             transactions={transactions}
             categories={categories}
-            bills={bills}
             selectedYear={selectedYear}
             selectedMonth={selectedMonth}
             monthlyBudgets={monthlyBudgets}
