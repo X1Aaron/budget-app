@@ -3,6 +3,7 @@ import './SpendingAndBills.css'
 import { getCategoryColor } from '../utils/categories'
 import { calculateMonthStartingBalance } from '../utils/balanceCalculations'
 import { generateBillOccurrences, matchTransactionToBill } from '../utils/billMatching'
+import { importTransactionsFromCSV, importTransactionsFromJSON } from '../utils/import'
 
 function SpendingAndBills({
   transactions,
@@ -24,6 +25,8 @@ function SpendingAndBills({
   const [billModalOpen, setBillModalOpen] = useState(false)
   const [addTransactionModalOpen, setAddTransactionModalOpen] = useState(false)
   const [importModalOpen, setImportModalOpen] = useState(false)
+  const [importError, setImportError] = useState(null)
+  const [selectedFile, setSelectedFile] = useState(null)
   const [transactionFormData, setTransactionFormData] = useState({
     date: '',
     description: '',
@@ -295,6 +298,44 @@ function SpendingAndBills({
 
   const handleImport = () => {
     setImportModalOpen(true)
+    setImportError(null)
+    setSelectedFile(null)
+  }
+
+  const handleFileChange = (e) => {
+    setSelectedFile(e.target.files[0])
+    setImportError(null)
+  }
+
+  const handleImportSubmit = async () => {
+    if (!selectedFile) {
+      setImportError('Please select a file to import')
+      return
+    }
+
+    try {
+      const fileExtension = selectedFile.name.split('.').pop().toLowerCase()
+      let importedTransactions
+
+      if (fileExtension === 'csv') {
+        importedTransactions = await importTransactionsFromCSV(selectedFile)
+      } else if (fileExtension === 'json') {
+        importedTransactions = await importTransactionsFromJSON(selectedFile)
+      } else {
+        throw new Error('Unsupported file format. Please use CSV or JSON files.')
+      }
+
+      // Add imported transactions to existing transactions
+      importedTransactions.forEach(transaction => {
+        onUpdateTransaction(transactions.length, transaction)
+      })
+
+      setImportModalOpen(false)
+      setSelectedFile(null)
+      alert(`Successfully imported ${importedTransactions.length} transaction${importedTransactions.length !== 1 ? 's' : ''}`)
+    } catch (err) {
+      setImportError(err.message)
+    }
   }
 
   const isTransactionABill = (transaction) => {
@@ -512,33 +553,38 @@ function SpendingAndBills({
           <div className="bill-modal" onClick={(e) => e.stopPropagation()}>
             <h3>Import Transactions</h3>
             <div className="bill-modal-form">
-              <p>Upload a CSV file with your transactions. The file should include columns for date, description, and amount.</p>
+              <p>Upload a CSV or JSON file with your transactions. The file should include columns for date, description, and amount.</p>
+              {importError && (
+                <div style={{ color: 'red', marginBottom: '10px', padding: '10px', backgroundColor: '#ffeeee', borderRadius: '4px' }}>
+                  {importError}
+                </div>
+              )}
               <div className="form-group">
-                <label>CSV File</label>
+                <label>File {selectedFile && `(${selectedFile.name})`}</label>
                 <input
                   type="file"
-                  accept=".csv"
-                  onChange={(e) => {
-                    // TODO: Implement CSV import functionality
-                    console.log('File selected:', e.target.files[0])
-                  }}
+                  accept=".csv,.json"
+                  onChange={handleFileChange}
                 />
               </div>
               <div className="import-help">
-                <p><strong>Expected format:</strong></p>
+                <p><strong>Expected CSV format:</strong></p>
                 <ul>
                   <li>Date (YYYY-MM-DD format)</li>
                   <li>Description</li>
                   <li>Amount (negative for expenses, positive for income)</li>
+                  <li>Category (optional)</li>
+                  <li>Memo (optional)</li>
                 </ul>
+                <p><strong>JSON format:</strong> Array of transaction objects with the same fields</p>
               </div>
             </div>
             <div className="bill-modal-actions">
               <button className="cancel-btn" onClick={() => setImportModalOpen(false)}>
                 Cancel
               </button>
-              <button className="save-btn" disabled>
-                Import (Coming Soon)
+              <button className="save-btn" onClick={handleImportSubmit} disabled={!selectedFile}>
+                Import
               </button>
             </div>
           </div>
