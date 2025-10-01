@@ -351,54 +351,44 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
                   key={`${bill.id}-${bill.occurrenceDate}`}
                   className={'bill-item' + (bill.isPaid ? ' paid' : '')}
                 >
-                  <div className="bill-status-badge">
-                    <span className={bill.isPaid ? 'status-paid' : 'status-unpaid'}>
-                      {bill.isPaid ? '✓ PAID' : '○ UNPAID'}
-                    </span>
-                  </div>
-                  <div className="bill-info">
-                    <div className="bill-name">
-                      {bill.name}
-                      {bill.sourceDescription && (
-                        <span className="bill-source-badge" title="Created from transaction">📄</span>
-                      )}
+                  <div className="bill-main">
+                    <div className="bill-check">
+                      <button
+                        className="toggle-paid-btn"
+                        onClick={() => handleTogglePaid(bill.id, bill.occurrenceDate)}
+                        title={bill.isPaid ? 'Mark as Unpaid' : 'Mark as Paid'}
+                      >
+                        {bill.isPaid ? '✓' : '○'}
+                      </button>
                     </div>
-                    <div className="bill-meta">
-                      <span className="bill-date">Due: {formatDate(bill.occurrenceDate)}</span>
-                      <span className="bill-frequency">{bill.frequency}</span>
-                      {bill.category && <span className="bill-category">{bill.category}</span>}
-                    </div>
-                    {bill.memo && <div className="bill-memo">{bill.memo}</div>}
-                    {bill.payment && (
-                      <div className="bill-payment-info">
-                        {bill.payment.manuallyMarked ? (
-                          <span className="payment-manual" title="Manually marked as paid">
-                            ✓ Manually marked paid
-                          </span>
-                        ) : (
-                          <div className="payment-auto" title="Auto-matched to transaction">
-                            <div className="payment-auto-header">
-                              💰 Auto-matched to transaction:
-                            </div>
-                            <div className="payment-auto-details">
-                              <div><strong>Date:</strong> {bill.payment.transactionDate}</div>
-                              <div><strong>Amount:</strong> {formatCurrency(bill.payment.transactionAmount)}</div>
-                              <div><strong>Description:</strong> {bill.payment.transactionDescription}</div>
-                            </div>
-                          </div>
-                        )}
+                    <div className="bill-info">
+                      <div className="bill-header">
+                        <div className="bill-name">
+                          {bill.name}
+                          {bill.sourceDescription && (
+                            <span className="bill-source-badge" title="Created from transaction">📄</span>
+                          )}
+                          {bill.payment && (
+                            <span className="bill-payment-badge" title={
+                              bill.payment.manuallyMarked
+                                ? 'Manually marked as paid'
+                                : `Auto-matched: ${bill.payment.transactionDescription} (${formatCurrency(bill.payment.transactionAmount)} on ${bill.payment.transactionDate})`
+                            }>
+                              {bill.payment.manuallyMarked ? '✓' : '💰'}
+                            </span>
+                          )}
+                        </div>
+                        <div className="bill-amount">{formatCurrency(bill.amount)}</div>
                       </div>
-                    )}
+                      <div className="bill-meta">
+                        <span className="bill-date">{formatDate(bill.occurrenceDate)}</span>
+                        <span className="bill-frequency">{bill.frequency}</span>
+                        {bill.category && <span className="bill-category">{bill.category}</span>}
+                      </div>
+                      {bill.memo && <div className="bill-memo">{bill.memo}</div>}
+                    </div>
                   </div>
-                  <div className="bill-amount">{formatCurrency(bill.amount)}</div>
                   <div className="bill-actions">
-                    <button
-                      className="toggle-paid-btn"
-                      onClick={() => handleTogglePaid(bill.id, bill.occurrenceDate)}
-                      title={bill.isPaid ? 'Mark as Unpaid' : 'Mark as Paid'}
-                    >
-                      {bill.isPaid ? '↶' : '✓'}
-                    </button>
                     <button
                       className="edit-btn"
                       onClick={() => handleEditBill(bill)}
