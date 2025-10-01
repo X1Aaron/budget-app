@@ -7,6 +7,22 @@
   border-radius: 8px;
 }
 
+.calendar-today-btn {
+  position: relative;
+  margin-left: 4px;
+}
+
+.calendar-today-btn::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
 .month-year-display {
   font-size: 16px;
   font-weight: 500;

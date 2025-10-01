@@ -400,24 +400,22 @@ function App() {
             <h2>Settings</h2>
             <div className="settings-group">
               <h3>Account Starting Balance</h3>
-              <div className="settings-buttons">
-                <input
-                  type="number"
-                  step="0.01"
-                  value={accountStartingBalance}
-                  onChange={(e) => handleUpdateAccountStartingBalance(parseFloat(e.target.value) || 0)}
-                  placeholder="Enter account starting balance"
-                  className="account-balance-input"
-                />
-                <p className="settings-description">
-                  This is your account balance when you started tracking. Monthly balances will be calculated automatically.
-                </p>
-              </div>
+              <input
+                type="number"
+                step="0.01"
+                value={accountStartingBalance}
+                onChange={(e) => handleUpdateAccountStartingBalance(parseFloat(e.target.value) || 0)}
+                placeholder="Enter starting balance"
+                className="account-balance-input"
+              />
+              <p className="settings-description">
+                Your account balance when you started tracking. Monthly balances are calculated automatically.
+              </p>
             </div>
             <div className="settings-group">
               <h3>Bill Matching Criteria</h3>
               <p className="settings-description">
-                Configure how transactions are automatically matched to bills. These settings control when a transaction is considered a payment for a bill. Changes apply immediately to all bill matching.
+                Configure how transactions are automatically matched to bills. Changes apply immediately to all bill matching.
               </p>
               <div className="settings-buttons">
                 <div className="bill-matching-settings">
@@ -434,7 +432,7 @@ function App() {
                       })}
                       className="setting-input"
                     />
-                    <p className="setting-help">How much the transaction amount can differ from the bill amount (e.g., 5 = within $5). <strong>Lower values</strong> = stricter matching, fewer false positives. <strong>Higher values</strong> = more flexible, catches bills with varying amounts.</p>
+                    <p className="setting-help">How much the transaction amount can differ from the bill amount. Lower values = stricter matching, higher values = more flexible.</p>
                   </div>
 
                   <div className="setting-row">
@@ -450,7 +448,7 @@ function App() {
                       })}
                       className="setting-input"
                     />
-                    <p className="setting-help">How many days before/after the due date to look for matching transactions. <strong>Smaller window</strong> = only matches transactions very close to due date. <strong>Larger window</strong> = catches early or late payments.</p>
+                    <p className="setting-help">How many days before or after the due date to look for matching transactions. Smaller window = stricter, larger window = more flexible.</p>
                   </div>
 
                   <div className="setting-row">
@@ -466,7 +464,7 @@ function App() {
                       })}
                       className="setting-input"
                     />
-                    <p className="setting-help">Controls overall match quality threshold. <strong>Higher scores (70-100)</strong> = very strict, only excellent matches. <strong>Lower scores (40-60)</strong> = more lenient, may include imperfect matches. Recommended: 60-80.</p>
+                    <p className="setting-help">Controls overall match quality threshold. Higher scores = very strict (excellent matches only), lower scores = more lenient. Recommended: 60-80.</p>
                   </div>
 
                   <div className="setting-row checkbox-row">
@@ -481,7 +479,7 @@ function App() {
                       />
                       Require Description Match
                     </label>
-                    <p className="setting-help">Transaction description must match bill name. <strong>Unchecked</strong> = allows matching by amount and date alone (not recommended, may cause incorrect matches).</p>
+                    <p className="setting-help">Transaction description must match bill name. Unchecked = allows matching by amount and date alone (not recommended).</p>
                   </div>
 
                   <div className="setting-row checkbox-row">
@@ -496,7 +494,7 @@ function App() {
                       />
                       Require Amount Match
                     </label>
-                    <p className="setting-help">Transaction amount must be within tolerance. <strong>Unchecked</strong> = matches even if amounts differ significantly (useful for bills with variable amounts).</p>
+                    <p className="setting-help">Transaction amount must be within tolerance. Unchecked = matches even if amounts differ significantly.</p>
                   </div>
 
                   <div className="setting-row checkbox-row">
@@ -511,7 +509,7 @@ function App() {
                       />
                       Require Date Window
                     </label>
-                    <p className="setting-help">Transaction must be within date window of due date. <strong>Unchecked</strong> = matches transactions from any date (useful for finding missed historical payments).</p>
+                    <p className="setting-help">Transaction must be within date window of due date. Unchecked = matches transactions from any date.</p>
                   </div>
                 </div>
                 <div className="settings-impact-note">
