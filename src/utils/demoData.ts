@@ -104,11 +104,13 @@ export function generateDemoData(): Transaction[] {
     for (let i = 0; i < transactionCount; i++) {
       const template = demoTransactions[Math.floor(Math.random() * demoTransactions.length)];
       const amount = getRandomAmount(template.amountRange);
+      // Income is positive, expenses are negative
+      const finalAmount = template.category === 'Income' ? amount : -amount;
 
       transactions.push({
         date: getRandomDate(year, month),
         description: template.description,
-        amount: amount,
+        amount: finalAmount,
         category: template.category,
         merchantName: template.description.split(' ')[0],
         memo: '',
@@ -121,7 +123,7 @@ export function generateDemoData(): Transaction[] {
     transactions.push({
       date: getRandomDate(year, month),
       description: 'PROPERTY MANAGEMENT RENT',
-      amount: 1500,
+      amount: -1500,
       category: 'Housing',
       merchantName: 'Property Management',
       memo: 'Monthly rent',
@@ -132,7 +134,7 @@ export function generateDemoData(): Transaction[] {
     transactions.push({
       date: getRandomDate(year, month),
       description: 'COMCAST INTERNET',
-      amount: 79.99,
+      amount: -79.99,
       category: 'Bills & Fees',
       merchantName: 'Comcast',
       memo: '',
@@ -143,7 +145,7 @@ export function generateDemoData(): Transaction[] {
     transactions.push({
       date: getRandomDate(year, month),
       description: 'VERIZON WIRELESS',
-      amount: 85,
+      amount: -85,
       category: 'Bills & Fees',
       merchantName: 'Verizon',
       memo: '',

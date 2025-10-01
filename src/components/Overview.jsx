@@ -364,7 +364,8 @@ function Overview({
                   const category = categoryObj.name
                   const color = getCategoryColor(category, categories)
                   const budgeted = categoryObj.budgeted || 0
-                  const spent = Math.abs(summary.categoryBreakdown[category] || 0)
+                  const categoryAmount = summary.categoryBreakdown[category] || 0
+                  const spent = categoryAmount < 0 ? Math.abs(categoryAmount) : 0
                   const difference = budgeted - spent
                   const isOverBudget = difference < 0
 
