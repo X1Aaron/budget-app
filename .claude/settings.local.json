@@ -26,7 +26,9 @@
       "Bash(curl:*)",
       "Bash(echo \"Test script to check localStorage - needs to run in browser console:\nlocalStorage.getItem(''bills'')\")",
       "Bash(npm run build:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(node:*)",
+      "Bash(npx tsx:*)"
     ],
     "deny": [],
     "ask": []
