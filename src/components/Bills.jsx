@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import './Bills.css'
+import { generateBillOccurrences } from '../utils/billMatching'
 
 function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange, categories }) {
   const [isAdding, setIsAdding] = useState(false)
@@ -93,19 +94,25 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
   const handleTogglePaid = (billId, occurrenceDate) => {
     const updatedBills = bills.map(bill => {
       if (bill.id === billId) {
-        const paidDates = bill.paidDates || []
-        const isPaid = paidDates.includes(occurrenceDate)
+        // Use new payments structure
+        const payments = bill.payments || []
+        const existingPayment = payments.find(p => p.occurrenceDate === occurrenceDate)
 
-        if (isPaid) {
+        if (existingPayment) {
+          // Remove payment
           return {
             ...bill,
-            paidDates: paidDates.filter(date => date !== occurrenceDate)
+            payments: payments.filter(p => p.occurrenceDate !== occurrenceDate)
           }
         } else {
+          // Add manual payment
           cashRegisterSound.play().catch(err => console.log('Sound play failed:', err))
           return {
             ...bill,
-            paidDates: [...paidDates, occurrenceDate]
+            payments: [...payments, {
+              occurrenceDate,
+              manuallyMarked: true
+            }]
           }
         }
       }
@@ -129,81 +136,23 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
   }
 
   const generateRecurringBills = useMemo(() => {
+    // Use the new utility function to generate bill occurrences
+    const startYear = selectedYear
+    const endYear = selectedYear + 1
     const recurringBills = []
 
-    bills.forEach(bill => {
-      const [year, month, day] = bill.dueDate.split('-').map(Number)
-      const startDate = new Date(year, month - 1, day)
-      const billYear = startDate.getFullYear()
-      const billMonth = startDate.getMonth()
-      const billDay = startDate.getDate()
-
-      if (bill.frequency === 'one-time') {
-        recurringBills.push({
-          ...bill,
-          occurrenceDate: bill.dueDate,
-          isPaid: (bill.paidDates || []).includes(bill.dueDate)
-        })
-      } else {
-        const startYear = Math.min(billYear, selectedYear)
-        const endYear = Math.max(billYear, selectedYear + 1)
-
-        for (let year = startYear; year <= endYear; year++) {
-          if (bill.frequency === 'yearly') {
-            const date = new Date(year, billMonth, billDay)
-            const occurrenceDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-            if (date >= startDate) {
-              recurringBills.push({
-                ...bill,
-                occurrenceDate,
-                isPaid: (bill.paidDates || []).includes(occurrenceDate)
-              })
-            }
-          } else if (bill.frequency === 'monthly') {
-            for (let month = 0; month < 12; month++) {
-              const date = new Date(year, month, billDay)
-              const occurrenceDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-              if (date >= startDate) {
-                recurringBills.push({
-                  ...bill,
-                  occurrenceDate,
-                  isPaid: (bill.paidDates || []).includes(occurrenceDate)
-                })
-              }
-            }
-          } else if (bill.frequency === 'quarterly') {
-            for (let quarter = 0; quarter < 4; quarter++) {
-              const month = billMonth + (quarter * 3)
-              if (month < 12) {
-                const date = new Date(year, month, billDay)
-                const occurrenceDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-                if (date >= startDate) {
-                  recurringBills.push({
-                    ...bill,
-                    occurrenceDate,
-                    isPaid: (bill.paidDates || []).includes(occurrenceDate)
-                  })
-                }
-              }
-            }
-          } else if (bill.frequency === 'weekly') {
-            const weekMs = 7 * 24 * 60 * 60 * 1000
-            let currentDate = new Date(startDate)
-            const endDate = new Date(endYear + 1, 0, 1)
-
-            while (currentDate < endDate) {
-              const occurrenceDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`
-              recurringBills.push({
-                ...bill,
-                occurrenceDate,
-                isPaid: (bill.paidDates || []).includes(occurrenceDate)
-              })
-              currentDate = new Date(currentDate.getTime() + weekMs)
-            }
-          }
-        }
+    // Generate occurrences for the entire year range
+    for (let year = startYear; year <= endYear; year++) {
+      for (let month = 0; month < 12; month++) {
+        const occurrences = generateBillOccurrences(bills, year, month)
+        recurringBills.push(...occurrences.map(occ => ({
+          ...bills.find(b => b.id === occ.billId),
+          occurrenceDate: occ.occurrenceDate,
+          isPaid: !!occ.payment,
+          payment: occ.payment
+        })))
       }
-    })
+    }
 
     return recurringBills
   }, [bills, selectedYear])
@@ -420,6 +369,26 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
                       {bill.category && <span className="bill-category">{bill.category}</span>}
                     </div>
                     {bill.memo && <div className="bill-memo">{bill.memo}</div>}
+                    {bill.payment && (
+                      <div className="bill-payment-info">
+                        {bill.payment.manuallyMarked ? (
+                          <span className="payment-manual" title="Manually marked as paid">
+                            ✓ Manually marked paid
+                          </span>
+                        ) : (
+                          <div className="payment-auto" title="Auto-matched to transaction">
+                            <div className="payment-auto-header">
+                              💰 Auto-matched to transaction:
+                            </div>
+                            <div className="payment-auto-details">
+                              <div><strong>Date:</strong> {bill.payment.transactionDate}</div>
+                              <div><strong>Amount:</strong> {formatCurrency(bill.payment.transactionAmount)}</div>
+                              <div><strong>Description:</strong> {bill.payment.transactionDescription}</div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className="bill-amount">{formatCurrency(bill.amount)}</div>
                   <div className="bill-actions">

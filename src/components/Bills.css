@@ -567,6 +567,51 @@
   font-size: 1.1rem;
 }
 
+/* Bill payment info */
+.bill-payment-info {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-radius: 6px;
+  border-left: 3px solid #10b981;
+  font-size: 0.85rem;
+}
+
+.payment-manual {
+  color: #047857;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.payment-auto {
+  color: #065f46;
+}
+
+.payment-auto-header {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #047857;
+  font-size: 0.875rem;
+}
+
+.payment-auto-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-left: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.payment-auto-details div {
+  color: #065f46;
+}
+
+.payment-auto-details strong {
+  color: #047857;
+  min-width: 90px;
+  display: inline-block;
+}
+
 @media (max-width: 768px) {
   .form-grid {
     grid-template-columns: 1fr;

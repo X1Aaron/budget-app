@@ -20,15 +20,26 @@ export interface Transaction {
   isBill?: boolean;
 }
 
+export interface BillPayment {
+  occurrenceDate: string; // YYYY-MM-DD format
+  transactionDate?: string; // Date of the transaction that paid this bill
+  transactionAmount?: number; // Amount of the transaction
+  transactionDescription?: string; // Description of the transaction
+  manuallyMarked?: boolean; // True if manually marked, false if auto-matched
+}
+
 export interface Bill {
   id: string;
   name: string;
   amount: number;
-  dueDate: number; // day of month
+  dueDate: string; // YYYY-MM-DD format (first occurrence date)
   category: string;
-  isRecurring: boolean;
-  frequency?: 'monthly' | 'quarterly' | 'yearly';
+  frequency?: 'monthly' | 'quarterly' | 'yearly' | 'weekly' | 'one-time';
   notes?: string;
+  memo?: string;
+  sourceDescription?: string; // Original transaction description that created this bill
+  paidDates?: string[]; // Legacy format - array of YYYY-MM-DD dates
+  payments?: BillPayment[]; // New format - detailed payment tracking
 }
 
 export interface MonthlyBudget {

@@ -843,3 +843,78 @@
 .total-amount.negative {
   color: #ef4444;
 }
+
+/* Bill matching indicators */
+.bill-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.bill-match-indicator {
+  font-size: 1rem;
+  cursor: help;
+  animation: billPulse 2s ease-in-out infinite;
+}
+
+@keyframes billPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.bill-match-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.transaction-row.bill-matched {
+  background: linear-gradient(to right, rgba(209, 250, 229, 0.3), transparent 50%);
+  border-left: 3px solid #10b981;
+}
+
+.transaction-row.bill-matched:hover {
+  background: linear-gradient(to right, rgba(209, 250, 229, 0.5), transparent 50%);
+}
+
+/* Bill match details section */
+.bill-match-section {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 2px solid #10b981;
+}
+
+.bill-match-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bill-match-row {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #065f46;
+  padding: 0.25rem 0;
+}
+
+.bill-match-row strong {
+  min-width: 150px;
+  color: #047857;
+}

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import './Spending.css'
 import { getCategoryColor } from '../utils/categories'
 import { calculateMonthStartingBalance } from '../utils/balanceCalculations'
+import { generateBillOccurrences, matchTransactionToBill } from '../utils/billMatching'
 
 function Spending({
   transactions,
@@ -42,6 +43,16 @@ function Spending({
     // Sort by date ascending for running balance calculation
     return filtered.sort((a, b) => new Date(a.date) - new Date(b.date))
   }, [transactions, selectedYear, selectedMonth])
+
+  // Generate bill occurrences and match transactions
+  const billMatches = useMemo(() => {
+    const billOccurrences = generateBillOccurrences(bills, selectedYear, selectedMonth)
+
+    return transactions.map((transaction, index) => {
+      const match = matchTransactionToBill(transaction, index, billOccurrences)
+      return match
+    })
+  }, [transactions, bills, selectedYear, selectedMonth])
 
   // Calculate starting balance for the current month
   const currentStartingBalance = useMemo(() => {
@@ -346,20 +357,31 @@ function Spending({
                 const isEditingMerchant = editingMerchantIndex === originalIndex
                 const isUncategorized = !transaction.category || transaction.category === 'Uncategorized'
 
+                // Get bill match info for this transaction
+                const billMatch = billMatches[originalIndex]
+                const isMatchedToBill = billMatch && billMatch.matchedBill && billMatch.matchScore >= 60
+
                 return (
                   <React.Fragment key={originalIndex}>
                     <tr
-                      className={`transaction-row ${transaction.amount < 0 ? 'expense' : 'income'}${isUncategorized ? ' uncategorized' : ''}${isExpanded ? ' expanded' : ''}`}
+                      className={`transaction-row ${transaction.amount < 0 ? 'expense' : 'income'}${isUncategorized ? ' uncategorized' : ''}${isExpanded ? ' expanded' : ''}${isMatchedToBill ? ' bill-matched' : ''}`}
                       onClick={() => setExpandedIndex(isExpanded ? null : originalIndex)}
                     >
                       <td className="bill-checkbox-cell" onClick={(e) => e.stopPropagation()}>
                         {transaction.amount < 0 && (
-                          <input
-                            type="checkbox"
-                            checked={isTransactionABill(transaction)}
-                            onChange={() => handleBillCheckbox(transaction, originalIndex)}
-                            title="Mark as recurring bill"
-                          />
+                          <div className="bill-checkbox-wrapper">
+                            <input
+                              type="checkbox"
+                              checked={isTransactionABill(transaction)}
+                              onChange={() => handleBillCheckbox(transaction, originalIndex)}
+                              title="Mark as recurring bill"
+                            />
+                            {isMatchedToBill && (
+                              <span className="bill-match-indicator" title={`Matched to bill: ${billMatch.matchedBill.billName} (score: ${billMatch.matchScore})`}>
+                                💰
+                              </span>
+                            )}
+                          </div>
                         )}
                       </td>
                       <td className="transaction-date">{transaction.date}</td>
@@ -392,6 +414,11 @@ function Spending({
                             title="Click to edit merchant name (updates all with same description)"
                           >
                             {transaction.merchantName || transaction.description}
+                            {isMatchedToBill && (
+                              <span className="bill-match-badge" title={`Bill: ${billMatch.matchedBill.billName}`}>
+                                📋 BILL
+                              </span>
+                            )}
                           </span>
                         )}
                       </td>
@@ -465,6 +492,37 @@ function Spending({
                                 rows="3"
                               />
                             </div>
+                            {isMatchedToBill && (
+                              <div className="detail-section bill-match-section">
+                                <label className="detail-label">Bill Match:</label>
+                                <div className="bill-match-info">
+                                  <div className="bill-match-row">
+                                    <strong>Bill:</strong> {billMatch.matchedBill.billName}
+                                  </div>
+                                  <div className="bill-match-row">
+                                    <strong>Due Date:</strong> {billMatch.matchedBill.occurrenceDate}
+                                  </div>
+                                  <div className="bill-match-row">
+                                    <strong>Expected Amount:</strong> {formatCurrency(-billMatch.matchedBill.billAmount)}
+                                  </div>
+                                  <div className="bill-match-row">
+                                    <strong>Match Score:</strong> {billMatch.matchScore}/100
+                                  </div>
+                                  <div className="bill-match-row">
+                                    <strong>Description Match:</strong> {billMatch.matchDetails.descriptionMatch ? '✓ Yes' : '✗ No'}
+                                  </div>
+                                  <div className="bill-match-row">
+                                    <strong>Amount Match:</strong> {billMatch.matchDetails.amountMatch ? '✓ Yes' : '✗ No'}
+                                  </div>
+                                  <div className="bill-match-row">
+                                    <strong>Date Proximity:</strong> {billMatch.matchDetails.dateProximity} days from due date
+                                  </div>
+                                  <div className="bill-match-row">
+                                    <strong>Within Window:</strong> {billMatch.matchDetails.withinWindow ? '✓ Yes (±7 days)' : '✗ No'}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </td>
                       </tr>

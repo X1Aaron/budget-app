@@ -11,6 +11,7 @@ import ImportButton from './components/ImportButton.jsx';
 import MonthYearSelector from './components/MonthYearSelector.jsx';
 import { DEFAULT_CATEGORIES, autoCategorize, generateMerchantName } from './utils/categories';
 import { generateDemoData } from './utils/demoData';
+import { updateBillsWithTransactionMatches } from './utils/billMatching';
 import type {
   Transaction,
   Category,
@@ -93,6 +94,24 @@ function App() {
       localStorage.setItem('transactions', JSON.stringify(transactions));
     }
   }, [transactions]);
+
+  // Auto-match transactions to bills
+  useEffect(() => {
+    if (transactions.length > 0 && bills.length > 0) {
+      const updatedBills = updateBillsWithTransactionMatches(
+        bills,
+        transactions,
+        selectedYear,
+        selectedMonth
+      );
+
+      // Only update if there are actual changes
+      const hasChanges = JSON.stringify(updatedBills) !== JSON.stringify(bills);
+      if (hasChanges) {
+        setBills(updatedBills);
+      }
+    }
+  }, [transactions, bills.length, selectedYear, selectedMonth]); // Depend on bills.length not bills to avoid infinite loop
 
   const handleImport = (importedTransactions: Transaction[], existingTransactions: Transaction[] = transactions) => {
     // Check for duplicate transactions
