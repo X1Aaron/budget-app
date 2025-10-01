@@ -36,11 +36,11 @@ function CSVImport({ onImport }) {
         date: values[dateIndex],
         description: values[descIndex],
         amount: parseFloat(values[amountIndex]),
-        category: categoryIndex !== -1 ? values[categoryIndex] : 'Uncategorized',
-        needWant: needWantIndex !== -1 ? values[needWantIndex] : undefined,
-        autoCategorized: autoCategorizedIndex !== -1 ? (values[autoCategorizedIndex] === 'true') : false,
-        merchantName: merchantNameIndex !== -1 ? values[merchantNameIndex] : (friendlyNameIndex !== -1 ? values[friendlyNameIndex] : values[descIndex]),
-        memo: memoIndex !== -1 ? values[memoIndex] : ''
+        category: categoryIndex !== -1 && values[categoryIndex] ? values[categoryIndex] : 'Uncategorized',
+        needWant: needWantIndex !== -1 && values[needWantIndex] ? values[needWantIndex] : undefined,
+        autoCategorized: autoCategorizedIndex !== -1 && values[autoCategorizedIndex] ? (values[autoCategorizedIndex] === 'true') : false,
+        merchantName: merchantNameIndex !== -1 && values[merchantNameIndex] ? values[merchantNameIndex] : (friendlyNameIndex !== -1 && values[friendlyNameIndex] ? values[friendlyNameIndex] : values[descIndex]),
+        memo: memoIndex !== -1 && values[memoIndex] ? values[memoIndex] : ''
       }
 
       if (!isNaN(transaction.amount)) {
