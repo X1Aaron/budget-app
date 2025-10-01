@@ -22,6 +22,15 @@ function SpendingAndBills({
   const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'asc' })
   const [billFormData, setBillFormData] = useState(null)
   const [billModalOpen, setBillModalOpen] = useState(false)
+  const [addTransactionModalOpen, setAddTransactionModalOpen] = useState(false)
+  const [importModalOpen, setImportModalOpen] = useState(false)
+  const [transactionFormData, setTransactionFormData] = useState({
+    date: '',
+    description: '',
+    amount: '',
+    category: '',
+    memo: ''
+  })
 
   const cashRegisterSound = useMemo(() => new Audio('/cash-register.mp3'), [])
 
@@ -221,6 +230,73 @@ function SpendingAndBills({
     setBillFormData(null)
   }
 
+  const handleAddTransaction = () => {
+    if (!transactionFormData.date || !transactionFormData.description || !transactionFormData.amount) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    const newTransaction = {
+      id: Date.now(),
+      date: transactionFormData.date,
+      description: transactionFormData.description,
+      merchantName: transactionFormData.description,
+      amount: parseFloat(transactionFormData.amount),
+      category: transactionFormData.category || 'Uncategorized',
+      memo: transactionFormData.memo || '',
+      autoCategorized: false
+    }
+
+    // Add to transactions array
+    onUpdateTransaction(transactions.length, newTransaction)
+
+    // Reset form and close modal
+    setTransactionFormData({
+      date: '',
+      description: '',
+      amount: '',
+      category: '',
+      memo: ''
+    })
+    setAddTransactionModalOpen(false)
+  }
+
+  const handleOpenAddBillModal = () => {
+    // Pre-fill with current month's date
+    const today = new Date()
+    const currentDate = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
+    setBillFormData({
+      name: '',
+      amount: '',
+      dueDate: currentDate,
+      frequency: 'monthly',
+      category: '',
+      memo: '',
+      paidDates: []
+    })
+    setBillModalOpen(true)
+  }
+
+  const handleOpenAddTransactionModal = () => {
+    // Pre-fill with current month's date
+    const today = new Date()
+    const currentDate = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
+    setTransactionFormData({
+      date: currentDate,
+      description: '',
+      amount: '',
+      category: '',
+      memo: ''
+    })
+    setAddTransactionModalOpen(true)
+  }
+
+  const handleImport = () => {
+    setImportModalOpen(true)
+  }
+
   const isTransactionABill = (transaction) => {
     return bills.some(b =>
       b.sourceDescription === transaction.description ||
@@ -359,10 +435,131 @@ function SpendingAndBills({
         </div>
       )}
 
+      {/* Add Transaction Modal */}
+      {addTransactionModalOpen && (
+        <div className="bill-modal-backdrop" onClick={() => setAddTransactionModalOpen(false)}>
+          <div className="bill-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Add Transaction</h3>
+            <div className="bill-modal-form">
+              <div className="form-group">
+                <label>Date *</label>
+                <input
+                  type="date"
+                  value={transactionFormData.date}
+                  onChange={(e) => setTransactionFormData({ ...transactionFormData, date: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Description *</label>
+                <input
+                  type="text"
+                  value={transactionFormData.description}
+                  onChange={(e) => setTransactionFormData({ ...transactionFormData, description: e.target.value })}
+                  placeholder="e.g., Grocery Store"
+                />
+              </div>
+              <div className="form-group">
+                <label>Amount *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={transactionFormData.amount}
+                  onChange={(e) => setTransactionFormData({ ...transactionFormData, amount: e.target.value })}
+                  placeholder="Use negative for expenses"
+                />
+              </div>
+              <div className="form-group">
+                <label>Category</label>
+                <select
+                  value={transactionFormData.category}
+                  onChange={(e) => setTransactionFormData({ ...transactionFormData, category: e.target.value })}
+                >
+                  <option value="">Select a category</option>
+                  {categories && [...categories]
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map(cat => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Memo</label>
+                <textarea
+                  value={transactionFormData.memo}
+                  onChange={(e) => setTransactionFormData({ ...transactionFormData, memo: e.target.value })}
+                  placeholder="Optional note"
+                  rows="2"
+                />
+              </div>
+            </div>
+            <div className="bill-modal-actions">
+              <button className="cancel-btn" onClick={() => setAddTransactionModalOpen(false)}>
+                Cancel
+              </button>
+              <button className="save-btn" onClick={handleAddTransaction}>
+                Add Transaction
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import Modal */}
+      {importModalOpen && (
+        <div className="bill-modal-backdrop" onClick={() => setImportModalOpen(false)}>
+          <div className="bill-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Import Transactions</h3>
+            <div className="bill-modal-form">
+              <p>Upload a CSV file with your transactions. The file should include columns for date, description, and amount.</p>
+              <div className="form-group">
+                <label>CSV File</label>
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={(e) => {
+                    // TODO: Implement CSV import functionality
+                    console.log('File selected:', e.target.files[0])
+                  }}
+                />
+              </div>
+              <div className="import-help">
+                <p><strong>Expected format:</strong></p>
+                <ul>
+                  <li>Date (YYYY-MM-DD format)</li>
+                  <li>Description</li>
+                  <li>Amount (negative for expenses, positive for income)</li>
+                </ul>
+              </div>
+            </div>
+            <div className="bill-modal-actions">
+              <button className="cancel-btn" onClick={() => setImportModalOpen(false)}>
+                Cancel
+              </button>
+              <button className="save-btn" disabled>
+                Import (Coming Soon)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="timeline-section">
         <div className="timeline-header">
           <h2>Spending & Bills - {monthNames[selectedMonth]} {selectedYear}</h2>
           <div className="header-controls">
+            <div className="action-buttons">
+              <button className="action-btn add-transaction-btn" onClick={handleOpenAddTransactionModal}>
+                + Transaction
+              </button>
+              <button className="action-btn add-bill-btn" onClick={handleOpenAddBillModal}>
+                + Bill
+              </button>
+              <button className="action-btn import-btn" onClick={handleImport}>
+                ⬆ Import
+              </button>
+            </div>
             <div className="starting-balance-display">
               <span className="starting-balance-label">Starting Balance:</span>
               <span className="starting-balance-value">{formatCurrency(currentStartingBalance)}</span>

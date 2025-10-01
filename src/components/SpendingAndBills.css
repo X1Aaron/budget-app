@@ -98,6 +98,36 @@
   background: #2563eb;
 }
 
+.bill-modal-actions .save-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.import-help {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+}
+
+.import-help p {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+  color: #374151;
+}
+
+.import-help ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #6b7280;
+}
+
+.import-help li {
+  margin: 0.25rem 0;
+}
+
 /* Timeline Section */
 .timeline-section {
   background: var(--card-bg);
@@ -125,6 +155,63 @@
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.action-btn {
+  padding: 0.625rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.action-btn.add-transaction-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.action-btn.add-transaction-btn:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+  transform: translateY(-1px);
+}
+
+.action-btn.add-bill-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.action-btn.add-bill-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.action-btn.import-btn {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);
+}
+
+.action-btn.import-btn:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.action-btn:active {
+  transform: translateY(0);
 }
 
 .starting-balance-display {
