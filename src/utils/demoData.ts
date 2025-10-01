@@ -3,21 +3,21 @@ import type { Transaction, Bill } from '../types';
 // Demo merchant data with realistic descriptions and categories
 const demoTransactions = [
   // Groceries
-  { description: 'WHOLE FOODS MARKET #12345', category: 'Groceries', amountRange: [50, 150] },
-  { description: 'TRADER JOES #456', category: 'Groceries', amountRange: [30, 80] },
-  { description: 'SAFEWAY STORE 1234', category: 'Groceries', amountRange: [40, 120] },
-  { description: 'COSTCO WHOLESALE #789', category: 'Groceries', amountRange: [100, 300] },
-  { description: 'TARGET STORE T-2345', category: 'Groceries', amountRange: [25, 75] },
+  { description: 'WHOLE FOODS MARKET #12345', category: 'Food & Dining', amountRange: [50, 150] },
+  { description: 'TRADER JOES #456', category: 'Food & Dining', amountRange: [30, 80] },
+  { description: 'SAFEWAY STORE 1234', category: 'Food & Dining', amountRange: [40, 120] },
+  { description: 'COSTCO WHOLESALE #789', category: 'Food & Dining', amountRange: [100, 300] },
+  { description: 'TARGET STORE T-2345', category: 'Food & Dining', amountRange: [25, 75] },
 
   // Dining
-  { description: 'STARBUCKS STORE 12345', category: 'Dining Out', amountRange: [5, 15] },
-  { description: 'CHIPOTLE MEXICAN GRILL', category: 'Dining Out', amountRange: [10, 25] },
-  { description: 'PANERA BREAD #1234', category: 'Dining Out', amountRange: [12, 30] },
-  { description: 'SUBWAY 12345', category: 'Dining Out', amountRange: [8, 15] },
-  { description: 'OLIVE GARDEN #456', category: 'Dining Out', amountRange: [30, 60] },
-  { description: 'PIZZA HUT 12345', category: 'Dining Out', amountRange: [15, 35] },
-  { description: 'MCDONALDS F12345', category: 'Dining Out', amountRange: [8, 20] },
-  { description: 'TACO BELL #12345', category: 'Dining Out', amountRange: [10, 20] },
+  { description: 'STARBUCKS STORE 12345', category: 'Food & Dining', amountRange: [5, 15] },
+  { description: 'CHIPOTLE MEXICAN GRILL', category: 'Food & Dining', amountRange: [10, 25] },
+  { description: 'PANERA BREAD #1234', category: 'Food & Dining', amountRange: [12, 30] },
+  { description: 'SUBWAY 12345', category: 'Food & Dining', amountRange: [8, 15] },
+  { description: 'OLIVE GARDEN #456', category: 'Food & Dining', amountRange: [30, 60] },
+  { description: 'PIZZA HUT 12345', category: 'Food & Dining', amountRange: [15, 35] },
+  { description: 'MCDONALDS F12345', category: 'Food & Dining', amountRange: [8, 20] },
+  { description: 'TACO BELL #12345', category: 'Food & Dining', amountRange: [10, 20] },
 
   // Transportation
   { description: 'SHELL OIL 12345678', category: 'Transportation', amountRange: [40, 80] },
@@ -43,10 +43,10 @@ const demoTransactions = [
   { description: 'MACYS #1234', category: 'Shopping', amountRange: [30, 150] },
 
   // Utilities
-  { description: 'PG&E UTILITY PAYMENT', category: 'Utilities', amountRange: [80, 150] },
-  { description: 'COMCAST CABLE COMM', category: 'Utilities', amountRange: [60, 120] },
-  { description: 'AT&T WIRELESS', category: 'Utilities', amountRange: [50, 100] },
-  { description: 'VERIZON WIRELESS', category: 'Utilities', amountRange: [60, 110] },
+  { description: 'PG&E UTILITY PAYMENT', category: 'Bills & Fees', amountRange: [80, 150] },
+  { description: 'COMCAST CABLE COMM', category: 'Bills & Fees', amountRange: [60, 120] },
+  { description: 'AT&T WIRELESS', category: 'Bills & Fees', amountRange: [50, 100] },
+  { description: 'VERIZON WIRELESS', category: 'Bills & Fees', amountRange: [60, 110] },
 
   // Healthcare
   { description: 'WALGREENS #12345', category: 'Healthcare', amountRange: [10, 50] },
@@ -75,11 +75,11 @@ function getRandomDay(): number {
 
 // Demo bill templates
 const demoBillTemplates = [
-  { name: 'Electric Bill', category: 'Utilities', amountRange: [80, 150], frequency: 'monthly' as const },
-  { name: 'Water Bill', category: 'Utilities', amountRange: [40, 80], frequency: 'monthly' as const },
-  { name: 'Internet Service', category: 'Utilities', amountRange: [60, 120], frequency: 'monthly' as const },
-  { name: 'Phone Bill', category: 'Utilities', amountRange: [50, 100], frequency: 'monthly' as const },
-  { name: 'Gym Membership', category: 'Healthcare', amountRange: [30, 80], frequency: 'monthly' as const },
+  { name: 'Electric Bill', category: 'Bills & Fees', amountRange: [80, 150], frequency: 'monthly' as const },
+  { name: 'Water Bill', category: 'Bills & Fees', amountRange: [40, 80], frequency: 'monthly' as const },
+  { name: 'Internet Service', category: 'Bills & Fees', amountRange: [60, 120], frequency: 'monthly' as const },
+  { name: 'Phone Bill', category: 'Bills & Fees', amountRange: [50, 100], frequency: 'monthly' as const },
+  { name: 'Gym Membership', category: 'Personal Care', amountRange: [30, 80], frequency: 'monthly' as const },
   { name: 'Streaming Service', category: 'Entertainment', amountRange: [10, 20], frequency: 'monthly' as const },
   { name: 'Car Insurance', category: 'Transportation', amountRange: [100, 200], frequency: 'monthly' as const },
   { name: 'Rent/Mortgage', category: 'Housing', amountRange: [1200, 2000], frequency: 'monthly' as const },
@@ -133,7 +133,7 @@ export function generateDemoData(): Transaction[] {
       date: getRandomDate(year, month),
       description: 'COMCAST INTERNET',
       amount: 79.99,
-      category: 'Utilities',
+      category: 'Bills & Fees',
       merchantName: 'Comcast',
       memo: '',
       autoCategorized: false
@@ -144,7 +144,7 @@ export function generateDemoData(): Transaction[] {
       date: getRandomDate(year, month),
       description: 'VERIZON WIRELESS',
       amount: 85,
-      category: 'Utilities',
+      category: 'Bills & Fees',
       merchantName: 'Verizon',
       memo: '',
       autoCategorized: false
