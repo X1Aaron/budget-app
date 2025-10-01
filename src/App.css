@@ -130,6 +130,30 @@
   margin-bottom: 1rem;
 }
 
+.demo-data-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-size: 0.95rem;
+}
+
+.demo-data-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.4);
+}
+
+.settings-description {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0 0;
+  max-width: 600px;
+}
+
 @media (max-width: 768px) {
   .header-top {
     flex-direction: column;

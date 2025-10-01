@@ -35,7 +35,7 @@
   right: 0;
   bottom: 0;
   background: transparent;
-  z-index: 999;
+  z-index: 9999;
 }
 
 .export-menu {
@@ -46,7 +46,7 @@
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   min-width: 280px;
-  z-index: 1000;
+  z-index: 10000;
   overflow: visible;
 }
 
@@ -95,7 +95,7 @@
   min-width: 120px;
   margin-left: 0.5rem;
   overflow: hidden;
-  z-index: 1001;
+  z-index: 10001;
 }
 
 .export-submenu-item {

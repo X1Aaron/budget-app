@@ -10,6 +10,7 @@ import ExportButton from './components/ExportButton.jsx';
 import ImportButton from './components/ImportButton.jsx';
 import MonthYearSelector from './components/MonthYearSelector.jsx';
 import { DEFAULT_CATEGORIES, autoCategorize, generateMerchantName } from './utils/categories';
+import { generateDemoData } from './utils/demoData';
 import type {
   Transaction,
   Category,
@@ -263,6 +264,14 @@ function App() {
     alert('Rules imported successfully!');
   };
 
+  const handleImportDemoData = () => {
+    if (confirm('This will replace all existing transactions with demo data. Are you sure?')) {
+      const demoTransactions = generateDemoData();
+      setTransactions(demoTransactions);
+      alert(`Successfully imported ${demoTransactions.length} demo transactions for the past 12 months!`);
+    }
+  };
+
   return (
     <div className="app">
       <header className="app-header">
@@ -391,6 +400,17 @@ function App() {
               <h3>Import CSV</h3>
               <div className="settings-buttons">
                 <CSVImport onImport={handleImport} />
+              </div>
+            </div>
+            <div className="settings-group">
+              <h3>Demo Data</h3>
+              <div className="settings-buttons">
+                <button className="demo-data-btn" onClick={handleImportDemoData}>
+                  Import Demo Data
+                </button>
+                <p className="settings-description">
+                  Import sample transaction data for the past 12 months to explore the app's features.
+                </p>
               </div>
             </div>
           </div>
