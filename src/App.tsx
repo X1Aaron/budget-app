@@ -12,6 +12,7 @@ import MonthYearSelector from './components/MonthYearSelector.jsx';
 import { DEFAULT_CATEGORIES, autoCategorize, generateMerchantName } from './utils/categories';
 import { generateDemoData } from './utils/demoData';
 import { updateBillsWithTransactionMatches } from './utils/billMatching';
+import { useTheme } from './contexts/ThemeContext';
 import type {
   Transaction,
   Category,
@@ -23,6 +24,7 @@ import type {
 } from './types';
 
 function App() {
+  const { theme, toggleTheme } = useTheme();
   const [activeSection, setActiveSection] = useState<ActiveSection>('overview');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
@@ -368,6 +370,9 @@ function App() {
           />
           <div className="header-controls">
             <div className="header-actions">
+              <button onClick={toggleTheme} className="theme-toggle" title="Toggle dark mode">
+                {theme === 'light' ? '🌙' : '☀️'}
+              </button>
               <ImportButton
                 activeSection={activeSection}
                 onImportTransactions={handleImportTransactions}

@@ -3,7 +3,7 @@
 }
 
 .import-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -12,11 +12,11 @@
 .import-card h2 {
   font-size: 1.3rem;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .import-description {
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 1.5rem;
   font-size: 0.95rem;
 }
@@ -56,7 +56,7 @@
 }
 
 .file-name {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -80,17 +80,17 @@
 .example-format strong {
   display: block;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .example-format pre {
-  background: #fff;
+  background: var(--card-bg);
   padding: 0.75rem;
   border-radius: 4px;
   overflow-x: auto;
   font-size: 0.85rem;
-  color: #555;
-  border: 1px solid #e5e7eb;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
 }
 
 @media (max-width: 768px) {

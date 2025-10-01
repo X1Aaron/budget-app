@@ -7,7 +7,7 @@
 .overview-empty {
   text-align: center;
   padding: 3rem;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 1.1rem;
 }
 
@@ -17,7 +17,7 @@
   justify-content: center;
   gap: 1rem;
   margin-bottom: 2rem;
-  background: white;
+  background: var(--card-bg);
   padding: 1rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -26,7 +26,7 @@
 .month-display {
   margin: 0;
   font-size: 1.5rem;
-  color: #111827;
+  color: var(--text-primary);
   min-width: 250px;
   text-align: center;
 }
@@ -54,7 +54,7 @@
 }
 
 .budget-card {
-  background: white;
+  background: var(--card-bg);
   padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -62,7 +62,7 @@
 
 .budget-card h3 {
   margin: 0 0 0.5rem 0;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
   text-transform: uppercase;
 }
@@ -148,7 +148,7 @@
 }
 
 .summary-card {
-  background: white;
+  background: var(--card-bg);
   padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -156,7 +156,7 @@
 
 .summary-card h3 {
   margin: 0 0 0.5rem 0;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
   text-transform: uppercase;
 }
@@ -188,7 +188,7 @@
 }
 
 .upcoming-bills-section {
-  background: white;
+  background: var(--card-bg);
   padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -198,7 +198,7 @@
 .upcoming-bills-section h2 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .upcoming-bills-list {
@@ -230,7 +230,7 @@
 .upcoming-bill-item .bill-name {
   font-size: 1rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
 }
 
@@ -247,7 +247,7 @@
 }
 
 .categories-section {
-  background: white;
+  background: var(--card-bg);
   padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -257,7 +257,7 @@
 .categories-section h2 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .categories-list {
@@ -267,7 +267,7 @@
 
 .category-card {
   padding: 1.25rem;
-  background: white;
+  background: var(--card-bg);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -289,7 +289,7 @@
 .category-name {
   font-weight: 700;
   font-size: 1.1rem;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .category-details {
@@ -321,7 +321,7 @@
 .stat-value {
   font-weight: 700;
   font-size: 1rem;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .stat-value.no-budget {
@@ -356,7 +356,7 @@
   border-radius: 6px;
   overflow: visible;
   position: relative;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
 }
 
 .progress-fill {
@@ -474,7 +474,7 @@
 
 .categories-table thead {
   background: #f3f4f6;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--border-color);
 }
 
 .categories-table th {
@@ -488,7 +488,7 @@
 }
 
 .categories-table tbody tr {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
   transition: background 0.15s;
 }
 
@@ -507,7 +507,7 @@
 }
 
 .spent-cell {
-  color: #111827;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -538,7 +538,7 @@
 }
 
 .cash-flow-section {
-  background: white;
+  background: var(--card-bg);
   padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -548,5 +548,5 @@
 .cash-flow-section h2 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: #333;
+  color: var(--text-primary);
 }

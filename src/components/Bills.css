@@ -14,7 +14,7 @@
   justify-content: center;
   gap: 1rem;
   margin-bottom: 2rem;
-  background: white;
+  background: var(--card-bg);
   padding: 1rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -23,7 +23,7 @@
 .year-display {
   margin: 0;
   font-size: 1.8rem;
-  color: #111827;
+  color: var(--text-primary);
   min-width: 150px;
   text-align: center;
 }
@@ -70,7 +70,7 @@
 }
 
 .monthly-breakdown {
-  background: white;
+  background: var(--card-bg);
   padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -80,7 +80,7 @@
 .monthly-breakdown h2 {
   margin-top: 0;
   margin-bottom: 1.5rem;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .months-grid {
@@ -92,7 +92,7 @@
 .month-card {
   padding: 1rem;
   background: #f9fafb;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 8px;
   text-align: center;
   transition: all 0.2s;
@@ -135,7 +135,7 @@
   margin: 0.5rem 0;
   font-size: 1.4rem;
   font-weight: bold;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .month-card.has-bills .month-total {
@@ -156,7 +156,7 @@
 }
 
 .bills-summary .summary-card {
-  background: white;
+  background: var(--card-bg);
   padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -164,7 +164,7 @@
 
 .bills-summary .summary-card h3 {
   margin: 0 0 0.5rem 0;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
   text-transform: uppercase;
 }
@@ -184,7 +184,7 @@
 }
 
 .bills-section {
-  background: white;
+  background: var(--card-bg);
   padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -199,7 +199,7 @@
 
 .bills-header h2 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .bills-header-actions {
@@ -286,13 +286,13 @@
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
 }
 
 .bill-form h3 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .form-grid {
@@ -322,10 +322,10 @@
 .form-group select,
 .form-group textarea {
   padding: 0.6rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 1rem;
-  background: white;
+  background: var(--card-bg);
   font-family: inherit;
 }
 
@@ -375,7 +375,7 @@
 .bills-empty {
   text-align: center;
   padding: 3rem;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 1.1rem;
 }
 
@@ -391,7 +391,7 @@
   gap: 1rem;
   padding: 1rem;
   background: #f9fafb;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 8px;
   transition: all 0.2s;
 }
@@ -443,7 +443,7 @@
 .bill-name {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
 }
 
@@ -488,7 +488,7 @@
 .bill-amount {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-primary);
   margin-right: 1rem;
 }
 
@@ -529,7 +529,7 @@
 
 .category-totals h3 {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1.1rem;
 }
 
@@ -545,7 +545,7 @@
   align-items: center;
   padding: 1rem;
   background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   transition: all 0.2s;
 }

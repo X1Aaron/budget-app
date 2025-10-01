@@ -60,11 +60,11 @@
 .add-form input[type="number"],
 .add-form select {
   padding: 0.75rem;
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.95rem;
   transition: all 0.2s ease;
-  background: white;
+  background: var(--card-bg);
 }
 
 .add-form input[type="text"]:focus,
@@ -89,7 +89,7 @@
 .input-color {
   width: 60px;
   height: 40px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   cursor: pointer;
 }
@@ -117,9 +117,9 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   padding: 0.75rem;
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid var(--border-color);
   border-radius: 8px;
-  background: white;
+  background: var(--card-bg);
   min-height: 48px;
   align-items: center;
   transition: all 0.2s ease;
@@ -282,8 +282,8 @@
 .categories-table-wrapper {
   overflow-x: auto;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  background: white;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
@@ -309,7 +309,7 @@
 }
 
 .categories-table tbody tr {
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-color);
   transition: all 0.15s ease;
 }
 
@@ -540,8 +540,8 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: white;
-  border: 2px solid #e5e7eb;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
   border-radius: 8px;
   transition: all 0.2s;
 }
@@ -595,7 +595,7 @@
 
 .rule-pattern {
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
   font-size: 0.95rem;
 }
@@ -747,7 +747,7 @@
 .inline-edit input[type="color"],
 .inline-edit select {
   padding: 0.4rem;
-  border: 1px solid #3b82f6;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 0.85rem;
 }

@@ -18,7 +18,7 @@
 }
 
 .bill-modal {
-  background: white;
+  background: var(--card-bg);
   border-radius: 8px;
   padding: 2rem;
   max-width: 500px;
@@ -55,7 +55,7 @@
 .bill-modal-form select,
 .bill-modal-form textarea {
   padding: 0.5rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 1rem;
 }
@@ -121,9 +121,9 @@
 .spending-empty {
   text-align: center;
   padding: 3rem;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 1.1rem;
-  background: white;
+  background: var(--card-bg);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -133,7 +133,7 @@
 }
 
 .starting-balance-header {
-  background: white;
+  background: var(--card-bg);
   padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -267,7 +267,7 @@
   justify-content: center;
   gap: 1rem;
   margin-bottom: 2rem;
-  background: white;
+  background: var(--card-bg);
   padding: 1rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -276,7 +276,7 @@
 .month-display {
   margin: 0;
   font-size: 1.5rem;
-  color: #111827;
+  color: var(--text-primary);
   min-width: 250px;
   text-align: center;
 }
@@ -352,27 +352,27 @@
   gap: 1rem;
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background: white;
+  background: var(--card-bg);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .spending-filters label {
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .category-filter-select {
   padding: 0.625rem 1rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.95rem;
-  background: white;
+  background: var(--card-bg);
   cursor: pointer;
   min-width: 200px;
   font-weight: 500;
   transition: all 0.2s ease;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .category-filter-select:hover {
@@ -411,7 +411,7 @@
 }
 
 .transactions-section {
-  background: white;
+  background: var(--card-bg);
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -426,7 +426,7 @@
 
 .transactions-header h2 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .header-controls {
@@ -437,7 +437,7 @@
 }
 
 .transaction-count {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
   white-space: nowrap;
 }
@@ -445,7 +445,7 @@
 .transactions-table-container {
   overflow-x: auto;
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
@@ -456,7 +456,7 @@
 }
 
 .transactions-table thead {
-  background: linear-gradient(to bottom, #ffffff, #f9fafb);
+  background: linear-gradient(to bottom, var(--card-bg), #f9fafb);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -469,8 +469,8 @@
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #6b7280;
-  border-bottom: 2px solid #e5e7eb;
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--border-color);
   white-space: nowrap;
 }
 
@@ -558,7 +558,7 @@
 
 .transaction-description {
   font-weight: 500;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .transaction-merchant-cell {
@@ -568,7 +568,7 @@
 
 .transaction-merchant {
   font-weight: 500;
-  color: #111827;
+  color: var(--text-primary);
   font-size: 0.95rem;
 }
 
@@ -593,7 +593,7 @@
   font-size: 0.95rem;
   font-weight: 500;
   transition: all 0.2s ease;
-  background: white;
+  background: var(--card-bg);
 }
 
 .merchant-name-input:focus {
@@ -607,9 +607,9 @@
   flex-direction: column;
   gap: 1.25rem;
   padding: 1rem;
-  background: white;
+  background: var(--card-bg);
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
 }
 
 .detail-section {
@@ -637,12 +637,12 @@
 
 .category-select-expanded {
   padding: 0.625rem 0.75rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.95rem;
   max-width: 300px;
   transition: all 0.2s ease;
-  background: white;
+  background: var(--card-bg);
 }
 
 .category-select-expanded:focus {
@@ -662,7 +662,7 @@
 .memo-input {
   width: 100%;
   padding: 0.875rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.95rem;
   font-family: inherit;
@@ -827,7 +827,7 @@
   gap: 1rem;
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 2px solid #e5e7eb;
+  border-top: 2px solid var(--border-color);
   font-size: 1.1rem;
   font-weight: 600;
 }

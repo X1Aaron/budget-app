@@ -33,7 +33,7 @@
 }
 
 .category-modal-content {
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
   max-width: 800px;
   width: 100%;
@@ -47,7 +47,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h2 {
@@ -60,7 +60,7 @@
   border: none;
   font-size: 2rem;
   cursor: pointer;
-  color: #666;
+  color: var(--text-secondary);
   padding: 0;
   width: 2rem;
   height: 2rem;
@@ -98,7 +98,7 @@
 .add-category-form input[type="text"],
 .add-category-form select {
   padding: 0.5rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 0.9rem;
 }
@@ -106,7 +106,7 @@
 .add-category-form input[type="color"] {
   width: 50px;
   height: 38px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   cursor: pointer;
 }
@@ -145,7 +145,7 @@
   background: #f9fafb;
   border-radius: 8px;
   padding: 1rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
 }
 
 .category-card-header {
@@ -188,7 +188,7 @@
   flex-direction: column;
   gap: 0.25rem;
   font-size: 0.85rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .category-type {

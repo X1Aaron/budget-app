@@ -56,7 +56,7 @@
   position: absolute;
   top: calc(100% + 0.5rem);
   right: 0;
-  background: white;
+  background: var(--card-bg);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   min-width: 280px;
@@ -66,7 +66,7 @@
 
 .import-menu-group {
   position: relative;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .import-menu-group:last-child {
@@ -79,7 +79,7 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem 1.25rem;
-  background: white;
+  background: var(--card-bg);
   transition: background 0.2s;
   text-align: left;
 }
@@ -96,14 +96,14 @@
 .submenu-arrow {
   margin-left: auto;
   font-size: 1.2rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .import-submenu {
   position: absolute;
   left: 100%;
   top: 0;
-  background: white;
+  background: var(--card-bg);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   min-width: 120px;
@@ -116,17 +116,17 @@
   width: 100%;
   padding: 0.75rem 1.25rem;
   border: none;
-  background: white;
+  background: var(--card-bg);
   cursor: pointer;
   transition: background 0.2s;
   text-align: left;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .import-submenu-item:hover:not(:disabled) {
   background: #3b82f6;
-  color: white;
+  color: var(--card-bg);
 }
 
 .import-submenu-item:disabled {
@@ -135,7 +135,7 @@
 }
 
 .import-submenu-item:not(:last-child) {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .menu-icon {
@@ -148,13 +148,13 @@
 
 .menu-title {
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
 }
 
 .menu-subtitle {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 768px) {
