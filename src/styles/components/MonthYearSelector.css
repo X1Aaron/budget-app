@@ -1,3 +1,9 @@
+.month-year-selector-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .month-year-selector {
   display: flex;
   align-items: center;
@@ -8,19 +14,9 @@
 }
 
 .calendar-today-btn {
-  position: relative;
-  margin-left: 4px;
-}
-
-.calendar-today-btn::before {
-  content: '';
-  position: absolute;
-  left: -10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 1px;
-  height: 24px;
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--bg-secondary);
+  padding: 8px 12px;
+  border-radius: 8px;
 }
 
 .month-year-display {

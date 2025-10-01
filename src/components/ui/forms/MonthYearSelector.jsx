@@ -28,16 +28,18 @@ function MonthYearSelector({ selectedYear, selectedMonth, onDateChange }) {
   }
 
   return (
-    <div className="month-year-selector">
-      <button className="month-nav-btn" onClick={handlePreviousMonth} title="Previous month">
-        ←
-      </button>
-      <span className="month-year-display">
-        {monthNames[selectedMonth]} {selectedYear}
-      </span>
-      <button className="month-nav-btn" onClick={handleNextMonth} title="Next month">
-        →
-      </button>
+    <div className="month-year-selector-wrapper">
+      <div className="month-year-selector">
+        <button className="month-nav-btn" onClick={handlePreviousMonth} title="Previous month">
+          ←
+        </button>
+        <span className="month-year-display">
+          {monthNames[selectedMonth]} {selectedYear}
+        </span>
+        <button className="month-nav-btn" onClick={handleNextMonth} title="Next month">
+          →
+        </button>
+      </div>
       <button className="month-nav-btn calendar-today-btn" onClick={handleGoToCurrentMonth} title="Go to current month">
         📅
       </button>
