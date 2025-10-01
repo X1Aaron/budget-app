@@ -77,14 +77,3 @@ export type ActiveSection =
   | 'categories'
   | 'auto-categorization'
   | 'settings';
-
-// Export/Import types
-export interface ExportData {
-  transactions?: Transaction[];
-  categories?: Category[];
-  rules?: {
-    merchantMappings: MerchantMapping;
-    categoryMappings: CategoryMapping;
-  };
-  bills?: Bill[];
-}

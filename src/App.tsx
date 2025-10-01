@@ -3,9 +3,7 @@ import './App.css';
 import { Overview } from './components/features/overview';
 import { Spending } from './components/features/transactions';
 import { Bills, SpendingAndBills } from './components/features/bills';
-import { CSVImport } from './components/features/transactions';
 import { CategorySettings, AutoCategorization } from './components/features/categories';
-import { ExportButton, ImportButton } from './components/ui/buttons';
 import { MonthYearSelector } from './components/ui/forms';
 import { DEFAULT_CATEGORIES, autoCategorize, generateMerchantName } from './utils/categories';
 import { generateDemoData } from './utils/demoData';
@@ -187,78 +185,6 @@ function App() {
     setTransactions(newTransactions);
   };
 
-  const handleImportTransactions = (importedTransactions: Transaction[]) => {
-    // Check for duplicate transactions
-    const duplicates: Transaction[] = [];
-    const newTransactions: Transaction[] = [];
-
-    importedTransactions.forEach(imported => {
-      const isDuplicate = transactions.some(existing =>
-        existing.date === imported.date &&
-        existing.description === imported.description &&
-        existing.amount === imported.amount
-      );
-
-      if (isDuplicate) {
-        duplicates.push(imported);
-      } else {
-        newTransactions.push(imported);
-      }
-    });
-
-    if (duplicates.length > 0) {
-      throw new Error(`Found ${duplicates.length} duplicate transaction${duplicates.length !== 1 ? 's' : ''} (same date, description, and amount). Import rejected to prevent duplicates.`);
-    }
-
-    const categorizedTransactions = newTransactions.map(t => {
-      const result = autoCategorize(t.description, t.amount, t.category, categories);
-      return {
-        ...t,
-        category: result.category,
-        autoCategorized: result.wasAutoCategorized,
-        merchantName: t.merchantName || t.friendlyName || generateMerchantName(t.description),
-        memo: t.memo || ''
-      };
-    });
-    setTransactions([...transactions, ...categorizedTransactions]);
-  };
-
-  const handleImportCategories = (importedCategories: Category[]) => {
-    // Merge imported categories with existing ones, avoiding duplicates by name
-    const existingNames = new Set(categories.map(c => c.name.toLowerCase()));
-    const newCategories = importedCategories.filter(
-      c => !existingNames.has(c.name.toLowerCase())
-    );
-    setCategories([...categories, ...newCategories]);
-  };
-
-  const handleImportBills = (importedBills: Bill[]) => {
-    // Merge imported bills with existing ones, avoiding duplicates
-    const duplicates: Bill[] = [];
-    const newBills: Bill[] = [];
-
-    importedBills.forEach(imported => {
-      const isDuplicate = bills.some(existing =>
-        existing.name === imported.name &&
-        existing.amount === imported.amount &&
-        existing.dueDate === imported.dueDate
-      );
-
-      if (isDuplicate) {
-        duplicates.push(imported);
-      } else {
-        newBills.push(imported);
-      }
-    });
-
-    if (duplicates.length > 0) {
-      throw new Error(`Found ${duplicates.length} duplicate bill${duplicates.length !== 1 ? 's' : ''} (same name, amount, and due date). Import rejected to prevent duplicates.`);
-    }
-
-    setBills([...bills, ...newBills]);
-  };
-
-
   const handleDateChange = (year: number, month: number) => {
     setSelectedYear(year);
     setSelectedMonth(month);
@@ -290,18 +216,6 @@ function App() {
       delete updated[description];
       return updated;
     });
-  };
-
-  const handleImportRules = (importedMerchantMappings: MerchantMapping, importedCategoryMappings: CategoryMapping) => {
-    setMerchantMappings(prev => ({
-      ...prev,
-      ...importedMerchantMappings
-    }));
-    setCategoryMappings(prev => ({
-      ...prev,
-      ...importedCategoryMappings
-    }));
-    alert('Rules imported successfully!');
   };
 
   const handleImportDemoData = () => {
@@ -397,21 +311,6 @@ function App() {
               <button onClick={toggleTheme} className="theme-toggle" title="Toggle dark mode">
                 {theme === 'light' ? '🌙' : '☀️'}
               </button>
-              <ImportButton
-                activeSection={activeSection}
-                onImportTransactions={handleImportTransactions}
-                onImportCategories={handleImportCategories}
-                onImportRules={handleImportRules}
-                onImportBills={handleImportBills}
-              />
-              <ExportButton
-                activeSection={activeSection}
-                transactions={transactions}
-                categories={categories}
-                merchantMappings={merchantMappings}
-                categoryMappings={categoryMappings}
-                bills={bills}
-              />
             </div>
           </div>
         </div>
