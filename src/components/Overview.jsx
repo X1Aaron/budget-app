@@ -386,8 +386,9 @@ function Overview({
                             <div className="progress-bar">
                               <div
                                 className={'progress-fill ' + (isOverBudget ? 'over-budget' : '')}
-                                style={{ width: `${Math.min((spent / budgeted) * 100, 100)}%` }}
+                                style={{ width: `${Math.min((spent / budgeted) * 100, 125) / 1.25}%` }}
                               ></div>
+                              <div className="progress-100-line"></div>
                             </div>
                             <span className="progress-text">
                               {Math.round((spent / budgeted) * 100)}%
