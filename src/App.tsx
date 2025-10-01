@@ -268,6 +268,14 @@ function App() {
     if (confirm('This will replace all existing transactions with demo data. Are you sure?')) {
       const demoTransactions = generateDemoData();
       setTransactions(demoTransactions);
+
+      // Set all category budgets to $1500 for demo data
+      const updatedCategories = categories.map(cat => ({
+        ...cat,
+        budgeted: 1500
+      }));
+      setCategories(updatedCategories);
+
       alert(`Successfully imported ${demoTransactions.length} demo transactions for the past 12 months!`);
     }
   };
