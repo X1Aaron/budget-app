@@ -6,8 +6,8 @@ import {
   exportCategoriesToCSV,
   exportBillsToJSON,
   exportBillsToCSV
-} from '../utils/export'
-import './ExportButton.css'
+} from '../../../utils/export'
+import '../../../styles/components/ExportButton.css'
 
 function ExportButton({ activeSection, transactions, categories, merchantMappings, categoryMappings, bills }) {
   const [isOpen, setIsOpen] = useState(false)

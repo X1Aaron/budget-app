@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
-import './Bills.css'
-import { generateBillOccurrences } from '../utils/billMatching'
+import '../../../styles/components/Bills.css'
+import { generateBillOccurrences } from '../../../utils/billMatching'
 
 function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange, categories }) {
   const [isAdding, setIsAdding] = useState(false)

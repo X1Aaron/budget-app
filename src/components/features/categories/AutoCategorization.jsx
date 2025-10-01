@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import './AutoCategorization.css'
+import '../../../styles/components/AutoCategorization.css'
 
 function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMerchantMapping, onDeleteCategoryMapping }) {
   const combinedMappings = useMemo(() => {

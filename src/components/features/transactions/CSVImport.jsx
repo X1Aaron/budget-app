@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import './CSVImport.css'
+import '../../../styles/components/CSVImport.css'
 
 function CSVImport({ onImport }) {
   const [fileName, setFileName] = useState('')

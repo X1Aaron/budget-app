@@ -1,6 +1,6 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
-import { getCategoryColor } from '../utils/categories'
-import './CategoryPieChart.css'
+import { getCategoryColor } from '../../../utils/categories'
+import '../../../styles/components/CategoryPieChart.css'
 
 function CategoryPieChart({ transactions, categories }) {
   const formatCurrency = (value) => {

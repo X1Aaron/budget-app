@@ -28,7 +28,11 @@
       "Bash(npm run build:*)",
       "Bash(npx tsc:*)",
       "Bash(node:*)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(tree:*)",
+      "Bash(find:*)",
+      "Bash(while read file)",
+      "Bash(do sed -i \"s|from ''''\\./\\(.*\\)\\.css''''|from ''''../../../styles/components/\\1.css''''|g\" \"$file\" sed -i 's|from \"\"\"\"\\./\\(.*\\)\\.css\"\"\"\"|from \"\"\"\"../../../styles/components/\\1.css\"\"\"\"|g' \"$file\" done)"
     ],
     "deny": [],
     "ask": []

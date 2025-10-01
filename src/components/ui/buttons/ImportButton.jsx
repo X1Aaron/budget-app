@@ -6,8 +6,8 @@ import {
   importCategoriesFromJSON,
   importBillsFromCSV,
   importBillsFromJSON
-} from '../utils/import'
-import './ImportButton.css'
+} from '../../../utils/import'
+import '../../../styles/components/ImportButton.css'
 
 function ImportButton({ activeSection, onImportTransactions, onImportCategories, onImportRules, onImportBills }) {
   const [isOpen, setIsOpen] = useState(false)

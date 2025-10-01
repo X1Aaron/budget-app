@@ -1,4 +1,4 @@
-import './MonthYearSelector.css'
+import '../../../styles/components/MonthYearSelector.css'
 
 function MonthYearSelector({ selectedYear, selectedMonth, onDateChange }) {
   const monthNames = [

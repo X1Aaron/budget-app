@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
-import './Overview.css'
-import { getCategoryColor } from '../utils/categories'
+import '../../../styles/components/Overview.css'
+import { getCategoryColor } from '../../../utils/categories'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, ReferenceLine } from 'recharts'
-import { calculateMonthStartingBalance } from '../utils/balanceCalculations'
+import { calculateMonthStartingBalance } from '../../../utils/balanceCalculations'
 
 function Overview({
   transactions,

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
-import './CategorySettings.css'
-import { autoCategorize } from '../utils/categories'
+import '../../../styles/components/CategorySettings.css'
+import { autoCategorize } from '../../../utils/categories'
 
 function CategorySettings({ categories, onUpdateCategories, transactions, onUpdateTransactions, selectedYear, selectedMonth }) {
   const [isAdding, setIsAdding] = useState(false)

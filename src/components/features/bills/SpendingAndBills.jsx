@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from 'react'
-import './SpendingAndBills.css'
-import { getCategoryColor } from '../utils/categories'
-import { calculateMonthStartingBalance } from '../utils/balanceCalculations'
-import { generateBillOccurrences, matchTransactionToBill } from '../utils/billMatching'
-import { importTransactionsFromCSV, importTransactionsFromJSON } from '../utils/import'
+import '../../../styles/components/SpendingAndBills.css'
+import { getCategoryColor } from '../../../utils/categories'
+import { calculateMonthStartingBalance } from '../../../utils/balanceCalculations'
+import { generateBillOccurrences, matchTransactionToBill } from '../../../utils/billMatching'
+import { importTransactionsFromCSV, importTransactionsFromJSON } from '../../../utils/import'
 
 function SpendingAndBills({
   transactions,

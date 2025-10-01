@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
-import './BudgetDashboard.css'
-import { getCategoryColor } from '../utils/categories'
-import CategoryPieChart from './CategoryPieChart'
+import '../../../styles/components/BudgetDashboard.css'
+import { getCategoryColor } from '../../../utils/categories'
+import { CategoryPieChart } from '../../ui/charts'
 
 function BudgetDashboard({ transactions, categories, onUpdateTransaction }) {
   const [editingIndex, setEditingIndex] = useState(null)

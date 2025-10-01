@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import './CategoryManager.css'
+import '../../../styles/components/CategoryManager.css'
 
 function CategoryManager({ categories, onUpdateCategories }) {
   const [isOpen, setIsOpen] = useState(false)

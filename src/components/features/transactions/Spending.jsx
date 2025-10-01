@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react'
-import './Spending.css'
-import { getCategoryColor } from '../utils/categories'
-import { calculateMonthStartingBalance } from '../utils/balanceCalculations'
-import { generateBillOccurrences, matchTransactionToBill } from '../utils/billMatching'
+import '../../../styles/components/Spending.css'
+import { getCategoryColor } from '../../../utils/categories'
+import { calculateMonthStartingBalance } from '../../../utils/balanceCalculations'
+import { generateBillOccurrences, matchTransactionToBill } from '../../../utils/billMatching'
 
 function Spending({
   transactions,

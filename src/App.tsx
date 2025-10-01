@@ -1,15 +1,12 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import Overview from './components/Overview.jsx';
-import Spending from './components/Spending.jsx';
-import Bills from './components/Bills.jsx';
-import SpendingAndBills from './components/SpendingAndBills.jsx';
-import CSVImport from './components/CSVImport.jsx';
-import CategorySettings from './components/CategorySettings.jsx';
-import AutoCategorization from './components/AutoCategorization.jsx';
-import ExportButton from './components/ExportButton.jsx';
-import ImportButton from './components/ImportButton.jsx';
-import MonthYearSelector from './components/MonthYearSelector.jsx';
+import { Overview } from './components/features/overview';
+import { Spending } from './components/features/transactions';
+import { Bills, SpendingAndBills } from './components/features/bills';
+import { CSVImport } from './components/features/transactions';
+import { CategorySettings, AutoCategorization } from './components/features/categories';
+import { ExportButton, ImportButton } from './components/ui/buttons';
+import { MonthYearSelector } from './components/ui/forms';
 import { DEFAULT_CATEGORIES, autoCategorize, generateMerchantName } from './utils/categories';
 import { generateDemoData } from './utils/demoData';
 import { updateBillsWithTransactionMatches } from './utils/billMatching';
@@ -149,7 +146,7 @@ function App() {
         memo: t.memo || ''
       };
     });
-    setTransactions(categorizedTransactions);
+    setTransactions([...existingTransactions, ...categorizedTransactions]);
   };
 
   const handleUpdateTransaction = (index: number, updatedTransaction: Transaction, updateAllMatching: boolean = false) => {
@@ -223,7 +220,7 @@ function App() {
         memo: t.memo || ''
       };
     });
-    setTransactions(categorizedTransactions);
+    setTransactions([...transactions, ...categorizedTransactions]);
   };
 
   const handleImportCategories = (importedCategories: Category[]) => {
@@ -233,6 +230,32 @@ function App() {
       c => !existingNames.has(c.name.toLowerCase())
     );
     setCategories([...categories, ...newCategories]);
+  };
+
+  const handleImportBills = (importedBills: Bill[]) => {
+    // Merge imported bills with existing ones, avoiding duplicates
+    const duplicates: Bill[] = [];
+    const newBills: Bill[] = [];
+
+    importedBills.forEach(imported => {
+      const isDuplicate = bills.some(existing =>
+        existing.name === imported.name &&
+        existing.amount === imported.amount &&
+        existing.dueDate === imported.dueDate
+      );
+
+      if (isDuplicate) {
+        duplicates.push(imported);
+      } else {
+        newBills.push(imported);
+      }
+    });
+
+    if (duplicates.length > 0) {
+      throw new Error(`Found ${duplicates.length} duplicate bill${duplicates.length !== 1 ? 's' : ''} (same name, amount, and due date). Import rejected to prevent duplicates.`);
+    }
+
+    setBills([...bills, ...newBills]);
   };
 
 
@@ -379,7 +402,7 @@ function App() {
                 onImportTransactions={handleImportTransactions}
                 onImportCategories={handleImportCategories}
                 onImportRules={handleImportRules}
-                onImportBills={(importedBills: Bill[]) => setBills(importedBills)}
+                onImportBills={handleImportBills}
               />
               <ExportButton
                 activeSection={activeSection}
