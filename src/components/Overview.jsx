@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import './Overview.css'
 import { getCategoryColor } from '../utils/categories'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, ReferenceLine } from 'recharts'
+import { calculateMonthStartingBalance } from '../utils/balanceCalculations'
 
 function Overview({
   transactions,
@@ -10,7 +11,7 @@ function Overview({
   selectedYear,
   selectedMonth,
   monthlyBudgets,
-  startingBalances = {},
+  accountStartingBalance,
   onDateChange,
   onUpdateBudget
 }) {
@@ -90,9 +91,13 @@ function Overview({
     const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate()
     const data = []
 
-    // Get starting balance for this month
-    const key = `${selectedYear}-${selectedMonth}`
-    const startingBalance = startingBalances[key] || 0
+    // Calculate starting balance for this month
+    const startingBalance = calculateMonthStartingBalance(
+      accountStartingBalance,
+      transactions,
+      selectedYear,
+      selectedMonth
+    )
 
     // Generate all recurring bills for the selected month
     const monthlyBills = []
@@ -206,7 +211,7 @@ function Overview({
     }
 
     return data
-  }, [bills, selectedYear, selectedMonth, monthlyTransactions, startingBalances])
+  }, [bills, selectedYear, selectedMonth, monthlyTransactions, accountStartingBalance, transactions])
 
   const categorySpendingData = useMemo(() => {
     return Object.entries(summary.categoryBreakdown)

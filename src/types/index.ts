@@ -34,10 +34,6 @@ export interface MonthlyBudget {
   [key: string]: number; // key format: "YYYY-M"
 }
 
-export interface StartingBalance {
-  [key: string]: number; // key format: "YYYY-M"
-}
-
 export interface MerchantMapping {
   [description: string]: string; // description -> merchant name
 }

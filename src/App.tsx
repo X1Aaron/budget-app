@@ -16,7 +16,6 @@ import type {
   Category,
   Bill,
   MonthlyBudget,
-  StartingBalance,
   MerchantMapping,
   CategoryMapping,
   ActiveSection
@@ -45,9 +44,9 @@ function App() {
     const saved = localStorage.getItem('categories');
     return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
   });
-  const [startingBalances, setStartingBalances] = useState<StartingBalance>(() => {
-    const saved = localStorage.getItem('startingBalances');
-    return saved ? JSON.parse(saved) : {};
+  const [accountStartingBalance, setAccountStartingBalance] = useState<number>(() => {
+    const saved = localStorage.getItem('accountStartingBalance');
+    return saved ? JSON.parse(saved) : 0;
   });
   const [merchantMappings, setMerchantMappings] = useState<MerchantMapping>(() => {
     const saved = localStorage.getItem('merchantMappings');
@@ -63,8 +62,8 @@ function App() {
   }, [categories]);
 
   useEffect(() => {
-    localStorage.setItem('startingBalances', JSON.stringify(startingBalances));
-  }, [startingBalances]);
+    localStorage.setItem('accountStartingBalance', JSON.stringify(accountStartingBalance));
+  }, [accountStartingBalance]);
 
   useEffect(() => {
     localStorage.setItem('bills', JSON.stringify(bills));
@@ -228,12 +227,8 @@ function App() {
     }));
   };
 
-  const handleUpdateStartingBalance = (year: number, month: number, balance: number) => {
-    const key = `${year}-${month}`;
-    setStartingBalances(prev => ({
-      ...prev,
-      [key]: balance
-    }));
+  const handleUpdateAccountStartingBalance = (balance: number) => {
+    setAccountStartingBalance(balance);
   };
 
   const handleDeleteMerchantMapping = (description: string) => {
@@ -361,7 +356,7 @@ function App() {
             selectedYear={selectedYear}
             selectedMonth={selectedMonth}
             monthlyBudgets={monthlyBudgets}
-            startingBalances={startingBalances}
+            accountStartingBalance={accountStartingBalance}
             onDateChange={handleDateChange}
             onUpdateBudget={handleUpdateBudget}
           />
@@ -373,8 +368,7 @@ function App() {
             selectedMonth={selectedMonth}
             onDateChange={handleDateChange}
             onUpdateTransaction={handleUpdateTransaction}
-            startingBalances={startingBalances}
-            onUpdateStartingBalance={handleUpdateStartingBalance}
+            accountStartingBalance={accountStartingBalance}
           />
         ) : activeSection === 'bills' ? (
           <Bills
@@ -407,6 +401,22 @@ function App() {
         ) : (
           <div className="settings-section">
             <h2>Settings</h2>
+            <div className="settings-group">
+              <h3>Account Starting Balance</h3>
+              <div className="settings-buttons">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={accountStartingBalance}
+                  onChange={(e) => handleUpdateAccountStartingBalance(parseFloat(e.target.value) || 0)}
+                  placeholder="Enter account starting balance"
+                  className="account-balance-input"
+                />
+                <p className="settings-description">
+                  This is your account balance when you started tracking. Monthly balances will be calculated automatically.
+                </p>
+              </div>
+            </div>
             <div className="settings-group">
               <h3>Import CSV</h3>
               <div className="settings-buttons">

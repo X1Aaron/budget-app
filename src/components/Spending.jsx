@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import './Spending.css'
 import { getCategoryColor } from '../utils/categories'
+import { calculateMonthStartingBalance } from '../utils/balanceCalculations'
 
 function Spending({
   transactions,
@@ -9,14 +10,12 @@ function Spending({
   selectedMonth,
   onDateChange,
   onUpdateTransaction,
-  startingBalances,
-  onUpdateStartingBalance
+  accountStartingBalance
 }) {
   const [expandedIndex, setExpandedIndex] = useState(null)
   const [editingMerchantIndex, setEditingMerchantIndex] = useState(null)
   const [filterCategory, setFilterCategory] = useState('all')
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
-  const [editingStartingBalance, setEditingStartingBalance] = useState(false)
 
   const handleSort = (key) => {
     let direction = 'asc'
@@ -40,11 +39,15 @@ function Spending({
     return filtered.sort((a, b) => new Date(a.date) - new Date(b.date))
   }, [transactions, selectedYear, selectedMonth])
 
-  // Get starting balance for the current month
+  // Calculate starting balance for the current month
   const currentStartingBalance = useMemo(() => {
-    const key = `${selectedYear}-${selectedMonth}`
-    return startingBalances[key] || 0
-  }, [startingBalances, selectedYear, selectedMonth])
+    return calculateMonthStartingBalance(
+      accountStartingBalance,
+      transactions,
+      selectedYear,
+      selectedMonth
+    )
+  }, [accountStartingBalance, transactions, selectedYear, selectedMonth])
 
   // Calculate running balance for each transaction
   const transactionsWithBalance = useMemo(() => {
@@ -107,15 +110,6 @@ function Spending({
     }).format(amount)
   }
 
-  const handleStartingBalanceSubmit = (e) => {
-    e.preventDefault()
-    const formData = new FormData(e.target)
-    const balance = parseFloat(formData.get('startingBalance'))
-    if (!isNaN(balance)) {
-      onUpdateStartingBalance(selectedYear, selectedMonth, balance)
-      setEditingStartingBalance(false)
-    }
-  }
 
   return (
     <div className="spending">
@@ -129,40 +123,10 @@ function Spending({
         <div className="transactions-header">
           <h2>Transactions{filterCategory !== 'all' && ` - ${filterCategory}`}</h2>
           <div className="header-controls">
-            {!editingStartingBalance ? (
-              <div className="starting-balance-display">
-                <span className="starting-balance-label">Starting Balance:</span>
-                <span className="starting-balance-value">{formatCurrency(currentStartingBalance)}</span>
-                <button
-                  className="edit-balance-btn"
-                  onClick={() => setEditingStartingBalance(true)}
-                >
-                  Edit
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleStartingBalanceSubmit} className="starting-balance-form">
-                <input
-                  type="number"
-                  name="startingBalance"
-                  step="0.01"
-                  defaultValue={currentStartingBalance}
-                  placeholder="Enter starting balance"
-                  className="starting-balance-input"
-                  autoFocus
-                />
-                <div className="balance-form-buttons">
-                  <button type="submit" className="save-balance-btn">Save</button>
-                  <button
-                    type="button"
-                    className="cancel-balance-btn"
-                    onClick={() => setEditingStartingBalance(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            )}
+            <div className="starting-balance-display">
+              <span className="starting-balance-label">Starting Balance:</span>
+              <span className="starting-balance-value">{formatCurrency(currentStartingBalance)}</span>
+            </div>
             <select
               id="category-filter"
               value={filterCategory}
