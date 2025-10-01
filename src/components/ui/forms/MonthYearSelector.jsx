@@ -22,6 +22,11 @@ function MonthYearSelector({ selectedYear, selectedMonth, onDateChange }) {
     }
   }
 
+  const handleGoToCurrentMonth = () => {
+    const now = new Date()
+    onDateChange(now.getFullYear(), now.getMonth())
+  }
+
   return (
     <div className="month-year-selector">
       <button className="month-nav-btn" onClick={handlePreviousMonth} title="Previous month">
@@ -30,6 +35,9 @@ function MonthYearSelector({ selectedYear, selectedMonth, onDateChange }) {
       <span className="month-year-display">
         {monthNames[selectedMonth]} {selectedYear}
       </span>
+      <button className="month-nav-btn calendar-today-btn" onClick={handleGoToCurrentMonth} title="Go to current month">
+        📅
+      </button>
       <button className="month-nav-btn" onClick={handleNextMonth} title="Next month">
         →
       </button>

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect, useRef } from 'react'
 import '../../../styles/components/SpendingAndBills.css'
 import { getCategoryColor } from '../../../utils/categories'
 import { calculateMonthStartingBalance } from '../../../utils/balanceCalculations'
@@ -30,8 +30,27 @@ function SpendingAndBills({
     category: '',
     memo: ''
   })
+  const [addDropdownOpen, setAddDropdownOpen] = useState(false)
+  const addDropdownRef = useRef(null)
 
   const cashRegisterSound = useMemo(() => new Audio('/cash-register.mp3'), [])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (addDropdownRef.current && !addDropdownRef.current.contains(event.target)) {
+        setAddDropdownOpen(false)
+      }
+    }
+
+    if (addDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [addDropdownOpen])
 
   const handleSort = (key) => {
     let direction = 'asc'
@@ -275,6 +294,7 @@ function SpendingAndBills({
       paidDates: []
     })
     setBillModalOpen(true)
+    setAddDropdownOpen(false)
   }
 
   const handleOpenAddTransactionModal = () => {
@@ -290,6 +310,7 @@ function SpendingAndBills({
       memo: ''
     })
     setAddTransactionModalOpen(true)
+    setAddDropdownOpen(false)
   }
 
   const isTransactionABill = (transaction) => {
@@ -506,12 +527,30 @@ function SpendingAndBills({
           <h2>Spending & Bills - {monthNames[selectedMonth]} {selectedYear}</h2>
           <div className="header-controls">
             <div className="action-buttons">
-              <button className="action-btn add-transaction-btn" onClick={handleOpenAddTransactionModal}>
-                + Transaction
-              </button>
-              <button className="action-btn add-bill-btn" onClick={handleOpenAddBillModal}>
-                + Bill
-              </button>
+              <div className="add-button-container" ref={addDropdownRef}>
+                <button
+                  className="action-btn add-unified-btn"
+                  onClick={() => setAddDropdownOpen(!addDropdownOpen)}
+                >
+                  + Add
+                </button>
+                {addDropdownOpen && (
+                  <div className="add-dropdown-menu">
+                    <button
+                      className="dropdown-item"
+                      onClick={handleOpenAddTransactionModal}
+                    >
+                      💵 Add Transaction
+                    </button>
+                    <button
+                      className="dropdown-item"
+                      onClick={handleOpenAddBillModal}
+                    >
+                      📋 Add Bill
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="starting-balance-display">
               <span className="starting-balance-label">Starting Balance:</span>
