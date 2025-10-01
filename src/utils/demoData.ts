@@ -1,4 +1,4 @@
-import type { Transaction, Bill } from '../types';
+import type { Transaction } from '../types';
 
 // Demo merchant data with realistic descriptions, categories, and frequency patterns
 interface TransactionTemplate {
@@ -120,24 +120,6 @@ function getAllFridaysInMonth(year: number, month: number): string[] {
   return fridays;
 }
 
-function getRandomDay(): number {
-  return Math.floor(Math.random() * 28) + 1; // 1-28 to ensure valid for all months
-}
-
-// Demo bill templates
-const demoBillTemplates = [
-  { name: 'Electric Bill', category: 'Utilities', amountRange: [80, 150], frequency: 'monthly' as const },
-  { name: 'Water Bill', category: 'Utilities', amountRange: [40, 80], frequency: 'monthly' as const },
-  { name: 'Internet Service', category: 'Utilities', amountRange: [60, 120], frequency: 'monthly' as const },
-  { name: 'Phone Bill', category: 'Phone', amountRange: [50, 100], frequency: 'monthly' as const },
-  { name: 'Gym Membership', category: 'Fitness & Gym', amountRange: [30, 80], frequency: 'monthly' as const },
-  { name: 'Streaming Service', category: 'Subscriptions', amountRange: [10, 20], frequency: 'monthly' as const },
-  { name: 'Car Insurance', category: 'Insurance', amountRange: [100, 200], frequency: 'monthly' as const },
-  { name: 'Rent/Mortgage', category: 'Housing', amountRange: [1200, 2000], frequency: 'monthly' as const },
-  { name: 'Cloud Storage', category: 'Subscriptions', amountRange: [5, 15], frequency: 'monthly' as const },
-  { name: 'Credit Card Payment', category: 'Debt Payments', amountRange: [100, 500], frequency: 'monthly' as const },
-];
-
 export function generateDemoData(): Transaction[] {
   const transactions: Transaction[] = [];
   const currentDate = new Date();
@@ -216,7 +198,8 @@ export function generateDemoData(): Transaction[] {
           category: template.category,
           merchantName: template.description.split(' ')[0],
           memo: '',
-          autoCategorized: false
+          autoCategorized: false,
+          isBill: true  // Mark monthly subscriptions and recurring expenses as bills
         });
       } else if (template.frequency === 'occasional') {
         // Add 0-3 times per month randomly
@@ -255,7 +238,8 @@ export function generateDemoData(): Transaction[] {
       category: 'Housing',
       merchantName: 'Property Management',
       memo: 'Monthly rent',
-      autoCategorized: false
+      autoCategorized: false,
+      isBill: true
     });
 
     // Internet - $70/month
@@ -266,7 +250,8 @@ export function generateDemoData(): Transaction[] {
       category: 'Utilities',
       merchantName: 'Comcast',
       memo: '',
-      autoCategorized: false
+      autoCategorized: false,
+      isBill: true
     });
 
     // Phone - $55/month
@@ -277,7 +262,8 @@ export function generateDemoData(): Transaction[] {
       category: 'Phone',
       merchantName: 'Verizon',
       memo: '',
-      autoCategorized: false
+      autoCategorized: false,
+      isBill: true
     });
 
     // Electric - varies by month ($60-120) - simulates seasonal variation
@@ -291,7 +277,8 @@ export function generateDemoData(): Transaction[] {
       category: 'Utilities',
       merchantName: 'PG&E',
       memo: '',
-      autoCategorized: false
+      autoCategorized: false,
+      isBill: true
     });
 
     // Water - $45/month
@@ -302,7 +289,8 @@ export function generateDemoData(): Transaction[] {
       category: 'Utilities',
       merchantName: 'City Water',
       memo: '',
-      autoCategorized: false
+      autoCategorized: false,
+      isBill: true
     });
 
     // Car Insurance - $120/month
@@ -313,7 +301,8 @@ export function generateDemoData(): Transaction[] {
       category: 'Insurance',
       merchantName: 'GEICO',
       memo: '',
-      autoCategorized: false
+      autoCategorized: false,
+      isBill: true
     });
 
     // Student Loan - $285/month
@@ -324,7 +313,8 @@ export function generateDemoData(): Transaction[] {
       category: 'Debt Payments',
       merchantName: 'MOHELA',
       memo: '',
-      autoCategorized: false
+      autoCategorized: false,
+      isBill: true
     });
 
     // Credit Card Payment - $150-300/month (varies)
@@ -336,7 +326,8 @@ export function generateDemoData(): Transaction[] {
       category: 'Debt Payments',
       merchantName: 'Chase',
       memo: '',
-      autoCategorized: false
+      autoCategorized: false,
+      isBill: true
     });
 
     // Weekly paychecks on Fridays - $1500/week
@@ -358,31 +349,4 @@ export function generateDemoData(): Transaction[] {
   transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return transactions;
-}
-
-export function generateDemoBills(): Bill[] {
-  const bills: Bill[] = [];
-  const currentDate = new Date();
-
-  // Randomly select 5 bill templates
-  const shuffled = [...demoBillTemplates].sort(() => 0.5 - Math.random());
-  const selectedTemplates = shuffled.slice(0, 5);
-
-  selectedTemplates.forEach((template, index) => {
-    const amount = getRandomAmount(template.amountRange);
-    const dueDay = getRandomDay();
-
-    bills.push({
-      id: `demo-bill-${Date.now()}-${index}`,
-      name: template.name,
-      amount: amount,
-      dueDate: `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dueDay).padStart(2, '0')}` as any,
-      category: template.category,
-      frequency: template.frequency,
-      memo: '',
-      paidDates: []
-    } as any);
-  });
-
-  return bills;
 }

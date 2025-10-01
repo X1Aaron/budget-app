@@ -10,7 +10,7 @@ import ExportButton from './components/ExportButton.jsx';
 import ImportButton from './components/ImportButton.jsx';
 import MonthYearSelector from './components/MonthYearSelector.jsx';
 import { DEFAULT_CATEGORIES, autoCategorize, generateMerchantName } from './utils/categories';
-import { generateDemoData, generateDemoBills } from './utils/demoData';
+import { generateDemoData } from './utils/demoData';
 import type {
   Transaction,
   Category,
@@ -261,10 +261,9 @@ function App() {
 
   const handleImportDemoData = () => {
     const demoTransactions = generateDemoData();
-    const demoBills = generateDemoBills();
 
     setTransactions(demoTransactions);
-    setBills(demoBills);
+    setBills([]);  // Bills are now marked as isBill in transactions
     setAccountStartingBalance(5000);
 
     // Calculate average monthly expenses per category from demo data

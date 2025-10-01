@@ -17,6 +17,7 @@ export interface Transaction {
   friendlyName?: string;
   memo?: string;
   needWant?: 'need' | 'want';
+  isBill?: boolean;
 }
 
 export interface Bill {
