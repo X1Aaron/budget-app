@@ -3,6 +3,7 @@ import '../../../styles/components/Dashboard.css'
 import { getCategoryColor } from '../../../utils/categories'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, ReferenceLine } from 'recharts'
 import { calculateMonthStartingBalance } from '../../../utils/balanceCalculations'
+import { useTheme } from '../../../contexts/ThemeContext'
 
 function Dashboard({
   transactions,
@@ -15,6 +16,7 @@ function Dashboard({
   onDateChange,
   onUpdateBudget
 }) {
+  const { theme } = useTheme()
   const [isEditingBudget, setIsEditingBudget] = useState(false)
   const [budgetInput, setBudgetInput] = useState('')
 
@@ -272,6 +274,15 @@ function Dashboard({
 
   const remaining = currentBudget - summary.expenses
 
+  // Theme-aware chart colors
+  const chartColors = {
+    text: theme === 'dark' ? '#e5e7eb' : '#374151',
+    grid: theme === 'dark' ? '#374151' : '#e5e7eb',
+    line: theme === 'dark' ? '#60a5fa' : '#8884d8',
+    tooltipBg: theme === 'dark' ? '#1f2937' : '#ffffff',
+    tooltipBorder: theme === 'dark' ? '#374151' : '#e5e7eb'
+  }
+
   return (
     <div className="dashboard">
       <div className="summary-cards">
@@ -318,24 +329,31 @@ function Dashboard({
         <h2>Cash Flow for {monthNames[selectedMonth]}</h2>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={cashFlowData}>
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
             <XAxis
               dataKey="date"
-              label={{ value: 'Day of Month', position: 'insideBottom', offset: -5 }}
+              label={{ value: 'Day of Month', position: 'insideBottom', offset: -5, fill: chartColors.text }}
+              tick={{ fill: chartColors.text }}
             />
             <YAxis
-              label={{ value: 'Balance ($)', angle: -90, position: 'insideLeft' }}
+              label={{ value: 'Balance ($)', angle: -90, position: 'insideLeft', fill: chartColors.text }}
               tickFormatter={(value) => `$${value.toLocaleString()}`}
+              tick={{ fill: chartColors.text }}
             />
             <Tooltip
               formatter={(value) => [`$${value.toLocaleString()}`, 'Balance']}
               labelFormatter={(label) => `Date: ${label}`}
+              contentStyle={{
+                backgroundColor: chartColors.tooltipBg,
+                border: `1px solid ${chartColors.tooltipBorder}`,
+                color: chartColors.text
+              }}
             />
             <ReferenceLine y={0} stroke="#e74c3c" strokeWidth={2} strokeDasharray="3 3" />
             <Line
               type="monotone"
               dataKey="balance"
-              stroke="#8884d8"
+              stroke={chartColors.line}
               strokeWidth={2}
               dot={false}
             />
@@ -416,19 +434,26 @@ function Dashboard({
         <h2>Category Spending</h2>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={categorySpendingData}>
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
             <XAxis
               dataKey="category"
               angle={-45}
               textAnchor="end"
               height={100}
+              tick={{ fill: chartColors.text }}
             />
             <YAxis
-              label={{ value: 'Amount ($)', angle: -90, position: 'insideLeft' }}
+              label={{ value: 'Amount ($)', angle: -90, position: 'insideLeft', fill: chartColors.text }}
               tickFormatter={(value) => `$${value.toLocaleString()}`}
+              tick={{ fill: chartColors.text }}
             />
             <Tooltip
               formatter={(value) => [`$${value.toLocaleString()}`, 'Spent']}
+              contentStyle={{
+                backgroundColor: chartColors.tooltipBg,
+                border: `1px solid ${chartColors.tooltipBorder}`,
+                color: chartColors.text
+              }}
             />
             <Bar dataKey="amount">
               {categorySpendingData.map((entry) => (

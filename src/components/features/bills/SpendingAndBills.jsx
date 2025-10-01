@@ -246,7 +246,7 @@ function SpendingAndBills({
         memo: formData.memo || '',
         autoCategorized: false
       }
-      onUpdateTransaction(transactions.length, newTransaction)
+      onUpdateTransactions([...transactions, newTransaction])
     } else {
       const newBill = {
         id: `bill-${Date.now()}`,
@@ -261,7 +261,7 @@ function SpendingAndBills({
         dueDate: formData.date,
         frequency: formData.frequency,
         sourceDescription: formData.sourceDescription,
-        paidDates: [formData.date],
+        paidDates: [],
         payments: []
       }
       onUpdateTransactions([...transactions, newBill])

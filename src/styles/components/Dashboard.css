@@ -212,15 +212,24 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background: #fef3c7;
+  background: var(--bill-bg, #fef3c7);
   border-left: 4px solid #f59e0b;
   border-radius: 6px;
   transition: all 0.2s;
 }
 
 .upcoming-bill-item:hover {
-  background: #fde68a;
+  background: var(--bill-bg-hover, #fde68a);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .upcoming-bill-item {
+  background: rgba(245, 158, 11, 0.15);
+  border-left-color: #f59e0b;
+}
+
+[data-theme="dark"] .upcoming-bill-item:hover {
+  background: rgba(245, 158, 11, 0.25);
 }
 
 .upcoming-bill-item .bill-info {
@@ -236,14 +245,19 @@
 
 .upcoming-bill-item .bill-due {
   font-size: 0.85rem;
-  color: #92400e;
+  color: var(--bill-text, #92400e);
   font-weight: 500;
 }
 
 .upcoming-bill-item .bill-amount {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #92400e;
+  color: var(--bill-text, #92400e);
+}
+
+[data-theme="dark"] .upcoming-bill-item .bill-due,
+[data-theme="dark"] .upcoming-bill-item .bill-amount {
+  color: #fbbf24;
 }
 
 .categories-section {
