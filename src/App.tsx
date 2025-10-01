@@ -287,16 +287,16 @@ function App() {
 
     // Define realistic budget strategies for each category type
     const budgetStrategies: { [category: string]: 'under' | 'on-target' | 'over' | 'tight' } = {
-      'Food & Dining': 'over',        // Often overspend on food/dining
+      'Food & Dining': 'tight',       // Slightly over budget on food/dining
       'Housing': 'on-target',         // Fixed costs, usually on target
       'Transportation': 'under',      // Good at staying under budget
-      'Shopping': 'over',             // Discretionary, often overspend
+      'Shopping': 'tight',            // Discretionary, slightly over
       'Bills & Fees': 'on-target',    // Fixed costs, predictable
-      'Entertainment': 'tight',       // Set tight budget, slightly over
+      'Entertainment': 'on-target',   // Generally on target
       'Personal Care': 'under',       // Usually under budget
       'Healthcare': 'on-target',      // Unpredictable but averages out
       'Education': 'on-target',
-      'Uncategorized': 'over'
+      'Uncategorized': 'on-target'
     };
 
     const updatedCategories = categories.map(cat => {
@@ -308,20 +308,20 @@ function App() {
 
       switch (strategy) {
         case 'under':
-          // Budget is 110-130% of actual (spending less than budgeted)
-          budgetPercent = 1.1 + Math.random() * 0.2;
+          // Budget is 110-120% of actual (spending less than budgeted)
+          budgetPercent = 1.1 + Math.random() * 0.1;
           break;
         case 'on-target':
-          // Budget is 95-105% of actual (right on target)
-          budgetPercent = 0.95 + Math.random() * 0.1;
+          // Budget is 98-108% of actual (right on target)
+          budgetPercent = 0.98 + Math.random() * 0.1;
           break;
         case 'tight':
-          // Budget is 80-90% of actual (moderately over budget)
-          budgetPercent = 0.8 + Math.random() * 0.1;
+          // Budget is 90-95% of actual (slightly over budget)
+          budgetPercent = 0.9 + Math.random() * 0.05;
           break;
         case 'over':
-          // Budget is 60-75% of actual (significantly over budget)
-          budgetPercent = 0.6 + Math.random() * 0.15;
+          // Budget is 75-85% of actual (moderately over budget)
+          budgetPercent = 0.75 + Math.random() * 0.1;
           break;
         default:
           budgetPercent = 1.0;
