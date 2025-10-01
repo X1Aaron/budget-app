@@ -29,21 +29,37 @@ function CSVImport({ onImport }) {
 
     const transactions = []
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map(v => v.trim())
-      if (values.length < headers.length) continue
+      if (lines[i].trim() === '') continue
+
+      // Properly parse CSV line with quoted values
+      const values = []
+      let currentValue = ''
+      let insideQuotes = false
+
+      for (let char of lines[i]) {
+        if (char === '"') {
+          insideQuotes = !insideQuotes
+        } else if (char === ',' && !insideQuotes) {
+          values.push(currentValue.trim())
+          currentValue = ''
+        } else {
+          currentValue += char
+        }
+      }
+      values.push(currentValue.trim())
 
       const transaction = {
-        date: values[dateIndex],
-        description: values[descIndex],
-        amount: parseFloat(values[amountIndex]),
+        date: values[dateIndex] || '',
+        description: values[descIndex] || '',
+        amount: parseFloat(values[amountIndex] || '0'),
         category: categoryIndex !== -1 && values[categoryIndex] ? values[categoryIndex] : 'Uncategorized',
         needWant: needWantIndex !== -1 && values[needWantIndex] ? values[needWantIndex] : undefined,
         autoCategorized: autoCategorizedIndex !== -1 && values[autoCategorizedIndex] ? (values[autoCategorizedIndex] === 'true') : false,
-        merchantName: merchantNameIndex !== -1 && values[merchantNameIndex] ? values[merchantNameIndex] : (friendlyNameIndex !== -1 && values[friendlyNameIndex] ? values[friendlyNameIndex] : values[descIndex]),
+        merchantName: merchantNameIndex !== -1 && values[merchantNameIndex] ? values[merchantNameIndex] : (friendlyNameIndex !== -1 && values[friendlyNameIndex] ? values[friendlyNameIndex] : (values[descIndex] || '')),
         memo: memoIndex !== -1 && values[memoIndex] ? values[memoIndex] : ''
       }
 
-      if (!isNaN(transaction.amount)) {
+      if (!isNaN(transaction.amount) && transaction.date && transaction.description) {
         transactions.push(transaction)
       }
     }

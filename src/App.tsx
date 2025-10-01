@@ -512,12 +512,6 @@ function App() {
               </div>
             </div>
             <div className="settings-group">
-              <h3>Import CSV</h3>
-              <div className="settings-buttons">
-                <CSVImport onImport={handleImport} />
-              </div>
-            </div>
-            <div className="settings-group">
               <h3>Demo Data</h3>
               <div className="settings-buttons">
                 <button className="demo-data-btn" onClick={handleImportDemoData}>
