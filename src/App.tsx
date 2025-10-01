@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import { Overview } from './components/features/overview';
+import { Dashboard } from './components/features/dashboard';
 import { Spending } from './components/features/transactions';
 import { Bills, SpendingAndBills } from './components/features/bills';
 import { CategorySettings, AutoCategorization } from './components/features/categories';
@@ -21,7 +21,7 @@ import type {
 
 function App() {
   const { theme, toggleTheme } = useTheme();
-  const [activeSection, setActiveSection] = useState<ActiveSection>('overview');
+  const [activeSection, setActiveSection] = useState<ActiveSection>('dashboard');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
@@ -322,10 +322,10 @@ function App() {
         </div>
         <nav className="app-nav">
           <button
-            className={'nav-btn' + (activeSection === 'overview' ? ' active' : '')}
-            onClick={() => setActiveSection('overview')}
+            className={'nav-btn' + (activeSection === 'dashboard' ? ' active' : '')}
+            onClick={() => setActiveSection('dashboard')}
           >
-            Overview
+            Dashboard
           </button>
           <button
             className={'nav-btn' + (activeSection === 'spending' ? ' active' : '')}
@@ -354,8 +354,8 @@ function App() {
         </nav>
       </header>
       <main className="app-main">
-        {activeSection === 'overview' ? (
-          <Overview
+        {activeSection === 'dashboard' ? (
+          <Dashboard
             transactions={transactions}
             categories={categories}
             selectedYear={selectedYear}

@@ -83,7 +83,7 @@ export interface SortConfig {
 }
 
 export type ActiveSection =
-  | 'overview'
+  | 'dashboard'
   | 'spending'
   | 'bills'
   | 'categories'

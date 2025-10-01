@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
-import '../../../styles/components/Overview.css'
+import '../../../styles/components/Dashboard.css'
 import { getCategoryColor } from '../../../utils/categories'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, ReferenceLine } from 'recharts'
 import { calculateMonthStartingBalance } from '../../../utils/balanceCalculations'
 
-function Overview({
+function Dashboard({
   transactions,
   categories,
   bills = [],
@@ -273,7 +273,7 @@ function Overview({
   const remaining = currentBudget - summary.expenses
 
   return (
-    <div className="overview">
+    <div className="dashboard">
       <div className="summary-cards">
         <div className="summary-card income">
           <h3>Income</h3>
@@ -445,4 +445,4 @@ function Overview({
   )
 }
 
-export default Overview
+export default Dashboard
