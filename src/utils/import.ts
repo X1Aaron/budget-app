@@ -92,17 +92,17 @@ export const importTransactionsFromCSV = async (file: File): Promise<Transaction
 
     const needWantValue = needWantIndex !== -1 ? values[needWantIndex] : undefined;
     const transaction: Transaction = {
-      date: values[dateIndex],
-      description: values[descIndex],
-      amount: parseFloat(values[amountIndex]),
-      category: categoryIndex !== -1 ? values[categoryIndex] : 'Uncategorized',
+      date: values[dateIndex] || '',
+      description: values[descIndex] || '',
+      amount: parseFloat(values[amountIndex] || '0'),
+      category: categoryIndex !== -1 && values[categoryIndex] ? values[categoryIndex] : 'Uncategorized',
       needWant: needWantValue === 'need' || needWantValue === 'want' ? needWantValue : undefined,
       autoCategorized: autoCategorizedIndex !== -1 ? (values[autoCategorizedIndex] === 'true') : false,
-      merchantName: merchantNameIndex !== -1 ? values[merchantNameIndex] : (friendlyNameIndex !== -1 ? values[friendlyNameIndex] : values[descIndex]),
-      memo: memoIndex !== -1 ? values[memoIndex] : ''
+      merchantName: merchantNameIndex !== -1 && values[merchantNameIndex] ? values[merchantNameIndex] : (friendlyNameIndex !== -1 && values[friendlyNameIndex] ? values[friendlyNameIndex] : (values[descIndex] || '')),
+      memo: memoIndex !== -1 && values[memoIndex] ? values[memoIndex] : ''
     };
 
-    if (!isNaN(transaction.amount)) {
+    if (!isNaN(transaction.amount) && transaction.date && transaction.description) {
       transactions.push(transaction);
     }
   }
@@ -119,16 +119,18 @@ export const importTransactionsFromJSON = async (file: File): Promise<Transactio
     throw new Error('Invalid JSON format: expected an array of transactions');
   }
 
-  return data.map(t => ({
-    date: t.date,
-    description: t.description,
-    amount: parseFloat(t.amount),
-    category: t.category || 'Uncategorized',
-    needWant: t.needWant || undefined,
-    autoCategorized: t.autoCategorized || false,
-    merchantName: t.merchantName || t.friendlyName || t.description,
-    memo: t.memo || ''
-  }));
+  return data
+    .filter(t => t != null && typeof t === 'object')
+    .map(t => ({
+      date: t.date,
+      description: t.description,
+      amount: parseFloat(t.amount),
+      category: t.category || 'Uncategorized',
+      needWant: t.needWant || undefined,
+      autoCategorized: t.autoCategorized || false,
+      merchantName: t.merchantName || t.friendlyName || t.description,
+      memo: t.memo || ''
+    }));
 };
 
 // Import categories from CSV
