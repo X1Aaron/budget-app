@@ -53,9 +53,9 @@ const demoTransactions = [
   { description: 'CVS/PHARMACY #12345', category: 'Healthcare', amountRange: [15, 60] },
   { description: 'KAISER PERMANENTE', category: 'Healthcare', amountRange: [20, 100] },
 
-  // Income (positive amounts)
-  { description: 'PAYROLL DEPOSIT - ACME CORP', category: 'Income', amountRange: [2500, 3000] },
-  { description: 'DIRECT DEPOSIT PAYROLL', category: 'Income', amountRange: [2800, 3200] },
+  // Income (positive amounts) - ~$1500/week = ~$6000/month for twice monthly paychecks
+  { description: 'PAYROLL DEPOSIT - ACME CORP', category: 'Income', amountRange: [2900, 3100] },
+  { description: 'DIRECT DEPOSIT PAYROLL', category: 'Income', amountRange: [2900, 3100] },
 ];
 
 function getRandomAmount(range: [number, number]): number {
@@ -150,26 +150,22 @@ export function generateDemoData(): Transaction[] {
       autoCategorized: false
     });
 
-    // Paycheck (twice a month)
-    transactions.push({
-      date: `${year}-${String(month + 1).padStart(2, '0')}-15`,
-      description: 'PAYROLL DEPOSIT - ACME CORP',
-      amount: 2800,
-      category: 'Income',
-      merchantName: 'ACME Corp',
-      memo: 'Bi-weekly paycheck',
-      autoCategorized: false
-    });
+    // Weekly paychecks - $1500/week
+    const weeksInMonth = Math.ceil(new Date(year, month + 1, 0).getDate() / 7);
+    for (let week = 0; week < weeksInMonth; week++) {
+      const weekDay = 7 + (week * 7); // Pay every Friday
+      const payDay = Math.min(weekDay, new Date(year, month + 1, 0).getDate());
 
-    transactions.push({
-      date: `${year}-${String(month + 1).padStart(2, '0')}-${month === 1 ? '28' : '30'}`,
-      description: 'PAYROLL DEPOSIT - ACME CORP',
-      amount: 2800,
-      category: 'Income',
-      merchantName: 'ACME Corp',
-      memo: 'Bi-weekly paycheck',
-      autoCategorized: false
-    });
+      transactions.push({
+        date: `${year}-${String(month + 1).padStart(2, '0')}-${String(payDay).padStart(2, '0')}`,
+        description: 'PAYROLL DEPOSIT - ACME CORP',
+        amount: 1500,
+        category: 'Income',
+        merchantName: 'ACME Corp',
+        memo: 'Weekly paycheck',
+        autoCategorized: false
+      });
+    }
   }
 
   // Sort by date descending

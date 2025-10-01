@@ -266,11 +266,12 @@ function App() {
 
       setTransactions(demoTransactions);
       setBills(demoBills);
+      setAccountStartingBalance(5000);
 
-      // Set all category budgets to $1500 for demo data
+      // Set all category budgets to $500 for demo data
       const updatedCategories = categories.map(cat => ({
         ...cat,
-        budgeted: 1500
+        budgeted: 500
       }));
       setCategories(updatedCategories);
 
