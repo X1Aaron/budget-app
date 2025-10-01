@@ -383,14 +383,20 @@ function Overview({
                       <td className="progress-cell">
                         {budgeted > 0 ? (
                           <div className="category-progress">
-                            <div className="progress-bar">
-                              <div
-                                className={'progress-fill ' + (isOverBudget ? 'over-budget' : '')}
-                                style={{ width: `${Math.min((spent / budgeted) * 100, 125) / 1.25}%` }}
-                              ></div>
-                              <div className="progress-100-line"></div>
+                            <div className="progress-bar-container">
+                              <div className="progress-bar">
+                                <div
+                                  className={'progress-fill ' + (isOverBudget ? 'over-budget' : '')}
+                                  style={{ width: `${Math.min((spent / budgeted) * 100, 150)}%` }}
+                                ></div>
+                                <div className="progress-100-marker"></div>
+                              </div>
+                              <div className="progress-labels">
+                                <span className="progress-label">$0</span>
+                                <span className="progress-label budget-marker">${budgeted.toLocaleString()}</span>
+                              </div>
                             </div>
-                            <span className="progress-text">
+                            <span className={'progress-text ' + (isOverBudget ? 'over-budget-text' : '')}>
                               {Math.round((spent / budgeted) * 100)}%
                             </span>
                           </div>
