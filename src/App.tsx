@@ -275,7 +275,10 @@ function App() {
       }));
       setCategories(updatedCategories);
 
-      alert(`Successfully imported ${demoTransactions.length} demo transactions and ${demoBills.length} demo bills for the past 12 months!`);
+      // Use setTimeout to ensure the alert shows after React has committed all state updates
+      setTimeout(() => {
+        alert(`Successfully imported ${demoTransactions.length} demo transactions and ${demoBills.length} demo bills for the past 12 months!`);
+      }, 0);
     }
   };
 
