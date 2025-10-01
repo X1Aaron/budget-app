@@ -116,7 +116,7 @@ function App() {
         }
       }
     }
-  }, [transactions.length, selectedYear, selectedMonth, billMatchingSettings]); // Depend on transactions.length to avoid infinite loop
+  }, [selectedYear, selectedMonth, billMatchingSettings]); // Removed transactions from dependencies to avoid infinite loop
 
   const handleImport = (importedTransactions: Transaction[], existingTransactions: Transaction[] = transactions) => {
     // Check for duplicate transactions
