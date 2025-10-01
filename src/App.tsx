@@ -3,6 +3,7 @@ import './App.css';
 import Overview from './components/Overview.jsx';
 import Spending from './components/Spending.jsx';
 import Bills from './components/Bills.jsx';
+import SpendingAndBills from './components/SpendingAndBills.jsx';
 import CSVImport from './components/CSVImport.jsx';
 import CategorySettings from './components/CategorySettings.jsx';
 import AutoCategorization from './components/AutoCategorization.jsx';
@@ -402,13 +403,7 @@ function App() {
             className={'nav-btn' + (activeSection === 'spending' ? ' active' : '')}
             onClick={() => setActiveSection('spending')}
           >
-            Spending
-          </button>
-          <button
-            className={'nav-btn' + (activeSection === 'bills' ? ' active' : '')}
-            onClick={() => setActiveSection('bills')}
-          >
-            Bills
+            Spending & Bills
           </button>
           <button
             className={'nav-btn' + (activeSection === 'categories' ? ' active' : '')}
@@ -444,7 +439,7 @@ function App() {
             onUpdateBudget={handleUpdateBudget}
           />
         ) : activeSection === 'spending' ? (
-          <Spending
+          <SpendingAndBills
             transactions={transactions}
             categories={categories}
             selectedYear={selectedYear}
@@ -454,15 +449,6 @@ function App() {
             accountStartingBalance={accountStartingBalance}
             bills={bills}
             onUpdateBills={handleUpdateBills}
-          />
-        ) : activeSection === 'bills' ? (
-          <Bills
-            bills={bills}
-            onUpdateBills={handleUpdateBills}
-            selectedYear={selectedYear}
-            selectedMonth={selectedMonth}
-            onDateChange={handleDateChange}
-            categories={categories}
           />
         ) : activeSection === 'categories' ? (
           <div className="categories-section">
