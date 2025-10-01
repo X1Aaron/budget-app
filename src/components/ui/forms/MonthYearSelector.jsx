@@ -35,11 +35,11 @@ function MonthYearSelector({ selectedYear, selectedMonth, onDateChange }) {
       <span className="month-year-display">
         {monthNames[selectedMonth]} {selectedYear}
       </span>
-      <button className="month-nav-btn calendar-today-btn" onClick={handleGoToCurrentMonth} title="Go to current month">
-        📅
-      </button>
       <button className="month-nav-btn" onClick={handleNextMonth} title="Next month">
         →
+      </button>
+      <button className="month-nav-btn calendar-today-btn" onClick={handleGoToCurrentMonth} title="Go to current month">
+        📅
       </button>
     </div>
   )
