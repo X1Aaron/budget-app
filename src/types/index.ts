@@ -8,6 +8,7 @@ export interface Category {
 }
 
 export interface Transaction {
+  id?: string;
   date: string;
   description: string;
   amount: number;
@@ -17,7 +18,18 @@ export interface Transaction {
   friendlyName?: string;
   memo?: string;
   needWant?: 'need' | 'want';
+  // Bill-related properties (when isBill is true)
   isBill?: boolean;
+  billName?: string; // Display name for the bill
+  billAmount?: number; // Expected bill amount (can differ from transaction amount)
+  dueDate?: string; // YYYY-MM-DD format (first occurrence date for recurring)
+  frequency?: 'monthly' | 'quarterly' | 'yearly' | 'weekly' | 'one-time';
+  sourceDescription?: string; // Original transaction description that created this bill
+  paidDates?: string[]; // Legacy format - array of YYYY-MM-DD dates
+  payments?: BillPayment[]; // New format - detailed payment tracking
+  // Matching properties (when transaction matched to a bill)
+  matchedToBillId?: string; // ID of the bill this transaction paid
+  hiddenAsBillPayment?: boolean; // Hide from main transaction list (shown when bill is expanded)
 }
 
 export interface BillPayment {

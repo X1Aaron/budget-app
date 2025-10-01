@@ -1,4 +1,4 @@
-import type { Transaction, Bill, BillPayment, BillMatchingSettings } from '../types';
+import type { Transaction, BillPayment, BillMatchingSettings } from '../types';
 
 export interface BillOccurrence {
   billId: string;
@@ -9,6 +9,7 @@ export interface BillOccurrence {
   category: string;
   sourceDescription?: string;
   payment?: BillPayment;
+  billTransaction: Transaction; // Reference to the original bill transaction
 }
 
 export interface TransactionBillMatch {
@@ -26,83 +27,94 @@ export interface TransactionBillMatch {
 
 /**
  * Generate all bill occurrences for a given year and month
+ * Now works with transactions that have isBill = true
  */
 export function generateBillOccurrences(
-  bills: Bill[],
+  transactions: Transaction[],
   year: number,
   month: number
 ): BillOccurrence[] {
   const occurrences: BillOccurrence[] = [];
 
-  bills.forEach(bill => {
+  // Filter to only bill transactions
+  const billTransactions = transactions.filter(t => t.isBill);
+
+  billTransactions.forEach(bill => {
+    if (!bill.dueDate) return; // Skip if no due date
+
     const [billYear, billMonth, billDay] = bill.dueDate.split('-').map(Number);
     const startDate = new Date(billYear, billMonth - 1, billDay);
+    const frequency = bill.frequency || 'one-time';
 
-    if (bill.frequency === 'one-time') {
+    if (frequency === 'one-time') {
       if (billYear === year && billMonth - 1 === month) {
         const payment = getPaymentForOccurrence(bill, bill.dueDate);
         occurrences.push({
-          billId: bill.id,
-          billName: bill.name,
-          billAmount: bill.amount,
+          billId: bill.id || `${bill.date}-${bill.description}`,
+          billName: bill.billName || bill.description,
+          billAmount: bill.billAmount || Math.abs(bill.amount),
           occurrenceDate: bill.dueDate,
           dueDay: billDay,
           category: bill.category,
           sourceDescription: bill.sourceDescription,
-          payment
+          payment,
+          billTransaction: bill
         });
       }
-    } else if (bill.frequency === 'monthly') {
+    } else if (frequency === 'monthly') {
       // Check if this month should have an occurrence
       const occurrenceDate = new Date(year, month, billDay);
       if (occurrenceDate >= startDate) {
         const occurrenceDateStr = formatDate(occurrenceDate);
         const payment = getPaymentForOccurrence(bill, occurrenceDateStr);
         occurrences.push({
-          billId: bill.id,
-          billName: bill.name,
-          billAmount: bill.amount,
+          billId: bill.id || `${bill.date}-${bill.description}`,
+          billName: bill.billName || bill.description,
+          billAmount: bill.billAmount || Math.abs(bill.amount),
           occurrenceDate: occurrenceDateStr,
           dueDay: billDay,
           category: bill.category,
           sourceDescription: bill.sourceDescription,
-          payment
+          payment,
+          billTransaction: bill
         });
       }
-    } else if (bill.frequency === 'quarterly') {
+    } else if (frequency === 'quarterly') {
       const monthsSinceStart = (year - billYear) * 12 + (month - (billMonth - 1));
       if (monthsSinceStart >= 0 && monthsSinceStart % 3 === 0) {
         const occurrenceDate = new Date(year, month, billDay);
         const occurrenceDateStr = formatDate(occurrenceDate);
         const payment = getPaymentForOccurrence(bill, occurrenceDateStr);
         occurrences.push({
-          billId: bill.id,
-          billName: bill.name,
-          billAmount: bill.amount,
+          billId: bill.id || `${bill.date}-${bill.description}`,
+          billName: bill.billName || bill.description,
+          billAmount: bill.billAmount || Math.abs(bill.amount),
           occurrenceDate: occurrenceDateStr,
           dueDay: billDay,
           category: bill.category,
           sourceDescription: bill.sourceDescription,
-          payment
+          payment,
+          billTransaction: bill
         });
       }
-    } else if (bill.frequency === 'yearly') {
+    } else if (frequency === 'yearly') {
       if (billMonth - 1 === month && year >= billYear) {
         const occurrenceDate = new Date(year, month, billDay);
         const occurrenceDateStr = formatDate(occurrenceDate);
         const payment = getPaymentForOccurrence(bill, occurrenceDateStr);
         occurrences.push({
-          billId: bill.id,
-          billName: bill.name,
-          billAmount: bill.amount,
+          billId: bill.id || `${bill.date}-${bill.description}`,
+          billName: bill.billName || bill.description,
+          billAmount: bill.billAmount || Math.abs(bill.amount),
           occurrenceDate: occurrenceDateStr,
           dueDay: billDay,
           category: bill.category,
           sourceDescription: bill.sourceDescription,
-          payment
+          payment,
+          billTransaction: bill
         });
       }
-    } else if (bill.frequency === 'weekly') {
+    } else if (frequency === 'weekly') {
       const weekMs = 7 * 24 * 60 * 60 * 1000;
       let currentDate = new Date(startDate);
       const monthStart = new Date(year, month, 1);
@@ -113,14 +125,15 @@ export function generateBillOccurrences(
           const occurrenceDateStr = formatDate(currentDate);
           const payment = getPaymentForOccurrence(bill, occurrenceDateStr);
           occurrences.push({
-            billId: bill.id,
-            billName: bill.name,
-            billAmount: bill.amount,
+            billId: bill.id || `${bill.date}-${bill.description}`,
+            billName: bill.billName || bill.description,
+            billAmount: bill.billAmount || Math.abs(bill.amount),
             occurrenceDate: occurrenceDateStr,
             dueDay: currentDate.getDate(),
             category: bill.category,
             sourceDescription: bill.sourceDescription,
-            payment
+            payment,
+            billTransaction: bill
           });
         }
         currentDate = new Date(currentDate.getTime() + weekMs);
@@ -134,7 +147,7 @@ export function generateBillOccurrences(
 /**
  * Get payment info for a specific bill occurrence
  */
-function getPaymentForOccurrence(bill: Bill, occurrenceDate: string): BillPayment | undefined {
+function getPaymentForOccurrence(bill: Transaction, occurrenceDate: string): BillPayment | undefined {
   // Check new payment format
   if (bill.payments) {
     return bill.payments.find(p => p.occurrenceDate === occurrenceDate);
@@ -295,30 +308,58 @@ function checkDescriptionMatch(
 }
 
 /**
- * Update bills with automatic payment matching
+ * Update bill transactions with automatic payment matching
+ * Now works with transactions that have isBill = true
+ * Marks matched transactions as hidden (they'll show when you expand the bill)
  */
 export function updateBillsWithTransactionMatches(
-  bills: Bill[],
   transactions: Transaction[],
   year: number,
   month: number,
   settings: BillMatchingSettings
-): Bill[] {
-  const billOccurrences = generateBillOccurrences(bills, year, month);
+): Transaction[] {
+  const billOccurrences = generateBillOccurrences(transactions, year, month);
 
-  // Find all transaction matches
-  const matches: TransactionBillMatch[] = transactions
+  // Separate bill transactions from regular transactions
+  const regularTransactions = transactions.filter(t => !t.isBill);
+
+  // Find all transaction matches (regular transactions matching to bills)
+  const matches: TransactionBillMatch[] = regularTransactions
     .map((t, i) => matchTransactionToBill(t, i, billOccurrences, settings))
-    .filter(m => m.matchedBill !== null && m.matchScore >= settings.minimumScore); // Use minimum score from settings
+    .filter(m => m.matchedBill !== null && m.matchScore >= settings.minimumScore);
 
-  // Update bills with payment info
-  const updatedBills = bills.map(bill => {
-    const billMatches = matches.filter(m => m.matchedBill?.billId === bill.id);
+  // Create a map of transaction ID -> matched bill ID
+  const transactionToBillMap = new Map<string, string>();
+  matches.forEach(match => {
+    const transId = match.transaction.id || `${match.transaction.date}-${match.transaction.description}`;
+    transactionToBillMap.set(transId, match.matchedBill!.billId);
+  });
 
-    if (billMatches.length === 0) return bill;
+  // Update transactions: mark matched ones as hidden and update bills with payment info
+  const updatedTransactions = transactions.map(transaction => {
+    // For regular transactions: mark as hidden if matched to a bill
+    if (!transaction.isBill) {
+      const transId = transaction.id || `${transaction.date}-${transaction.description}`;
+      const matchedBillId = transactionToBillMap.get(transId);
+
+      if (matchedBillId) {
+        return {
+          ...transaction,
+          matchedToBillId: matchedBillId, // Link to the bill it matched
+          hiddenAsBillPayment: true // Hide from main transaction list
+        };
+      }
+      return transaction;
+    }
+
+    // For bill transactions: add payment info
+    const billId = transaction.id || `${transaction.date}-${transaction.description}`;
+    const billMatches = matches.filter(m => m.matchedBill?.billId === billId);
+
+    if (billMatches.length === 0) return transaction;
 
     // Initialize payments array if needed
-    const payments = bill.payments || [];
+    const payments = transaction.payments || [];
 
     // Add new payments
     billMatches.forEach(match => {
@@ -346,12 +387,12 @@ export function updateBillsWithTransactionMatches(
     });
 
     return {
-      ...bill,
+      ...transaction,
       payments
     };
   });
 
-  return updatedBills;
+  return updatedTransactions;
 }
 
 /**

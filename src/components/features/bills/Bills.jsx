@@ -2,12 +2,12 @@ import { useState, useMemo } from 'react'
 import '../../../styles/components/Bills.css'
 import { generateBillOccurrences } from '../../../utils/billMatching'
 
-function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange, categories }) {
+function Bills({ transactions, onUpdateTransactions, selectedYear, selectedMonth, onDateChange, categories }) {
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [formData, setFormData] = useState({
-    name: '',
-    amount: '',
+    billName: '',
+    billAmount: '',
     dueDate: '',
     frequency: 'monthly',
     category: '',
@@ -15,34 +15,42 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
     paidDates: []
   })
 
+  // Filter to get only bill transactions
+  const bills = transactions.filter(t => t.isBill)
+
   const cashRegisterSound = useMemo(() => new Audio('/cash-register.mp3'), [])
 
   const handleAddBill = () => {
     console.log('handleAddBill called with formData:', formData)
 
-    if (!formData.name || !formData.amount || !formData.dueDate) {
+    if (!formData.billName || !formData.billAmount || !formData.dueDate) {
       alert('Please fill in all required fields')
       return
     }
 
     const newBill = {
-      id: Date.now(),
-      ...formData,
-      amount: parseFloat(formData.amount),
-      paidDates: []
+      id: `bill-${Date.now()}`,
+      date: formData.dueDate,
+      description: formData.billName,
+      amount: -Math.abs(parseFloat(formData.billAmount)), // Bills are expenses (negative)
+      category: formData.category,
+      isBill: true,
+      billName: formData.billName,
+      billAmount: parseFloat(formData.billAmount),
+      dueDate: formData.dueDate,
+      frequency: formData.frequency,
+      memo: formData.memo,
+      paidDates: [],
+      payments: []
     }
 
     console.log('Adding new bill:', newBill)
-    console.log('Current bills:', bills)
-    const updatedBills = [...bills, newBill]
-    console.log('Updated bills:', updatedBills)
-    console.log('Calling onUpdateBills with:', updatedBills)
-    onUpdateBills(updatedBills)
-    console.log('onUpdateBills called successfully')
+    const updatedTransactions = [...transactions, newBill]
+    onUpdateTransactions(updatedTransactions)
 
     setFormData({
-      name: '',
-      amount: '',
+      billName: '',
+      billAmount: '',
       dueDate: '',
       frequency: 'monthly',
       category: '',
@@ -50,31 +58,48 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
       paidDates: []
     })
     setIsAdding(false)
-    console.log('Form reset and closed')
   }
 
   const handleEditBill = (bill) => {
     setEditingId(bill.id)
-    setFormData(bill)
+    setFormData({
+      billName: bill.billName || bill.description,
+      billAmount: bill.billAmount || Math.abs(bill.amount),
+      dueDate: bill.dueDate,
+      frequency: bill.frequency || 'monthly',
+      category: bill.category,
+      memo: bill.memo || '',
+      paidDates: bill.paidDates || []
+    })
     setIsAdding(true)
   }
 
   const handleUpdateBill = () => {
-    if (!formData.name || !formData.amount || !formData.dueDate) {
+    if (!formData.billName || !formData.billAmount || !formData.dueDate) {
       alert('Please fill in all required fields')
       return
     }
 
-    const updatedBills = bills.map(bill =>
-      bill.id === editingId
-        ? { ...formData, amount: parseFloat(formData.amount) }
-        : bill
+    const updatedTransactions = transactions.map(t =>
+      t.id === editingId && t.isBill
+        ? {
+            ...t,
+            description: formData.billName,
+            billName: formData.billName,
+            billAmount: parseFloat(formData.billAmount),
+            amount: -Math.abs(parseFloat(formData.billAmount)),
+            dueDate: formData.dueDate,
+            frequency: formData.frequency,
+            category: formData.category,
+            memo: formData.memo
+          }
+        : t
     )
 
-    onUpdateBills(updatedBills)
+    onUpdateTransactions(updatedTransactions)
     setFormData({
-      name: '',
-      amount: '',
+      billName: '',
+      billAmount: '',
       dueDate: '',
       frequency: 'monthly',
       category: '',
@@ -87,28 +112,28 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
 
   const handleDeleteBill = (id) => {
     if (confirm('Are you sure you want to delete this bill?')) {
-      onUpdateBills(bills.filter(bill => bill.id !== id))
+      onUpdateTransactions(transactions.filter(t => t.id !== id))
     }
   }
 
   const handleTogglePaid = (billId, occurrenceDate) => {
-    const updatedBills = bills.map(bill => {
-      if (bill.id === billId) {
+    const updatedTransactions = transactions.map(transaction => {
+      if (transaction.id === billId && transaction.isBill) {
         // Use new payments structure
-        const payments = bill.payments || []
+        const payments = transaction.payments || []
         const existingPayment = payments.find(p => p.occurrenceDate === occurrenceDate)
 
         if (existingPayment) {
           // Remove payment
           return {
-            ...bill,
+            ...transaction,
             payments: payments.filter(p => p.occurrenceDate !== occurrenceDate)
           }
         } else {
           // Add manual payment
           cashRegisterSound.play().catch(err => console.log('Sound play failed:', err))
           return {
-            ...bill,
+            ...transaction,
             payments: [...payments, {
               occurrenceDate,
               manuallyMarked: true
@@ -116,17 +141,17 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
           }
         }
       }
-      return bill
+      return transaction
     })
-    onUpdateBills(updatedBills)
+    onUpdateTransactions(updatedTransactions)
   }
 
   const handleCancelEdit = () => {
     setIsAdding(false)
     setEditingId(null)
     setFormData({
-      name: '',
-      amount: '',
+      billName: '',
+      billAmount: '',
       dueDate: '',
       frequency: 'monthly',
       category: '',
@@ -144,18 +169,20 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
     // Generate occurrences for the entire year range
     for (let year = startYear; year <= endYear; year++) {
       for (let month = 0; month < 12; month++) {
-        const occurrences = generateBillOccurrences(bills, year, month)
+        const occurrences = generateBillOccurrences(transactions, year, month)
         recurringBills.push(...occurrences.map(occ => ({
-          ...bills.find(b => b.id === occ.billId),
+          ...occ.billTransaction,
           occurrenceDate: occ.occurrenceDate,
           isPaid: !!occ.payment,
-          payment: occ.payment
+          payment: occ.payment,
+          billName: occ.billName,
+          billAmount: occ.billAmount
         })))
       }
     }
 
     return recurringBills
-  }, [bills, selectedYear])
+  }, [transactions, selectedYear])
 
 
   const sortedBills = useMemo(() => {
@@ -195,11 +222,11 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
   }, [sortedBills, selectedMonth, selectedYear])
 
   const totalAmount = useMemo(() => {
-    return currentMonthBills.reduce((sum, bill) => sum + bill.amount, 0)
+    return currentMonthBills.reduce((sum, bill) => sum + (bill.billAmount || Math.abs(bill.amount)), 0)
   }, [currentMonthBills])
 
   const unpaidAmount = useMemo(() => {
-    return currentMonthBills.filter(b => !b.isPaid).reduce((sum, bill) => sum + bill.amount, 0)
+    return currentMonthBills.filter(b => !b.isPaid).reduce((sum, bill) => sum + (bill.billAmount || Math.abs(bill.amount)), 0)
   }, [currentMonthBills])
 
   const categoryTotals = useMemo(() => {
@@ -209,7 +236,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
       if (!totals[category]) {
         totals[category] = 0
       }
-      totals[category] += bill.amount
+      totals[category] += (bill.billAmount || Math.abs(bill.amount))
     })
     return Object.entries(totals)
       .map(([category, amount]) => ({ category, amount }))
@@ -260,8 +287,8 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
                 <input
                   type="text"
                   placeholder="e.g., Electric Bill"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  value={formData.billName}
+                  onChange={(e) => setFormData({ ...formData, billName: e.target.value })}
                 />
               </div>
               <div className="form-group">
@@ -270,8 +297,8 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
                   type="number"
                   placeholder="0.00"
                   step="0.01"
-                  value={formData.amount}
-                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                  value={formData.billAmount}
+                  onChange={(e) => setFormData({ ...formData, billAmount: e.target.value })}
                 />
               </div>
               <div className="form-group">
@@ -375,7 +402,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
                     <div className="bill-info">
                       <div className="bill-header">
                         <div className="bill-name">
-                          {bill.name}
+                          {bill.billName || bill.description}
                           {bill.sourceDescription && (
                             <span className="bill-source-badge" title="Created from transaction">📄</span>
                           )}
@@ -389,7 +416,7 @@ function Bills({ bills, onUpdateBills, selectedYear, selectedMonth, onDateChange
                             </span>
                           )}
                         </div>
-                        <div className="bill-amount">{formatCurrency(bill.amount)}</div>
+                        <div className="bill-amount">{formatCurrency(bill.billAmount || Math.abs(bill.amount))}</div>
                       </div>
                       <div className="bill-meta">
                         <span className="bill-date">{formatDate(bill.occurrenceDate)}</span>

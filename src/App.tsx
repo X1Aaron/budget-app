@@ -12,7 +12,6 @@ import { useTheme } from './contexts/ThemeContext';
 import type {
   Transaction,
   Category,
-  Bill,
   MonthlyBudget,
   MerchantMapping,
   CategoryMapping,
@@ -30,15 +29,8 @@ function App() {
     const saved = localStorage.getItem('monthlyBudgets');
     return saved ? JSON.parse(saved) : {};
   });
-  const [bills, setBills] = useState<Bill[]>(() => {
-    const saved = localStorage.getItem('bills');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const handleUpdateBills = (updatedBills: Bill[]) => {
-    console.log('handleUpdateBills called with:', updatedBills);
-    setBills(updatedBills);
-  };
+  // Bills are now stored as transactions with isBill = true
+  // No separate bills state needed anymore
 
   const [categories, setCategories] = useState<Category[]>(() => {
     const saved = localStorage.getItem('categories');
@@ -77,10 +69,6 @@ function App() {
   }, [accountStartingBalance]);
 
   useEffect(() => {
-    localStorage.setItem('bills', JSON.stringify(bills));
-  }, [bills]);
-
-  useEffect(() => {
     localStorage.setItem('monthlyBudgets', JSON.stringify(monthlyBudgets));
   }, [monthlyBudgets]);
 
@@ -111,22 +99,24 @@ function App() {
 
   // Auto-match transactions to bills
   useEffect(() => {
-    if (transactions.length > 0 && bills.length > 0) {
-      const updatedBills = updateBillsWithTransactionMatches(
-        bills,
-        transactions,
-        selectedYear,
-        selectedMonth,
-        billMatchingSettings
-      );
+    if (transactions.length > 0) {
+      const billTransactions = transactions.filter(t => t.isBill);
+      if (billTransactions.length > 0) {
+        const updatedTransactions = updateBillsWithTransactionMatches(
+          transactions,
+          selectedYear,
+          selectedMonth,
+          billMatchingSettings
+        );
 
-      // Only update if there are actual changes
-      const hasChanges = JSON.stringify(updatedBills) !== JSON.stringify(bills);
-      if (hasChanges) {
-        setBills(updatedBills);
+        // Only update if there are actual changes
+        const hasChanges = JSON.stringify(updatedTransactions) !== JSON.stringify(transactions);
+        if (hasChanges) {
+          setTransactions(updatedTransactions);
+        }
       }
     }
-  }, [transactions, bills.length, selectedYear, selectedMonth, billMatchingSettings]); // Depend on bills.length not bills to avoid infinite loop
+  }, [transactions.length, selectedYear, selectedMonth, billMatchingSettings]); // Depend on transactions.length to avoid infinite loop
 
   const handleImport = (importedTransactions: Transaction[], existingTransactions: Transaction[] = transactions) => {
     // Check for duplicate transactions
@@ -238,8 +228,7 @@ function App() {
   const handleImportDemoData = () => {
     const demoTransactions = generateDemoData();
 
-    setTransactions(demoTransactions);
-    setBills([]);  // Bills are now marked as isBill in transactions
+    setTransactions(demoTransactions);  // Bills are now marked as isBill in transactions
     setAccountStartingBalance(5000);
 
     // Calculate average monthly expenses per category from demo data
@@ -386,8 +375,7 @@ function App() {
             onDateChange={handleDateChange}
             onUpdateTransaction={handleUpdateTransaction}
             accountStartingBalance={accountStartingBalance}
-            bills={bills}
-            onUpdateBills={handleUpdateBills}
+            onUpdateTransactions={setTransactions}
           />
         ) : activeSection === 'categories' ? (
           <div className="categories-section">

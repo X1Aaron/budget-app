@@ -12,8 +12,7 @@ function SpendingAndBills({
   onDateChange,
   onUpdateTransaction,
   accountStartingBalance,
-  bills,
-  onUpdateBills
+  onUpdateTransactions
 }) {
   const [expandedIndex, setExpandedIndex] = useState(null)
   const [editingMerchantIndex, setEditingMerchantIndex] = useState(null)
@@ -49,28 +48,29 @@ function SpendingAndBills({
 
   // Generate bill occurrences for the current month
   const billOccurrences = useMemo(() => {
-    const occurrences = generateBillOccurrences(bills, selectedYear, selectedMonth)
+    const occurrences = generateBillOccurrences(transactions, selectedYear, selectedMonth)
     return occurrences.map(occ => {
-      const bill = bills.find(b => b.id === occ.billId)
       return {
         ...occ,
-        bill,
+        billTransaction: occ.billTransaction,
         type: 'bill',
         date: occ.occurrenceDate,
-        amount: -bill.amount, // Bills are expenses
-        category: bill.category,
-        description: bill.name,
-        merchantName: bill.name,
+        amount: -occ.billAmount, // Bills are expenses
+        category: occ.category,
+        description: occ.billName,
+        merchantName: occ.billName,
         isPaid: !!occ.payment,
         payment: occ.payment
       }
     })
-  }, [bills, selectedYear, selectedMonth])
+  }, [transactions, selectedYear, selectedMonth])
 
-  // Get actual transactions for the month
+  // Get actual non-bill transactions for the month (excluding hidden ones matched to bills)
   const monthlyTransactions = useMemo(() => {
     return transactions
       .filter(t => {
+        if (t.isBill) return false; // Exclude bill transactions
+        if (t.hiddenAsBillPayment) return false; // Exclude transactions matched to bills
         const date = new Date(t.date)
         return date.getFullYear() === selectedYear && date.getMonth() === selectedMonth
       })
@@ -181,15 +181,16 @@ function SpendingAndBills({
 
   const handleBillCheckbox = (transaction, originalIndex) => {
     // Check if this transaction is already a bill
-    const existingBill = bills.find(b =>
-      b.sourceDescription === transaction.description ||
-      b.name === (transaction.merchantName || transaction.description)
+    const existingBill = transactions.find(t => t.isBill &&
+      (t.sourceDescription === transaction.description ||
+       t.billName === (transaction.merchantName || transaction.description) ||
+       t.description === (transaction.merchantName || transaction.description))
     )
 
     if (existingBill) {
       // Uncheck - remove the bill
-      if (confirm(`Remove "${existingBill.name}" from bills?`)) {
-        onUpdateBills(bills.filter(b => b.id !== existingBill.id))
+      if (confirm(`Remove "${existingBill.billName || existingBill.description}" from bills?`)) {
+        onUpdateTransactions(transactions.filter(t => t.id !== existingBill.id))
       }
     } else {
       // Check - open modal to configure bill
@@ -236,7 +237,7 @@ function SpendingAndBills({
 
     if (addType === 'transaction') {
       const newTransaction = {
-        id: Date.now(),
+        id: `trans-${Date.now()}`,
         date: formData.date,
         description: formData.description,
         merchantName: formData.description,
@@ -248,17 +249,22 @@ function SpendingAndBills({
       onUpdateTransaction(transactions.length, newTransaction)
     } else {
       const newBill = {
-        id: Date.now(),
-        name: formData.description,
-        amount: parseFloat(formData.amount),
-        dueDate: formData.date,
-        frequency: formData.frequency,
+        id: `bill-${Date.now()}`,
+        date: formData.date,
+        description: formData.description,
+        amount: -Math.abs(parseFloat(formData.amount)), // Bills are expenses
         category: formData.category,
         memo: formData.memo,
+        isBill: true,
+        billName: formData.description,
+        billAmount: parseFloat(formData.amount),
+        dueDate: formData.date,
+        frequency: formData.frequency,
         sourceDescription: formData.sourceDescription,
-        paidDates: [formData.date]
+        paidDates: [formData.date],
+        payments: []
       }
-      onUpdateBills([...bills, newBill])
+      onUpdateTransactions([...transactions, newBill])
     }
 
     // Reset form and close modal
@@ -274,29 +280,30 @@ function SpendingAndBills({
   }
 
   const isTransactionABill = (transaction) => {
-    return bills.some(b =>
-      b.sourceDescription === transaction.description ||
-      b.name === (transaction.merchantName || transaction.description)
+    return transactions.some(t => t.isBill &&
+      (t.sourceDescription === transaction.description ||
+       t.billName === (transaction.merchantName || transaction.description) ||
+       t.description === (transaction.merchantName || transaction.description))
     )
   }
 
   const handleTogglePaid = (billOccurrence) => {
-    const updatedBills = bills.map(bill => {
-      if (bill.id === billOccurrence.billId) {
-        const payments = bill.payments || []
+    const updatedTransactions = transactions.map(transaction => {
+      if (transaction.isBill && transaction.id === billOccurrence.billId) {
+        const payments = transaction.payments || []
         const existingPayment = payments.find(p => p.occurrenceDate === billOccurrence.occurrenceDate)
 
         if (existingPayment) {
           // Remove payment
           return {
-            ...bill,
+            ...transaction,
             payments: payments.filter(p => p.occurrenceDate !== billOccurrence.occurrenceDate)
           }
         } else {
           // Add manual payment
           cashRegisterSound.play().catch(err => console.log('Sound play failed:', err))
           return {
-            ...bill,
+            ...transaction,
             payments: [...payments, {
               occurrenceDate: billOccurrence.occurrenceDate,
               manuallyMarked: true
@@ -304,15 +311,15 @@ function SpendingAndBills({
           }
         }
       }
-      return bill
+      return transaction
     })
-    onUpdateBills(updatedBills)
+    onUpdateTransactions(updatedTransactions)
   }
 
   // Summary stats
   const summary = useMemo(() => {
-    const billsTotal = billOccurrences.reduce((sum, b) => sum + b.bill.amount, 0)
-    const billsUnpaid = billOccurrences.filter(b => !b.isPaid).reduce((sum, b) => sum + b.bill.amount, 0)
+    const billsTotal = billOccurrences.reduce((sum, b) => sum + b.billAmount, 0)
+    const billsUnpaid = billOccurrences.filter(b => !b.isPaid).reduce((sum, b) => sum + b.billAmount, 0)
     const transactionsTotal = monthlyTransactions.reduce((sum, t) => sum + t.amount, 0)
     const income = monthlyTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0)
     const expenses = monthlyTransactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0)
@@ -565,11 +572,19 @@ function SpendingAndBills({
                   ? `timeline-row bill-row ${item.isPaid ? 'paid' : 'unpaid'}`
                   : `timeline-row transaction-row ${item.amount < 0 ? 'expense' : 'income'}${isUncategorized ? ' uncategorized' : ''}${isExpanded ? ' expanded' : ''}${isMatchedToBill ? ' bill-matched' : ''}`
 
+                // Get matched transactions for bills
+                const matchedTransactions = item.type === 'bill' && item.payment
+                  ? transactions.filter(t =>
+                      t.matchedToBillId === item.billId &&
+                      t.hiddenAsBillPayment
+                    )
+                  : []
+
                 return (
                   <React.Fragment key={`${item.type}-${index}`}>
                     <tr
                       className={rowClassName}
-                      onClick={() => item.type === 'transaction' && setExpandedIndex(isExpanded ? null : index)}
+                      onClick={() => setExpandedIndex(isExpanded ? null : index)}
                     >
                       {/* Type Column */}
                       <td className="type-cell" onClick={(e) => e.stopPropagation()}>
@@ -771,6 +786,81 @@ function SpendingAndBills({
                                   <div className="bill-match-row">
                                     <strong>Match Score:</strong> {billMatch.matchScore}/100
                                   </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+
+                    {/* Expanded row for bills */}
+                    {isExpanded && item.type === 'bill' && (
+                      <tr key={`${index}-expanded`} className="timeline-expanded-row bill-expanded">
+                        <td colSpan="7" onClick={(e) => e.stopPropagation()}>
+                          <div className="timeline-details">
+                            <div className="detail-section">
+                              <label className="detail-label">Bill Information:</label>
+                              <div className="bill-details">
+                                <div className="bill-detail-row">
+                                  <strong>Name:</strong> {item.billName || item.description}
+                                </div>
+                                <div className="bill-detail-row">
+                                  <strong>Expected Amount:</strong> {formatCurrency(item.billAmount)}
+                                </div>
+                                <div className="bill-detail-row">
+                                  <strong>Due Date:</strong> {item.occurrenceDate}
+                                </div>
+                                <div className="bill-detail-row">
+                                  <strong>Status:</strong> {item.isPaid ? '✓ Paid' : '⏳ Unpaid'}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Show matched transactions */}
+                            {matchedTransactions.length > 0 && (
+                              <div className="detail-section matched-transactions-section">
+                                <label className="detail-label">Matched Transactions:</label>
+                                <div className="matched-transactions-list">
+                                  {matchedTransactions.map((trans, idx) => (
+                                    <div key={idx} className="matched-transaction-item">
+                                      <div className="matched-trans-row">
+                                        <strong>Date:</strong> {trans.date}
+                                      </div>
+                                      <div className="matched-trans-row">
+                                        <strong>Description:</strong> {trans.description}
+                                      </div>
+                                      <div className="matched-trans-row">
+                                        <strong>Amount:</strong> {formatCurrency(trans.amount)}
+                                      </div>
+                                      {trans.memo && (
+                                        <div className="matched-trans-row">
+                                          <strong>Memo:</strong> {trans.memo}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {item.payment && (
+                              <div className="detail-section payment-info-section">
+                                <label className="detail-label">Payment Details:</label>
+                                <div className="payment-info">
+                                  <div className="payment-row">
+                                    <strong>Type:</strong> {item.payment.manuallyMarked ? 'Manually marked' : 'Auto-matched'}
+                                  </div>
+                                  {item.payment.transactionDate && (
+                                    <div className="payment-row">
+                                      <strong>Paid on:</strong> {item.payment.transactionDate}
+                                    </div>
+                                  )}
+                                  {item.payment.transactionAmount && (
+                                    <div className="payment-row">
+                                      <strong>Paid amount:</strong> {formatCurrency(item.payment.transactionAmount)}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             )}
