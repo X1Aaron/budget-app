@@ -429,6 +429,7 @@ function App() {
           <Dashboard
             transactions={transactions}
             categories={categories}
+            bills={transactions.filter(t => t.isBill)}
             recurringIncomes={recurringIncomes}
             selectedYear={selectedYear}
             selectedMonth={selectedMonth}
@@ -436,6 +437,17 @@ function App() {
             accountStartingBalance={accountStartingBalance}
             onDateChange={handleDateChange}
             onUpdateBudget={handleUpdateBudget}
+            onMarkBillPaid={(billId: string, dueDate: string) => {
+              setTransactions(prev => prev.map(t => {
+                if (t.id === billId) {
+                  const paidDates = t.paidDates || [];
+                  if (!paidDates.includes(dueDate)) {
+                    return { ...t, paidDates: [...paidDates, dueDate] };
+                  }
+                }
+                return t;
+              }));
+            }}
           />
         ) : activeSection === 'transactions' ? (
           <Transactions

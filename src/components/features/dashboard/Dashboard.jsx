@@ -15,11 +15,14 @@ function Dashboard({
   monthlyBudgets,
   accountStartingBalance,
   onDateChange,
-  onUpdateBudget
+  onUpdateBudget,
+  onMarkBillPaid
 }) {
   const { theme } = useTheme()
   const [isEditingBudget, setIsEditingBudget] = useState(false)
   const [budgetInput, setBudgetInput] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('all') // 'all', 'over-budget', 'approaching'
+  const [showCategoryChart, setShowCategoryChart] = useState(false)
 
   const monthlyTransactions = useMemo(() => {
     return transactions.filter(t => {
@@ -89,6 +92,32 @@ function Dashboard({
       })
       .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
   }, [bills])
+
+  // Calculate actionable items for alerts
+  const alerts = useMemo(() => {
+    const unlinkedCount = monthlyTransactions.filter(t => !t.billId && t.amount < 0).length
+    const uncategorizedCount = monthlyTransactions.filter(t => !t.category || t.category === 'Uncategorized').length
+
+    const unpaidBillsThisMonth = bills.filter(bill => {
+      if (bill.isPaid) return false
+      const dueDate = new Date(bill.dueDate)
+      return dueDate.getFullYear() === selectedYear && dueDate.getMonth() === selectedMonth
+    }).length
+
+    const overBudgetCategories = categories.filter(cat => {
+      if (cat.budgeted <= 0) return false
+      const categoryAmount = summary.categoryBreakdown[cat.name] || 0
+      const spent = categoryAmount < 0 ? Math.abs(categoryAmount) : 0
+      return spent > cat.budgeted
+    }).length
+
+    return {
+      unlinkedCount,
+      uncategorizedCount,
+      unpaidBillsThisMonth,
+      overBudgetCategories
+    }
+  }, [monthlyTransactions, bills, categories, summary.categoryBreakdown, selectedYear, selectedMonth])
 
   const cashFlowData = useMemo(() => {
     const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate()
@@ -301,6 +330,26 @@ function Dashboard({
       .sort((a, b) => b.amount - a.amount)
   }, [summary.categoryBreakdown])
 
+  const filteredCategories = useMemo(() => {
+    return categories
+      .filter(cat => cat.budgeted > 0)
+      .filter(cat => {
+        if (categoryFilter === 'all') return true
+
+        const categoryAmount = summary.categoryBreakdown[cat.name] || 0
+        const spent = categoryAmount < 0 ? Math.abs(categoryAmount) : 0
+        const difference = cat.budgeted - spent
+
+        if (categoryFilter === 'over-budget') {
+          return difference < 0
+        } else if (categoryFilter === 'approaching') {
+          return spent >= cat.budgeted * 0.8 && difference >= 0
+        }
+        return true
+      })
+      .sort((a, b) => a.name.localeCompare(b.name))
+  }, [categories, categoryFilter, summary.categoryBreakdown])
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -361,42 +410,140 @@ function Dashboard({
 
   return (
     <div className="dashboard">
+      {/* Action Items Section */}
+      {(alerts.unlinkedCount > 0 || alerts.uncategorizedCount > 0 || alerts.unpaidBillsThisMonth > 0 || alerts.overBudgetCategories > 0 || monthlyTransactions.length === 0 || categories.length === 0 || bills.length === 0) && (
+        <div className="action-alerts">
+          <h2>Action Items</h2>
+          <div className="alerts-grid">
+            {monthlyTransactions.length === 0 && (
+              <div className="alert-card alert-info">
+                <div className="alert-icon">📊</div>
+                <div className="alert-content">
+                  <div className="alert-title">No Transactions Yet</div>
+                  <div className="alert-description">Import your bank transactions to get started</div>
+                </div>
+                <button className="alert-action" onClick={() => window.location.href = '#/transactions'}>Import</button>
+              </div>
+            )}
+            {categories.length === 0 && (
+              <div className="alert-card alert-info">
+                <div className="alert-icon">🏷️</div>
+                <div className="alert-content">
+                  <div className="alert-title">Set Up Categories</div>
+                  <div className="alert-description">Create categories to organize your budget</div>
+                </div>
+                <button className="alert-action" onClick={() => window.location.href = '#/categories'}>Set Up</button>
+              </div>
+            )}
+            {bills.length === 0 && monthlyTransactions.length > 0 && (
+              <div className="alert-card alert-info">
+                <div className="alert-icon">📄</div>
+                <div className="alert-content">
+                  <div className="alert-title">Add Your Bills</div>
+                  <div className="alert-description">Track recurring payments</div>
+                </div>
+                <button className="alert-action" onClick={() => window.location.href = '#/bills'}>Add Bills</button>
+              </div>
+            )}
+            {alerts.uncategorizedCount > 0 && (
+              <div className="alert-card alert-warning">
+                <div className="alert-icon">⚠️</div>
+                <div className="alert-content">
+                  <div className="alert-title">{alerts.uncategorizedCount} Uncategorized Transaction{alerts.uncategorizedCount !== 1 ? 's' : ''}</div>
+                  <div className="alert-description">Review and categorize your transactions</div>
+                </div>
+                <button className="alert-action" onClick={() => window.location.href = '#/transactions'}>Review</button>
+              </div>
+            )}
+            {alerts.overBudgetCategories > 0 && (
+              <div className="alert-card alert-danger">
+                <div className="alert-icon">🚨</div>
+                <div className="alert-content">
+                  <div className="alert-title">{alerts.overBudgetCategories} Categor{alerts.overBudgetCategories !== 1 ? 'ies' : 'y'} Over Budget</div>
+                  <div className="alert-description">You've exceeded your budget in {alerts.overBudgetCategories} categor{alerts.overBudgetCategories !== 1 ? 'ies' : 'y'}</div>
+                </div>
+                <button className="alert-action" onClick={() => setCategoryFilter('over-budget')}>View</button>
+              </div>
+            )}
+            {alerts.unpaidBillsThisMonth > 0 && (
+              <div className="alert-card alert-warning">
+                <div className="alert-icon">💳</div>
+                <div className="alert-content">
+                  <div className="alert-title">{alerts.unpaidBillsThisMonth} Unpaid Bill{alerts.unpaidBillsThisMonth !== 1 ? 's' : ''}</div>
+                  <div className="alert-description">You have bills due this month</div>
+                </div>
+                <button className="alert-action" onClick={() => window.location.href = '#/bills'}>Pay</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Summary Cards - Simplified to 3 */}
       <div className="summary-cards">
-        <div className="summary-card income">
-          <h3>Income</h3>
-          <p className="amount">{formatCurrency(summary.income)}</p>
+        <div className={`summary-card balance ${summary.balance >= 0 ? 'positive' : 'negative'}`}>
+          <h3>Net Cash Flow</h3>
+          <p className="amount">{formatCurrency(summary.balance)}</p>
+          <p className="card-subtitle">{summary.balance >= 0 ? 'Surplus' : 'Deficit'} this month</p>
         </div>
         <div className="summary-card expenses">
-          <h3>Expenses</h3>
+          <h3>Total Spending</h3>
           <p className="amount">{formatCurrency(summary.expenses)}</p>
+          <p className="card-subtitle">
+            <span className="spending-breakdown">Need: {formatCurrency(summary.necessarySpending)} · Want: {formatCurrency(summary.discretionarySpending)}</span>
+          </p>
         </div>
-        <div className="summary-card balance">
-          <h3>Difference</h3>
-          <p className="amount">{formatCurrency(summary.balance)}</p>
-        </div>
-        <div className="summary-card necessary">
-          <h3>Necessary</h3>
-          <p className="amount">{formatCurrency(summary.necessarySpending)}</p>
-        </div>
-        <div className="summary-card discretionary">
-          <h3>Discretionary</h3>
-          <p className="amount">{formatCurrency(summary.discretionarySpending)}</p>
+        <div className={`summary-card budget ${remaining >= 0 ? 'positive' : 'negative'}`}>
+          <h3>Budget Remaining</h3>
+          <p className="amount">{currentBudget > 0 ? formatCurrency(remaining) : '—'}</p>
+          {currentBudget > 0 && (
+            <p className="card-subtitle">{formatCurrency(currentBudget)} budgeted</p>
+          )}
+          {currentBudget === 0 && (
+            <p className="card-subtitle"><button onClick={handleEditBudget} className="set-budget-btn">Set Budget</button></p>
+          )}
         </div>
       </div>
 
       {upcomingBills.length > 0 && (
         <div className="upcoming-bills-section">
-          <h2>Bills in the Next 7 Days</h2>
+          <div className="bills-header">
+            <h2>Upcoming Bills (Next 7 Days)</h2>
+            <div className="bills-total">Total: {formatCurrency(upcomingBills.reduce((sum, b) => sum + b.amount, 0))}</div>
+          </div>
           <div className="upcoming-bills-list">
-            {upcomingBills.map((bill) => (
-              <div key={bill.id} className="upcoming-bill-item">
-                <div className="bill-info">
-                  <div className="bill-name">{bill.name}</div>
-                  <div className="bill-due">Due {formatDate(bill.dueDate)}</div>
+            {upcomingBills.map((bill) => {
+              const dueDate = new Date(bill.dueDate)
+              const today = new Date()
+              today.setHours(0, 0, 0, 0)
+              dueDate.setHours(0, 0, 0, 0)
+
+              const isOverdue = dueDate < today
+              const isDueToday = dueDate.getTime() === today.getTime()
+
+              let urgencyClass = 'upcoming'
+              if (isOverdue) urgencyClass = 'overdue'
+              else if (isDueToday) urgencyClass = 'due-today'
+
+              return (
+                <div key={bill.id} className={`upcoming-bill-item ${urgencyClass}`}>
+                  <div className="bill-info">
+                    <div className="bill-name">{bill.name}</div>
+                    <div className="bill-due">Due {formatDate(bill.dueDate)}</div>
+                  </div>
+                  <div className="bill-amount">{formatCurrency(bill.amount)}</div>
+                  {onMarkBillPaid && (
+                    <button
+                      className="mark-paid-btn"
+                      onClick={() => onMarkBillPaid(bill.id, bill.dueDate)}
+                      title="Mark as paid"
+                    >
+                      ✓
+                    </button>
+                  )}
                 </div>
-                <div className="bill-amount">{formatCurrency(bill.amount)}</div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
@@ -438,7 +585,29 @@ function Dashboard({
       </div>
 
       <div className="categories-section">
-        <h2>Categories</h2>
+        <div className="categories-header">
+          <h2>Category Budgets</h2>
+          <div className="category-filters">
+            <button
+              className={`filter-btn ${categoryFilter === 'all' ? 'active' : ''}`}
+              onClick={() => setCategoryFilter('all')}
+            >
+              All
+            </button>
+            <button
+              className={`filter-btn ${categoryFilter === 'over-budget' ? 'active' : ''}`}
+              onClick={() => setCategoryFilter('over-budget')}
+            >
+              Over Budget
+            </button>
+            <button
+              className={`filter-btn ${categoryFilter === 'approaching' ? 'active' : ''}`}
+              onClick={() => setCategoryFilter('approaching')}
+            >
+              Approaching (≥80%)
+            </button>
+          </div>
+        </div>
         <div className="categories-table-container">
           <table className="categories-table">
             <thead>
@@ -451,10 +620,16 @@ function Dashboard({
               </tr>
             </thead>
             <tbody>
-              {categories
-                .filter(cat => cat.budgeted > 0)
-                .sort((a, b) => a.name.localeCompare(b.name))
-                .map((categoryObj) => {
+              {filteredCategories.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="empty-state">
+                    {categoryFilter === 'over-budget' && 'No categories are over budget'}
+                    {categoryFilter === 'approaching' && 'No categories are approaching their budget limit'}
+                    {categoryFilter === 'all' && 'No budgeted categories yet'}
+                  </td>
+                </tr>
+              )}
+              {filteredCategories.map((categoryObj) => {
                   const category = categoryObj.name
                   const color = getCategoryColor(category, categories)
                   const budgeted = categoryObj.budgeted || 0
@@ -507,40 +682,47 @@ function Dashboard({
       </div>
 
       <div className="cash-flow-section">
-        <h2>Category Spending</h2>
-        <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={categorySpendingData}>
-            <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
-            <XAxis
-              dataKey="category"
-              angle={-45}
-              textAnchor="end"
-              height={100}
-              tick={{ fill: chartColors.text }}
-            />
-            <YAxis
-              label={{ value: 'Amount ($)', angle: -90, position: 'insideLeft', fill: chartColors.text }}
-              tickFormatter={(value) => `$${value.toLocaleString()}`}
-              tick={{ fill: chartColors.text }}
-            />
-            <Tooltip
-              formatter={(value) => [`$${value.toLocaleString()}`, 'Spent']}
-              contentStyle={{
-                backgroundColor: chartColors.tooltipBg,
-                border: `1px solid ${chartColors.tooltipBorder}`,
-                color: chartColors.text
-              }}
-            />
-            <Bar dataKey="amount">
-              {categorySpendingData.map((entry) => (
-                <Cell
-                  key={entry.category}
-                  fill={getCategoryColor(entry.category, categories)}
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <div className="section-header-collapsible" onClick={() => setShowCategoryChart(!showCategoryChart)}>
+          <h2>Category Spending Chart</h2>
+          <button className="collapse-btn" aria-label={showCategoryChart ? 'Collapse' : 'Expand'}>
+            {showCategoryChart ? '▼' : '▶'}
+          </button>
+        </div>
+        {showCategoryChart && (
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={categorySpendingData}>
+              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+              <XAxis
+                dataKey="category"
+                angle={-45}
+                textAnchor="end"
+                height={100}
+                tick={{ fill: chartColors.text }}
+              />
+              <YAxis
+                label={{ value: 'Amount ($)', angle: -90, position: 'insideLeft', fill: chartColors.text }}
+                tickFormatter={(value) => `$${value.toLocaleString()}`}
+                tick={{ fill: chartColors.text }}
+              />
+              <Tooltip
+                formatter={(value) => [`$${value.toLocaleString()}`, 'Spent']}
+                contentStyle={{
+                  backgroundColor: chartColors.tooltipBg,
+                  border: `1px solid ${chartColors.tooltipBorder}`,
+                  color: chartColors.text
+                }}
+              />
+              <Bar dataKey="amount">
+                {categorySpendingData.map((entry) => (
+                  <Cell
+                    key={entry.category}
+                    fill={getCategoryColor(entry.category, categories)}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   )
