@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { Dashboard } from './components/features/dashboard';
-import { SpendingAndBills } from './components/features/bills';
+import { SpendingAndBills, BillReconciliation } from './components/features/bills';
 import { CategorySettings, AutoCategorization } from './components/features/categories';
 import { MonthYearSelector } from './components/ui/forms';
 import { DEFAULT_CATEGORIES, autoCategorize, generateMerchantName } from './utils/categories';
@@ -333,6 +333,12 @@ function App() {
             Spending & Bills
           </button>
           <button
+            className={'nav-btn' + (activeSection === 'reconciliation' ? ' active' : '')}
+            onClick={() => setActiveSection('reconciliation')}
+          >
+            Reconciliation
+          </button>
+          <button
             className={'nav-btn' + (activeSection === 'categories' ? ' active' : '')}
             onClick={() => setActiveSection('categories')}
           >
@@ -375,6 +381,14 @@ function App() {
             accountStartingBalance={accountStartingBalance}
             onUpdateTransactions={setTransactions}
             billMatchingSettings={billMatchingSettings}
+          />
+        ) : activeSection === 'reconciliation' ? (
+          <BillReconciliation
+            transactions={transactions}
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
+            billMatchingSettings={billMatchingSettings}
+            onUpdateTransactions={setTransactions}
           />
         ) : activeSection === 'categories' ? (
           <div className="categories-section">

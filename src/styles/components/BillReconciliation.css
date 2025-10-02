@@ -1,0 +1,354 @@
+.bill-reconciliation {
+  padding: 20px;
+}
+
+.bill-reconciliation h2 {
+  margin-bottom: 10px;
+}
+
+.reconciliation-description {
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.reconciliation-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.tab-btn {
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+  background: var(--background-secondary);
+}
+
+.tab-btn.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.reconciliation-content {
+  background: var(--background-primary);
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+}
+
+.empty-state p {
+  font-size: 16px;
+}
+
+/* Unpaid Bills Section */
+.bill-list, .expense-list, .suggestion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.unpaid-bill-item, .unmatched-expense-item {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--background-secondary);
+  overflow: hidden;
+}
+
+.bill-header, .expense-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.bill-header:hover, .expense-header:hover {
+  background: var(--background-hover);
+}
+
+.bill-info, .expense-info {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex: 1;
+}
+
+.bill-name, .expense-desc {
+  font-weight: 600;
+  flex: 1;
+  min-width: 200px;
+}
+
+.bill-amount, .expense-amount {
+  font-weight: 500;
+  color: var(--expense-color);
+  min-width: 100px;
+  text-align: right;
+}
+
+.bill-date, .expense-date {
+  color: var(--text-secondary);
+  font-size: 14px;
+  min-width: 120px;
+}
+
+.expense-category {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  background: var(--background-primary);
+  border: 1px solid var(--border-color);
+}
+
+.expand-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+.bill-matches, .expense-matches {
+  border-top: 1px solid var(--border-color);
+  padding: 16px;
+  background: var(--background-primary);
+}
+
+.no-matches {
+  color: var(--text-secondary);
+  font-style: italic;
+  text-align: center;
+  padding: 12px;
+}
+
+.matches-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.potential-match {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: var(--background-secondary);
+  border-radius: 4px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.match-info {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex: 1;
+}
+
+.match-desc {
+  flex: 1;
+  min-width: 200px;
+}
+
+.match-amount {
+  font-weight: 500;
+  min-width: 100px;
+  text-align: right;
+}
+
+.match-date {
+  color: var(--text-secondary);
+  font-size: 14px;
+  min-width: 120px;
+}
+
+.match-btn {
+  padding: 6px 16px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.match-btn:hover {
+  background: var(--primary-color-dark);
+}
+
+.match-btn.primary {
+  padding: 8px 24px;
+}
+
+/* Suggested Matches Section */
+.suggestion-info {
+  background: var(--info-background);
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+  border-left: 4px solid var(--primary-color);
+}
+
+.suggested-match-item {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--background-secondary);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.match-score-badge {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.match-score-badge[data-score="high"] {
+  background: #d4edda;
+  color: #155724;
+}
+
+.match-score-badge[data-score="medium"] {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.match-score-badge[data-score="low"] {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.match-details {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding: 12px;
+  background: var(--background-primary);
+  border-radius: 4px;
+}
+
+.transaction-side, .bill-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.transaction-side label, .bill-side label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.match-arrow {
+  font-size: 24px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.match-breakdown {
+  display: flex;
+  gap: 16px;
+  padding: 8px;
+  background: var(--background-primary);
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.match-breakdown span {
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.match-yes {
+  background: #d4edda;
+  color: #155724;
+}
+
+.match-no {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .match-score-badge[data-score="high"] {
+  background: #1e4620;
+  color: #a8e6a8;
+}
+
+[data-theme="dark"] .match-score-badge[data-score="medium"] {
+  background: #4a3f1a;
+  color: #ffd966;
+}
+
+[data-theme="dark"] .match-score-badge[data-score="low"] {
+  background: #4a1f23;
+  color: #f5a5ad;
+}
+
+[data-theme="dark"] .match-yes {
+  background: #1e4620;
+  color: #a8e6a8;
+}
+
+[data-theme="dark"] .match-no {
+  background: #4a1f23;
+  color: #f5a5ad;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .bill-info, .expense-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .match-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .match-details {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .match-arrow {
+    transform: rotate(90deg);
+    align-self: center;
+  }
+
+  .match-breakdown {
+    flex-direction: column;
+  }
+}

@@ -328,9 +328,26 @@ export function updateBillsWithTransactionMatches(
     .map((t, i) => matchTransactionToBill(t, i, billOccurrences, settings))
     .filter(m => m.matchedBill !== null && m.matchScore >= settings.minimumScore);
 
-  // Create a map of transaction ID -> matched bill ID
-  const transactionToBillMap = new Map<string, string>();
+  // Prevent duplicate matches: ensure one transaction per bill occurrence
+  // Key: billId-occurrenceDate, Value: best matching transaction
+  const billOccurrenceToTransactionMap = new Map<string, TransactionBillMatch>();
+
   matches.forEach(match => {
+    const occKey = `${match.matchedBill!.billId}-${match.matchedBill!.occurrenceDate}`;
+    const existing = billOccurrenceToTransactionMap.get(occKey);
+
+    // Keep the higher-scoring match (or first match if scores are equal)
+    if (!existing || match.matchScore > existing.matchScore) {
+      billOccurrenceToTransactionMap.set(occKey, match);
+    }
+  });
+
+  // Convert back to array of best matches only
+  const bestMatches = Array.from(billOccurrenceToTransactionMap.values());
+
+  // Create a map of transaction ID -> matched bill ID (using only best matches)
+  const transactionToBillMap = new Map<string, string>();
+  bestMatches.forEach(match => {
     const transId = match.transaction.id || `${match.transaction.date}-${match.transaction.description}`;
     transactionToBillMap.set(transId, match.matchedBill!.billId);
   });
@@ -354,7 +371,7 @@ export function updateBillsWithTransactionMatches(
 
     // For bill transactions: add payment info
     const billId = transaction.id || `${transaction.date}-${transaction.description}`;
-    const billMatches = matches.filter(m => m.matchedBill?.billId === billId);
+    const billMatches = bestMatches.filter(m => m.matchedBill?.billId === billId);
 
     if (billMatches.length === 0) return transaction;
 
@@ -403,4 +420,177 @@ function formatDate(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+/**
+ * Get all unmatched expense transactions
+ * Returns transactions that are expenses (negative amount) and not matched to bills
+ */
+export function getUnmatchedExpenseTransactions(
+  transactions: Transaction[],
+  year: number,
+  month: number
+): Transaction[] {
+  return transactions.filter(t => {
+    // Skip if it's a bill transaction itself
+    if (t.isBill) return false;
+
+    // Skip if it's not an expense
+    if (t.amount >= 0) return false;
+
+    // Skip if already matched to a bill
+    if (t.matchedToBillId) return false;
+
+    // Check if transaction is in the selected month
+    const transDate = new Date(t.date);
+    if (transDate.getFullYear() !== year || transDate.getMonth() !== month) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
+/**
+ * Get all unpaid bill occurrences
+ * Returns bill occurrences that don't have a payment recorded
+ */
+export function getUnpaidBillOccurrences(
+  transactions: Transaction[],
+  year: number,
+  month: number
+): BillOccurrence[] {
+  const billOccurrences = generateBillOccurrences(transactions, year, month);
+
+  return billOccurrences.filter(occ => !occ.payment);
+}
+
+/**
+ * Get low-confidence matches (potential matches that didn't meet threshold)
+ * Useful for suggesting manual matches
+ */
+export function getLowConfidenceMatches(
+  transactions: Transaction[],
+  year: number,
+  month: number,
+  settings: BillMatchingSettings
+): TransactionBillMatch[] {
+  const billOccurrences = generateBillOccurrences(transactions, year, month);
+  const regularTransactions = transactions.filter(t => !t.isBill && !t.matchedToBillId);
+
+  // Find matches that score between 30-minimumScore
+  const lowConfidenceThreshold = 30;
+
+  return regularTransactions
+    .map((t, i) => matchTransactionToBill(t, i, billOccurrences, settings))
+    .filter(m =>
+      m.matchedBill !== null &&
+      m.matchScore >= lowConfidenceThreshold &&
+      m.matchScore < settings.minimumScore
+    )
+    .sort((a, b) => b.matchScore - a.matchScore); // Highest scores first
+}
+
+/**
+ * Manually match a transaction to a bill occurrence
+ */
+export function manuallyMatchTransactionToBill(
+  transactions: Transaction[],
+  transactionId: string,
+  billId: string,
+  occurrenceDate: string
+): Transaction[] {
+  return transactions.map(t => {
+    const tId = t.id || `${t.date}-${t.description}`;
+
+    // Update the transaction being matched
+    if (tId === transactionId) {
+      return {
+        ...t,
+        matchedToBillId: billId,
+        hiddenAsBillPayment: true
+      };
+    }
+
+    // Update the bill transaction with payment info
+    const bId = t.id || `${t.date}-${t.description}`;
+    if (t.isBill && bId === billId) {
+      const payments = t.payments || [];
+      const transaction = transactions.find(tr => {
+        const trId = tr.id || `${tr.date}-${tr.description}`;
+        return trId === transactionId;
+      });
+
+      if (!transaction) return t;
+
+      // Check if payment already exists for this occurrence
+      const existingPaymentIndex = payments.findIndex(p => p.occurrenceDate === occurrenceDate);
+
+      const newPayment: BillPayment = {
+        occurrenceDate,
+        transactionDate: transaction.date,
+        transactionAmount: transaction.amount,
+        transactionDescription: transaction.description,
+        manuallyMarked: true
+      };
+
+      const updatedPayments = [...payments];
+      if (existingPaymentIndex >= 0) {
+        updatedPayments[existingPaymentIndex] = newPayment;
+      } else {
+        updatedPayments.push(newPayment);
+      }
+
+      return {
+        ...t,
+        payments: updatedPayments
+      };
+    }
+
+    return t;
+  });
+}
+
+/**
+ * Unmatch a transaction from a bill
+ */
+export function unmatchTransactionFromBill(
+  transactions: Transaction[],
+  transactionId: string
+): Transaction[] {
+  // Find the transaction to get its matched bill info
+  const transaction = transactions.find(t => {
+    const tId = t.id || `${t.date}-${t.description}`;
+    return tId === transactionId;
+  });
+
+  if (!transaction || !transaction.matchedToBillId) {
+    return transactions; // Nothing to unmatch
+  }
+
+  const billId = transaction.matchedToBillId;
+
+  return transactions.map(t => {
+    const tId = t.id || `${t.date}-${t.description}`;
+
+    // Remove match from the transaction
+    if (tId === transactionId) {
+      const { matchedToBillId, hiddenAsBillPayment, ...rest } = t;
+      return rest;
+    }
+
+    // Remove payment from the bill
+    const bId = t.id || `${t.date}-${t.description}`;
+    if (t.isBill && bId === billId && t.payments) {
+      // Find and remove the payment that references this transaction
+      const updatedPayments = t.payments.filter(p => p.transactionDate !== transaction.date);
+
+      return {
+        ...t,
+        payments: updatedPayments.length > 0 ? updatedPayments : undefined
+      };
+    }
+
+    return t;
+  });
 }
