@@ -142,7 +142,7 @@ function Income({
   }
 
   const handleDeleteIncome = (incomeId) => {
-    if (confirm('Are you sure you want to delete this recurring income?')) {
+    if (confirm('Are you sure you want to delete this income?')) {
       onUpdateRecurringIncomes(prev => prev.filter(i => i.id !== incomeId))
     }
   }
@@ -212,7 +212,7 @@ function Income({
       {addModalOpen && (
         <div className="income-modal-backdrop" onClick={() => setAddModalOpen(false)}>
           <div className="income-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>{editingIncome ? 'Edit Recurring Income' : 'Add Recurring Income'}</h3>
+            <h3>{editingIncome ? 'Edit Income' : 'Add Income'}</h3>
             <div className="income-modal-content">
               <div className="income-modal-form">
                 <div className="form-group">
@@ -298,10 +298,10 @@ function Income({
 
       <div className="income-section">
         <div className="income-header">
-          <h2>Recurring Income - {monthNames[selectedMonth]} {selectedYear}</h2>
+          <h2>Income - {monthNames[selectedMonth]} {selectedYear}</h2>
           <div className="header-controls">
             <button className="action-btn add-income-btn" onClick={handleOpenAddModal}>
-              + Add Recurring Income
+              + Add Income
             </button>
           </div>
         </div>
@@ -319,8 +319,8 @@ function Income({
         <div className="income-list">
           {monthlyIncomeOccurrences.length === 0 ? (
             <div className="empty-state">
-              <p>No recurring income for this month.</p>
-              <p>Click "Add Recurring Income" to create your first income entry.</p>
+              <p>No income for this month.</p>
+              <p>Click "Add Income" to create your first income entry.</p>
             </div>
           ) : (
             monthlyIncomeOccurrences.map((occ, index) => {
@@ -336,14 +336,14 @@ function Income({
                       <button
                         className="edit-btn"
                         onClick={() => handleEditIncome(recurringIncomes.find(i => i.id === occ.id))}
-                        title="Edit Recurring Income"
+                        title="Edit Income"
                       >
                         ✎ Edit
                       </button>
                       <button
                         className="delete-btn"
                         onClick={() => handleDeleteIncome(occ.id)}
-                        title="Delete Recurring Income"
+                        title="Delete Income"
                       >
                         🗑 Delete
                       </button>
@@ -362,13 +362,13 @@ function Income({
           )}
         </div>
 
-        {/* All Recurring Income Entries */}
+        {/* All Income Entries */}
         <div className="all-income-section">
-          <h3>All Recurring Income Entries</h3>
+          <h3>All Income Entries</h3>
           <div className="all-income-list">
             {recurringIncomes.length === 0 ? (
               <div className="empty-state">
-                <p>No recurring income entries.</p>
+                <p>No income entries.</p>
               </div>
             ) : (
               recurringIncomes.map((income) => {
