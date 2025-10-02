@@ -632,7 +632,7 @@ function SpendingAndBills({
                       <td className="timeline-merchant-cell" onClick={(e) => e.stopPropagation()}>
                         {item.type === 'bill' ? (
                           <div className="bill-description">
-                            <span className="bill-name">{item.bill.name}</span>
+                            <span className="bill-name">{item.billName || item.description}</span>
                             {item.payment && !item.payment.manuallyMarked && (
                               <span className="matched-indicator" title="Auto-matched to transaction">
                                 ↳ Matched transaction
