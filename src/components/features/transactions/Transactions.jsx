@@ -603,7 +603,7 @@ function Transactions({
                       </td>
 
                       <td className={`transaction-amount ${item.amount < 0 ? 'negative' : 'positive'}`}>
-                        {formatCurrency(item.amount)}
+                        {formatCurrency(Math.abs(item.amount))}
                       </td>
 
                       <td className="transaction-category-cell" onClick={(e) => e.stopPropagation()}>
@@ -617,7 +617,6 @@ function Transactions({
                               autoCategorized: false
                             })
                           }}
-                          style={{ color }}
                         >
                           <option value="Uncategorized">Uncategorized</option>
                           {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (

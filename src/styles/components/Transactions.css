@@ -222,6 +222,8 @@
 .transaction-date {
   font-family: monospace;
   white-space: nowrap;
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
 .transaction-merchant-cell {
@@ -237,6 +239,8 @@
 
 .transaction-merchant {
   cursor: pointer;
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
 .transaction-merchant.editable:hover {
@@ -266,7 +270,7 @@
 }
 
 .transaction-amount {
-  font-weight: 600;
+  font-weight: 400;
   text-align: right;
   font-family: monospace;
 }
@@ -288,9 +292,10 @@
   border: 1px solid var(--border-color);
   border-radius: 3px;
   background: var(--card-bg);
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
   font-size: 0.9rem;
   font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
 .transaction-category-select.uncategorized-label {
