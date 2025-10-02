@@ -40,13 +40,18 @@ export function BillReconciliation({
   );
 
   const handleManualMatch = (transactionId, billId, occurrenceDate) => {
-    const updatedTransactions = manuallyMatchTransactionToBill(
-      transactions,
-      transactionId,
-      billId,
-      occurrenceDate
-    );
-    onUpdateTransactions(updatedTransactions);
+    try {
+      const updatedTransactions = manuallyMatchTransactionToBill(
+        transactions,
+        transactionId,
+        billId,
+        occurrenceDate,
+        billMatchingSettings.amountTolerance
+      );
+      onUpdateTransactions(updatedTransactions);
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   const handleUnmatch = (transactionId) => {

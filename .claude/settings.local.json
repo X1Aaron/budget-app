@@ -33,7 +33,8 @@
       "Bash(find:*)",
       "Bash(while read file)",
       "Bash(do sed -i \"s|from ''''\\./\\(.*\\)\\.css''''|from ''''../../../styles/components/\\1.css''''|g\" \"$file\" sed -i 's|from \"\"\"\"\\./\\(.*\\)\\.css\"\"\"\"|from \"\"\"\"../../../styles/components/\\1.css\"\"\"\"|g' \"$file\" done)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []

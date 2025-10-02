@@ -86,6 +86,7 @@ export type ActiveSection =
   | 'dashboard'
   | 'spending'
   | 'bills'
+  | 'transactions'
   | 'reconciliation'
   | 'categories'
   | 'auto-categorization'

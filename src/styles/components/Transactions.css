@@ -1,0 +1,460 @@
+/* Transactions Page Styles */
+.transactions-page {
+  padding: 1rem;
+  max-width: 100%;
+}
+
+.transactions-section {
+  background: var(--surface-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.transactions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.transactions-header h2 {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 1.5rem;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 0.5rem 1rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.action-btn:hover {
+  background: var(--primary-dark);
+}
+
+.starting-balance-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--background-color);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.starting-balance-label {
+  color: var(--text-secondary);
+}
+
+.starting-balance-value {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.filter-select {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--surface-color);
+  color: var(--text-color);
+  font-size: 0.9rem;
+}
+
+.clear-filter-btn {
+  padding: 0.5rem 1rem;
+  background: var(--danger-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.clear-filter-btn:hover {
+  opacity: 0.9;
+}
+
+/* Summary Cards */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-card {
+  background: var(--background-color);
+  padding: 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.summary-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.summary-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.summary-value.income {
+  color: var(--success-color);
+}
+
+.summary-value.expenses {
+  color: var(--danger-color);
+}
+
+.summary-value.positive {
+  color: var(--success-color);
+}
+
+.summary-value.negative {
+  color: var(--danger-color);
+}
+
+/* Transactions Table */
+.transactions-table-container {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.transactions-table thead {
+  background: var(--background-color);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.transactions-table th {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-color);
+  position: sticky;
+  top: 0;
+  background: var(--background-color);
+  z-index: 10;
+}
+
+.transactions-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.transactions-table th.sortable:hover {
+  background: var(--surface-hover);
+}
+
+.sort-arrow {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.transactions-table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.2s;
+}
+
+.transaction-row {
+  cursor: pointer;
+}
+
+.transaction-row:hover {
+  background: var(--surface-hover);
+}
+
+.transaction-row.expanded {
+  background: var(--surface-hover);
+}
+
+.transaction-row.uncategorized {
+  background: rgba(255, 193, 7, 0.1);
+}
+
+.transaction-row.bill-payment {
+  background: rgba(76, 175, 80, 0.05);
+  border-left: 3px solid var(--success-color);
+}
+
+.transactions-table td {
+  padding: 0.75rem;
+  color: var(--text-color);
+}
+
+.transaction-date {
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+.transaction-merchant-cell {
+  min-width: 200px;
+}
+
+.transaction-description-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.transaction-merchant {
+  cursor: pointer;
+}
+
+.transaction-merchant.editable:hover {
+  text-decoration: underline;
+  color: var(--primary-color);
+}
+
+.merchant-name-input {
+  width: 100%;
+  padding: 0.25rem;
+  border: 1px solid var(--primary-color);
+  border-radius: 3px;
+  background: var(--surface-color);
+  color: var(--text-color);
+}
+
+.bill-payment-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  background: var(--success-color);
+  color: white;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.transaction-amount {
+  font-weight: 600;
+  text-align: right;
+  font-family: monospace;
+}
+
+.transaction-amount.negative {
+  color: var(--danger-color);
+}
+
+.transaction-amount.positive {
+  color: var(--success-color);
+}
+
+.transaction-category-cell {
+  min-width: 150px;
+}
+
+.transaction-category-select {
+  padding: 0.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  background: var(--surface-color);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.transaction-category-select.uncategorized-label {
+  color: var(--warning-color);
+  font-style: italic;
+}
+
+.auto-icon {
+  font-size: 0.8rem;
+}
+
+.warning-icon {
+  color: var(--warning-color);
+  font-size: 1rem;
+}
+
+.transaction-balance {
+  font-weight: 600;
+  text-align: right;
+  font-family: monospace;
+}
+
+.transaction-balance.negative {
+  color: var(--danger-color);
+}
+
+.transaction-balance.positive {
+  color: var(--success-color);
+}
+
+/* Expanded Row */
+.transaction-expanded-row {
+  background: var(--surface-hover);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.transaction-details {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: 0.85rem;
+}
+
+.detail-value {
+  color: var(--text-secondary);
+}
+
+.category-select-expanded {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--surface-color);
+  color: var(--text-color);
+  font-size: 0.9rem;
+  max-width: 300px;
+}
+
+.memo-section {
+  margin-top: 0.5rem;
+}
+
+.memo-input {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--surface-color);
+  color: var(--text-color);
+  font-family: inherit;
+  resize: vertical;
+  width: 100%;
+  max-width: 600px;
+}
+
+.bill-payment-section {
+  padding: 1rem;
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 4px;
+  border-left: 3px solid var(--success-color);
+}
+
+.bill-payment-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.bill-payment-row {
+  display: flex;
+  gap: 0.5rem;
+  color: var(--text-color);
+  font-size: 0.9rem;
+}
+
+/* Pagination */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.pagination-size-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.page-size-select {
+  padding: 0.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  background: var(--surface-color);
+  color: var(--text-color);
+}
+
+.pagination-btn {
+  padding: 0.5rem 1rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pagination-number {
+  padding: 0.5rem 0.75rem;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.pagination-number:hover {
+  background: var(--surface-hover);
+}
+
+.pagination-number.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.transactions-footer {
+  margin-top: 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}

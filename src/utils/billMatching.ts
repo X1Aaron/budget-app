@@ -527,13 +527,42 @@ export function getLowConfidenceMatches(
 
 /**
  * Manually match a transaction to a bill occurrence
+ * Validates that the transaction amount matches the bill amount within tolerance
+ * Auto-marks bill as paid if amounts match
  */
 export function manuallyMatchTransactionToBill(
   transactions: Transaction[],
   transactionId: string,
   billId: string,
-  occurrenceDate: string
+  occurrenceDate: string,
+  amountTolerance: number = 5
 ): Transaction[] {
+  // Find the transaction and bill to validate amount match
+  const transaction = transactions.find(tr => {
+    const trId = tr.id || `${tr.date}-${tr.description}`;
+    return trId === transactionId;
+  });
+
+  const billTransaction = transactions.find(t => {
+    const bId = t.id || `${t.date}-${t.description}`;
+    return t.isBill && bId === billId;
+  });
+
+  if (!transaction || !billTransaction) {
+    throw new Error('Transaction or bill not found');
+  }
+
+  // Validate amount match
+  const transactionAmount = Math.abs(transaction.amount);
+  const billAmount = billTransaction.billAmount || Math.abs(billTransaction.amount);
+  const amountDiff = Math.abs(transactionAmount - billAmount);
+
+  if (amountDiff > amountTolerance) {
+    throw new Error(
+      `Amount mismatch: Transaction amount ($${transactionAmount.toFixed(2)}) differs from bill amount ($${billAmount.toFixed(2)}) by $${amountDiff.toFixed(2)}, which exceeds tolerance of $${amountTolerance.toFixed(2)}`
+    );
+  }
+
   return transactions.map(t => {
     const tId = t.id || `${t.date}-${t.description}`;
 
@@ -550,12 +579,6 @@ export function manuallyMatchTransactionToBill(
     const bId = t.id || `${t.date}-${t.description}`;
     if (t.isBill && bId === billId) {
       const payments = t.payments || [];
-      const transaction = transactions.find(tr => {
-        const trId = tr.id || `${tr.date}-${tr.description}`;
-        return trId === transactionId;
-      });
-
-      if (!transaction) return t;
 
       // Check if payment already exists for this occurrence
       const existingPaymentIndex = payments.findIndex(p => p.occurrenceDate === occurrenceDate);
