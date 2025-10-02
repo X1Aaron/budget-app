@@ -116,6 +116,12 @@ function Dashboard({
     const noRecurringIncome = recurringIncomes.length === 0 && monthlyTransactions.length > 0
     const noBudgetedCategories = categories.length > 0 && categories.every(cat => (cat.budgeted || 0) === 0)
 
+    // Consolidated setup check - only show if user needs initial setup
+    const needsInitialSetup = monthlyTransactions.length === 0 || categories.length === 0 || bills.length === 0
+
+    // Account basics setup - only show if has transactions but missing financial basics
+    const needsAccountBasics = monthlyTransactions.length > 0 && (missingStartingBalance || noRecurringIncome)
+
     return {
       unlinkedCount,
       uncategorizedCount,
@@ -124,7 +130,9 @@ function Dashboard({
       overBudgetCategories,
       missingStartingBalance,
       noRecurringIncome,
-      noBudgetedCategories
+      noBudgetedCategories,
+      needsInitialSetup,
+      needsAccountBasics
     }
   }, [monthlyTransactions, bills, categories, summary.categoryBreakdown, selectedYear, selectedMonth, accountStartingBalance, recurringIncomes])
 
@@ -399,66 +407,62 @@ function Dashboard({
   return (
     <div className="dashboard">
       {/* Action Items Section */}
-      {(alerts.unlinkedCount > 0 || alerts.uncategorizedCount > 0 || alerts.unpaidBillsThisMonth > 0 || alerts.overdueBills > 0 || alerts.overBudgetCategories > 0 || alerts.missingStartingBalance || alerts.noRecurringIncome || alerts.noBudgetedCategories || monthlyTransactions.length === 0 || categories.length === 0 || bills.length === 0) && (
+      {(alerts.needsInitialSetup || alerts.needsAccountBasics || alerts.noBudgetedCategories || alerts.uncategorizedCount > 0 || alerts.unpaidBillsThisMonth > 0 || alerts.overdueBills > 0 || alerts.overBudgetCategories > 0) && (
         <div className="action-alerts">
           <h2>Action Items</h2>
           <div className="alerts-grid">
-            {alerts.missingStartingBalance && (
+            {/* Consolidated Initial Setup */}
+            {alerts.needsInitialSetup && (
               <div className="alert-card alert-info">
-                <div className="alert-icon">💰</div>
+                <div className="alert-icon">🚀</div>
                 <div className="alert-content">
-                  <div className="alert-title">Set Starting Balance</div>
-                  <div className="alert-description">Set your account balance when you started tracking for accurate cash flow</div>
-                </div>
-                <button className="alert-action" onClick={() => onNavigate?.('settings')}>Set Balance</button>
-              </div>
-            )}
-            {monthlyTransactions.length === 0 && (
-              <div className="alert-card alert-info">
-                <div className="alert-icon">📊</div>
-                <div className="alert-content">
-                  <div className="alert-title">No Transactions Yet</div>
-                  <div className="alert-description">Import your bank transactions or try demo data</div>
+                  <div className="alert-title">Get Started</div>
+                  <div className="alert-description">Set up your budget tracking in a few quick steps</div>
                 </div>
                 <div className="alert-actions">
-                  <button className="alert-action" onClick={() => onNavigate?.('transactions')}>Import</button>
-                  {onImportDemoData && (
-                    <button className="alert-action alert-action-secondary" onClick={onImportDemoData}>Demo Data</button>
+                  {monthlyTransactions.length === 0 && (
+                    <>
+                      <button className="alert-action" onClick={() => onNavigate?.('transactions')}>Import Transactions</button>
+                      {onImportDemoData && (
+                        <button className="alert-action alert-action-secondary" onClick={onImportDemoData}>Try Demo</button>
+                      )}
+                    </>
+                  )}
+                  {categories.length === 0 && monthlyTransactions.length > 0 && (
+                    <button className="alert-action" onClick={() => onNavigate?.('categories')}>Add Categories</button>
+                  )}
+                  {bills.length === 0 && monthlyTransactions.length > 0 && categories.length > 0 && (
+                    <button className="alert-action" onClick={() => onNavigate?.('bills')}>Add Bills</button>
                   )}
                 </div>
               </div>
             )}
-            {categories.length === 0 && (
+
+            {/* Consolidated Account Basics Setup */}
+            {alerts.needsAccountBasics && !alerts.needsInitialSetup && (
               <div className="alert-card alert-info">
-                <div className="alert-icon">🏷️</div>
+                <div className="alert-icon">💰</div>
                 <div className="alert-content">
-                  <div className="alert-title">Set Up Categories</div>
-                  <div className="alert-description">Create categories to organize your budget</div>
+                  <div className="alert-title">Complete Account Setup</div>
+                  <div className="alert-description">
+                    {alerts.missingStartingBalance && alerts.noRecurringIncome && 'Add starting balance and recurring income for accurate projections'}
+                    {alerts.missingStartingBalance && !alerts.noRecurringIncome && 'Set your starting balance for accurate cash flow tracking'}
+                    {!alerts.missingStartingBalance && alerts.noRecurringIncome && 'Add recurring income for accurate projections'}
+                  </div>
                 </div>
-                <button className="alert-action" onClick={() => onNavigate?.('categories')}>Set Up</button>
+                <div className="alert-actions">
+                  {alerts.missingStartingBalance && (
+                    <button className="alert-action" onClick={() => onNavigate?.('settings')}>Set Balance</button>
+                  )}
+                  {alerts.noRecurringIncome && (
+                    <button className="alert-action" onClick={() => onNavigate?.('income')}>Add Income</button>
+                  )}
+                </div>
               </div>
             )}
-            {bills.length === 0 && monthlyTransactions.length > 0 && (
-              <div className="alert-card alert-info">
-                <div className="alert-icon">📄</div>
-                <div className="alert-content">
-                  <div className="alert-title">Add Your Bills</div>
-                  <div className="alert-description">Track recurring payments</div>
-                </div>
-                <button className="alert-action" onClick={() => onNavigate?.('bills')}>Add Bills</button>
-              </div>
-            )}
-            {alerts.noRecurringIncome && (
-              <div className="alert-card alert-info">
-                <div className="alert-icon">💵</div>
-                <div className="alert-content">
-                  <div className="alert-title">Add Recurring Income</div>
-                  <div className="alert-description">Track your regular income sources for accurate projections</div>
-                </div>
-                <button className="alert-action" onClick={() => onNavigate?.('income')}>Add Income</button>
-              </div>
-            )}
-            {alerts.noBudgetedCategories && (
+
+            {/* Set Category Budgets - only if categories exist but have no budgets */}
+            {alerts.noBudgetedCategories && !alerts.needsInitialSetup && (
               <div className="alert-card alert-info">
                 <div className="alert-icon">🎯</div>
                 <div className="alert-content">
@@ -468,6 +472,8 @@ function Dashboard({
                 <button className="alert-action" onClick={() => onNavigate?.('categories')}>Set Budgets</button>
               </div>
             )}
+
+            {/* Time-Sensitive Alerts */}
             {alerts.overdueBills > 0 && (
               <div className="alert-card alert-danger">
                 <div className="alert-icon">🚨</div>
@@ -549,15 +555,44 @@ function Dashboard({
               const isOverdue = dueDate < today
               const isDueToday = dueDate.getTime() === today.getTime()
 
+              // Calculate days until due
+              const daysUntil = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24))
+              const isDueSoon = daysUntil <= 2 && daysUntil > 0
+
               let urgencyClass = 'upcoming'
               if (isOverdue) urgencyClass = 'overdue'
               else if (isDueToday) urgencyClass = 'due-today'
+              else if (isDueSoon) urgencyClass = 'due-soon'
+
+              // Format the due date with days indicator
+              const getDueText = () => {
+                if (isOverdue) {
+                  const daysOverdue = Math.abs(daysUntil)
+                  return `Overdue by ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''}`
+                } else if (isDueToday) {
+                  return 'Due Today'
+                } else if (daysUntil === 1) {
+                  return 'Due Tomorrow'
+                } else {
+                  return `Due in ${daysUntil} days`
+                }
+              }
 
               return (
                 <div key={bill.id} className={`upcoming-bill-item ${urgencyClass}`}>
                   <div className="bill-info">
                     <div className="bill-name">{bill.name}</div>
-                    <div className="bill-due">Due {formatDate(bill.dueDate)}</div>
+                    <div className="bill-details">
+                      <span className="bill-due">{getDueText()}</span>
+                      {bill.category && (
+                        <>
+                          <span className="bill-separator">•</span>
+                          <span className="bill-category">{bill.category}</span>
+                        </>
+                      )}
+                      <span className="bill-separator">•</span>
+                      <span className="bill-frequency">{bill.frequency}</span>
+                    </div>
                   </div>
                   <div className="bill-amount">{formatCurrency(bill.amount)}</div>
                   {onMarkBillPaid && (

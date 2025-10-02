@@ -393,40 +393,77 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  padding: 1rem;
-  background: var(--bill-bg, #fef3c7);
-  border-left: 4px solid #f59e0b;
+  padding: 1rem 1.25rem;
+  background: rgba(59, 130, 246, 0.08);
+  border-left: 4px solid #3b82f6;
   border-radius: 6px;
   transition: all 0.2s;
 }
 
 .upcoming-bill-item:hover {
-  background: var(--bill-bg-hover, #fde68a);
+  background: rgba(59, 130, 246, 0.12);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.upcoming-bill-item.overdue {
-  background: rgba(239, 68, 68, 0.1);
-  border-left-color: #ef4444;
+.upcoming-bill-item.due-soon {
+  background: rgba(245, 158, 11, 0.1);
+  border-left-color: #f59e0b;
+}
+
+.upcoming-bill-item.due-soon:hover {
+  background: rgba(245, 158, 11, 0.15);
 }
 
 .upcoming-bill-item.due-today {
-  background: rgba(245, 158, 11, 0.15);
-  border-left-color: #f59e0b;
+  background: rgba(249, 115, 22, 0.12);
+  border-left-color: #f97316;
+  border-left-width: 5px;
+}
+
+.upcoming-bill-item.due-today:hover {
+  background: rgba(249, 115, 22, 0.18);
+}
+
+.upcoming-bill-item.overdue {
+  background: rgba(239, 68, 68, 0.12);
+  border-left-color: #ef4444;
+  border-left-width: 5px;
+}
+
+.upcoming-bill-item.overdue:hover {
+  background: rgba(239, 68, 68, 0.18);
 }
 
 [data-theme="dark"] .upcoming-bill-item {
-  background: rgba(245, 158, 11, 0.15);
-  border-left-color: #f59e0b;
+  background: rgba(59, 130, 246, 0.12);
+  border-left-color: #60a5fa;
 }
 
 [data-theme="dark"] .upcoming-bill-item:hover {
-  background: rgba(245, 158, 11, 0.25);
+  background: rgba(59, 130, 246, 0.18);
+}
+
+[data-theme="dark"] .upcoming-bill-item.due-soon {
+  background: rgba(245, 158, 11, 0.15);
+  border-left-color: #fbbf24;
+}
+
+[data-theme="dark"] .upcoming-bill-item.due-soon:hover {
+  background: rgba(245, 158, 11, 0.22);
+}
+
+[data-theme="dark"] .upcoming-bill-item.due-today {
+  background: rgba(249, 115, 22, 0.15);
+  border-left-color: #fb923c;
+}
+
+[data-theme="dark"] .upcoming-bill-item.due-today:hover {
+  background: rgba(249, 115, 22, 0.22);
 }
 
 [data-theme="dark"] .upcoming-bill-item.overdue {
-  background: rgba(239, 68, 68, 0.15);
-  border-left-color: #ef4444;
+  background: rgba(239, 68, 68, 0.18);
+  border-left-color: #f87171;
 }
 
 [data-theme="dark"] .upcoming-bill-item.overdue:hover {
@@ -453,30 +490,74 @@
 
 .upcoming-bill-item .bill-info {
   flex: 1;
+  min-width: 0;
 }
 
 .upcoming-bill-item .bill-name {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
+}
+
+.upcoming-bill-item .bill-details {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
 }
 
 .upcoming-bill-item .bill-due {
-  font-size: 0.85rem;
-  color: var(--bill-text, #92400e);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.upcoming-bill-item.due-soon .bill-due {
+  color: #d97706;
+}
+
+.upcoming-bill-item.due-today .bill-due {
+  color: #ea580c;
+}
+
+.upcoming-bill-item.overdue .bill-due {
+  color: #dc2626;
+}
+
+[data-theme="dark"] .upcoming-bill-item.due-soon .bill-due {
+  color: #fbbf24;
+}
+
+[data-theme="dark"] .upcoming-bill-item.due-today .bill-due {
+  color: #fb923c;
+}
+
+[data-theme="dark"] .upcoming-bill-item.overdue .bill-due {
+  color: #f87171;
+}
+
+.upcoming-bill-item .bill-separator {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.upcoming-bill-item .bill-category {
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
-.upcoming-bill-item .bill-amount {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--bill-text, #92400e);
+.upcoming-bill-item .bill-frequency {
+  color: var(--text-secondary);
+  font-style: italic;
+  text-transform: capitalize;
 }
 
-[data-theme="dark"] .upcoming-bill-item .bill-due,
-[data-theme="dark"] .upcoming-bill-item .bill-amount {
-  color: #fbbf24;
+.upcoming-bill-item .bill-amount {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
 }
 
 .categories-section {
