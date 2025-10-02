@@ -243,6 +243,38 @@ function App() {
     });
   };
 
+  const handleAddExactRule = (description: string, category: string, merchantName?: string) => {
+    // Add to category mappings
+    setCategoryMappings(prev => ({
+      ...prev,
+      [description]: category
+    }));
+
+    // Add to merchant mappings if provided
+    if (merchantName) {
+      setMerchantMappings(prev => ({
+        ...prev,
+        [description]: merchantName
+      }));
+    }
+  };
+
+  const handleAddKeywordToCategory = (categoryName: string, keyword: string) => {
+    setCategories(prev => prev.map(cat => {
+      if (cat.name === categoryName) {
+        const keywords = cat.keywords || [];
+        // Only add if not already present
+        if (!keywords.includes(keyword)) {
+          return {
+            ...cat,
+            keywords: [...keywords, keyword]
+          };
+        }
+      }
+      return cat;
+    }));
+  };
+
   const handleImportDemoData = () => {
     const demoTransactions = generateDemoData();
 
@@ -448,6 +480,8 @@ function App() {
             categories={categories}
             disabledKeywords={disabledKeywords}
             onToggleKeyword={handleToggleKeyword}
+            onAddExactRule={handleAddExactRule}
+            onAddKeywordToCategory={handleAddKeywordToCategory}
           />
         ) : (
           <div className="settings-section">
