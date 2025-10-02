@@ -9,7 +9,9 @@ function Bills({
   selectedYear,
   selectedMonth,
   onUpdateTransactions,
-  billMatchingSettings
+  billMatchingSettings,
+  conversionData,
+  onConversionComplete
 }) {
   const [expandedBillId, setExpandedBillId] = useState(null)
   const [addModalOpen, setAddModalOpen] = useState(false)
@@ -68,6 +70,25 @@ function Bills({
     setConfirmLinkTransaction(false)
     setAddModalOpen(true)
   }
+
+  // Handle conversion from transaction
+  useEffect(() => {
+    if (conversionData) {
+      setFormData({
+        billName: conversionData.merchantName || conversionData.description,
+        amount: Math.abs(conversionData.amount).toString(),
+        dueDate: conversionData.date,
+        frequency: 'monthly',
+        category: conversionData.category || '',
+        memo: conversionData.memo || ''
+      })
+      setEditingBill(null)
+      setSuggestedTransactions([])
+      setSelectedSuggestion(null)
+      setConfirmLinkTransaction(false)
+      setAddModalOpen(true)
+    }
+  }, [conversionData])
 
   // Update suggestions when bill name or amount changes
   useEffect(() => {
@@ -206,6 +227,9 @@ function Bills({
     setSelectedSuggestion(null)
     setConfirmLinkTransaction(false)
     setAddModalOpen(false)
+    if (onConversionComplete) {
+      onConversionComplete()
+    }
   }
 
   const handleTogglePaid = (billOccurrence) => {
@@ -319,7 +343,7 @@ function Bills({
     <div className="bills-page">
       {/* Add/Edit Bill Modal */}
       {addModalOpen && (
-        <div className="bill-modal-backdrop" onClick={() => setAddModalOpen(false)}>
+        <div className="bill-modal-backdrop" onClick={() => { setAddModalOpen(false); if (onConversionComplete) onConversionComplete(); }}>
           <div className="bill-modal" onClick={(e) => e.stopPropagation()}>
             <h3>{editingBill ? 'Edit Bill' : 'Add New Bill'}</h3>
             <div className="bill-modal-content">
@@ -442,7 +466,7 @@ function Bills({
               )}
             </div>
             <div className="bill-modal-actions">
-              <button className="cancel-btn" onClick={() => setAddModalOpen(false)}>
+              <button className="cancel-btn" onClick={() => { setAddModalOpen(false); if (onConversionComplete) onConversionComplete(); }}>
                 Cancel
               </button>
               <button className="save-btn" onClick={handleSaveForm}>

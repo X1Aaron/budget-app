@@ -68,6 +68,7 @@ function App() {
     const saved = localStorage.getItem('recurringIncomes');
     return saved ? JSON.parse(saved) : [];
   });
+  const [billConversionData, setBillConversionData] = useState<Transaction | null>(null);
 
   useEffect(() => {
     localStorage.setItem('categories', JSON.stringify(categories));
@@ -275,6 +276,14 @@ function App() {
     }));
   };
 
+  const handleConvertTransactionToBill = (transactionId: string) => {
+    const transaction = transactions.find(t => t.id === transactionId);
+    if (transaction) {
+      setBillConversionData(transaction);
+      setActiveSection('bills');
+    }
+  };
+
   const handleImportDemoData = () => {
     const demoTransactions = generateDemoData();
 
@@ -439,6 +448,7 @@ function App() {
             onUpdateTransactions={setTransactions}
             categoryMappings={categoryMappings}
             disabledKeywords={disabledKeywords}
+            onConvertToBill={handleConvertTransactionToBill}
           />
         ) : activeSection === 'bills' ? (
           <Bills
@@ -448,6 +458,8 @@ function App() {
             selectedMonth={selectedMonth}
             onUpdateTransactions={setTransactions}
             billMatchingSettings={billMatchingSettings}
+            conversionData={billConversionData}
+            onConversionComplete={() => setBillConversionData(null)}
           />
         ) : activeSection === 'income' ? (
           <Income

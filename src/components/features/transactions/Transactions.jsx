@@ -13,7 +13,8 @@ function Transactions({
   accountStartingBalance,
   onUpdateTransactions,
   categoryMappings = {},
-  disabledKeywords = {}
+  disabledKeywords = {},
+  onConvertToBill
 }) {
   const [expandedIndex, setExpandedIndex] = useState(null)
   const [editingMerchantIndex, setEditingMerchantIndex] = useState(null)
@@ -860,6 +861,17 @@ function Transactions({
                                 rows="3"
                               />
                             </div>
+
+                            {onConvertToBill && !isBillPayment && item.amount < 0 && (
+                              <div className="detail-section">
+                                <button
+                                  className="convert-to-bill-btn"
+                                  onClick={() => onConvertToBill(item.id)}
+                                >
+                                  🔄 Convert to Recurring Bill
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </td>
                       </tr>
