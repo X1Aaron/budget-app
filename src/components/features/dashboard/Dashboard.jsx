@@ -17,7 +17,8 @@ function Dashboard({
   onDateChange,
   onUpdateBudget,
   onMarkBillPaid,
-  onNavigate
+  onNavigate,
+  onImportDemoData
 }) {
   const { theme } = useTheme()
   const [isEditingBudget, setIsEditingBudget] = useState(false)
@@ -445,9 +446,14 @@ function Dashboard({
                 <div className="alert-icon">📊</div>
                 <div className="alert-content">
                   <div className="alert-title">No Transactions Yet</div>
-                  <div className="alert-description">Import your bank transactions to get started</div>
+                  <div className="alert-description">Import your bank transactions or try demo data</div>
                 </div>
-                <button className="alert-action" onClick={() => onNavigate?.('transactions')}>Import</button>
+                <div className="alert-actions">
+                  <button className="alert-action" onClick={() => onNavigate?.('transactions')}>Import</button>
+                  {onImportDemoData && (
+                    <button className="alert-action alert-action-secondary" onClick={onImportDemoData}>Demo Data</button>
+                  )}
+                </div>
               </div>
             )}
             {categories.length === 0 && (

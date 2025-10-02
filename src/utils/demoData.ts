@@ -134,6 +134,9 @@ export function generateDemoData(): Transaction[] {
     // Track which week we're on for biweekly transactions
     let biweeklyCounter = monthOffset % 2;
 
+    // Track transaction count for this month to determine which to leave uncategorized
+    let monthTransactionCount = 0;
+
     // Process each transaction template based on frequency
     demoTransactions.forEach(template => {
       if (template.frequency === 'weekly') {
@@ -151,14 +154,15 @@ export function generateDemoData(): Transaction[] {
             transactionDate = getRandomDate(year, month);
           }
 
+          monthTransactionCount++;
+          // 90% categorized, 10% uncategorized
+          const shouldCategorize = Math.random() < 0.9;
+
           transactions.push({
             date: transactionDate,
             description: template.description,
             amount: -amount,
-            category: template.category,
-            merchantName: template.description.split(' ')[0],
-            memo: '',
-            autoCategorized: false
+            ...(shouldCategorize && { category: template.category })
           });
         }
       } else if (template.frequency === 'biweekly') {
@@ -191,15 +195,15 @@ export function generateDemoData(): Transaction[] {
         const amount = getRandomAmount(template.amountRange);
         const transactionDate = getRandomDate(year, month);
 
+        monthTransactionCount++;
+        // 90% categorized, 10% uncategorized
+        const shouldCategorize = Math.random() < 0.9;
+
         transactions.push({
           date: transactionDate,
           description: template.description,
           amount: -amount,
-          category: template.category,
-          merchantName: template.description.split(' ')[0],
-          memo: '',
-          autoCategorized: false,
-          isBill: true  // Mark monthly subscriptions and recurring expenses as bills
+          ...(shouldCategorize && { category: template.category })
         });
       } else if (template.frequency === 'occasional') {
         // Add 0-3 times per month randomly
@@ -216,14 +220,15 @@ export function generateDemoData(): Transaction[] {
             transactionDate = getRandomDate(year, month);
           }
 
+          monthTransactionCount++;
+          // 90% categorized, 10% uncategorized
+          const shouldCategorize = Math.random() < 0.9;
+
           transactions.push({
             date: transactionDate,
             description: template.description,
             amount: -amount,
-            category: template.category,
-            merchantName: template.description.split(' ')[0],
-            memo: '',
-            autoCategorized: false
+            ...(shouldCategorize && { category: template.category })
           });
         }
       }
@@ -231,116 +236,90 @@ export function generateDemoData(): Transaction[] {
 
     // Add consistent bills every month
     // Rent/Mortgage - $2100/month on 1st (35% of income)
+    monthTransactionCount++;
     transactions.push({
       date: `${year}-${String(month + 1).padStart(2, '0')}-01`,
       description: 'PROPERTY MANAGEMENT RENT',
       amount: -2100,
-      category: 'Housing',
-      merchantName: 'Property Management',
-      memo: 'Monthly rent',
-      autoCategorized: false,
-      isBill: true
+      category: 'Housing'  // Bills are always categorized
     });
 
     // Internet - $70/month
+    monthTransactionCount++;
     transactions.push({
       date: getDateOnDay(year, month, 5, 1), // First Friday
       description: 'COMCAST INTERNET',
       amount: -70,
-      category: 'Utilities',
-      merchantName: 'Comcast',
-      memo: '',
-      autoCategorized: false,
-      isBill: true
+      category: 'Utilities'  // Bills are always categorized
     });
 
     // Phone - $55/month
+    monthTransactionCount++;
     transactions.push({
       date: getDateOnDay(year, month, 3, 2), // Second Wednesday
       description: 'VERIZON WIRELESS',
       amount: -55,
-      category: 'Phone',
-      merchantName: 'Verizon',
-      memo: '',
-      autoCategorized: false,
-      isBill: true
+      category: 'Phone'  // Bills are always categorized
     });
 
     // Electric - varies by month ($60-120) - simulates seasonal variation
     const electricAmount = month >= 5 && month <= 8
       ? getRandomAmount([90, 120])  // Summer AC usage
       : getRandomAmount([60, 90]);   // Other months
+    monthTransactionCount++;
     transactions.push({
       date: getDateOnDay(year, month, 2, 2), // Second Tuesday
       description: 'PG&E ELECTRIC',
       amount: -electricAmount,
-      category: 'Utilities',
-      merchantName: 'PG&E',
-      memo: '',
-      autoCategorized: false,
-      isBill: true
+      category: 'Utilities'  // Bills are always categorized
     });
 
     // Water - $45/month
+    monthTransactionCount++;
     transactions.push({
       date: getDateOnDay(year, month, 4, 3), // Third Thursday
       description: 'CITY WATER UTILITY',
       amount: -45,
-      category: 'Utilities',
-      merchantName: 'City Water',
-      memo: '',
-      autoCategorized: false,
-      isBill: true
+      category: 'Utilities'  // Bills are always categorized
     });
 
     // Car Insurance - $120/month
+    monthTransactionCount++;
     transactions.push({
       date: `${year}-${String(month + 1).padStart(2, '0')}-15`,
       description: 'GEICO AUTO INSURANCE',
       amount: -120,
-      category: 'Insurance',
-      merchantName: 'GEICO',
-      memo: '',
-      autoCategorized: false,
-      isBill: true
+      category: 'Insurance'  // Bills are always categorized
     });
 
     // Student Loan - $285/month
+    monthTransactionCount++;
     transactions.push({
       date: `${year}-${String(month + 1).padStart(2, '0')}-10`,
       description: 'MOHELA STUDENT LOAN',
       amount: -285,
-      category: 'Debt Payments',
-      merchantName: 'MOHELA',
-      memo: '',
-      autoCategorized: false,
-      isBill: true
+      category: 'Debt Payments'  // Bills are always categorized
     });
 
     // Credit Card Payment - $150-300/month (varies)
     const ccPayment = getRandomAmount([150, 300]);
+    monthTransactionCount++;
     transactions.push({
       date: `${year}-${String(month + 1).padStart(2, '0')}-20`,
       description: 'CHASE CREDIT CARD PAYMENT',
       amount: -ccPayment,
-      category: 'Debt Payments',
-      merchantName: 'Chase',
-      memo: '',
-      autoCategorized: false,
-      isBill: true
+      category: 'Debt Payments'  // Bills are always categorized
     });
 
     // Weekly paychecks on Fridays - $1500/week
     const fridays = getAllFridaysInMonth(year, month);
     fridays.forEach(friday => {
+      monthTransactionCount++;
       transactions.push({
         date: friday,
         description: 'DIRECT DEP - TECHSYSTEMS INC',
         amount: 1500,
-        category: 'Income',
-        merchantName: 'TechSystems Inc',
-        memo: 'Weekly paycheck',
-        autoCategorized: false
+        ...(Math.random() < 0.9 && { category: 'Income' })
       });
     });
   }

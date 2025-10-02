@@ -287,77 +287,213 @@ function App() {
   const handleImportDemoData = () => {
     const demoTransactions = generateDemoData();
 
-    setTransactions(demoTransactions);  // Bills are now marked as isBill in transactions
+    setTransactions(demoTransactions);
     setAccountStartingBalance(5000);
 
-    // Calculate average monthly expenses per category from demo data
-    const categoryExpenses: { [category: string]: number[] } = {};
-
-    demoTransactions.forEach(t => {
-      if (t.amount < 0) { // Only expenses
-        const category = t.category || 'Uncategorized';
-        if (!categoryExpenses[category]) {
-          categoryExpenses[category] = [];
-        }
-        categoryExpenses[category].push(Math.abs(t.amount));
+    // Create realistic bills for average American family
+    const today = new Date();
+    const demoBills: Bill[] = [
+      {
+        id: crypto.randomUUID(),
+        name: 'Rent/Mortgage',
+        amount: 2100,
+        dueDate: new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0],
+        frequency: 'monthly',
+        category: 'Housing',
+        isPaid: false,
+        paidDates: []
+      },
+      {
+        id: crypto.randomUUID(),
+        name: 'Car Insurance',
+        amount: 120,
+        dueDate: new Date(today.getFullYear(), today.getMonth(), 15).toISOString().split('T')[0],
+        frequency: 'monthly',
+        category: 'Insurance',
+        isPaid: false,
+        paidDates: []
+      },
+      {
+        id: crypto.randomUUID(),
+        name: 'Internet',
+        amount: 70,
+        dueDate: new Date(today.getFullYear(), today.getMonth(), 5).toISOString().split('T')[0],
+        frequency: 'monthly',
+        category: 'Utilities',
+        isPaid: false,
+        paidDates: []
+      },
+      {
+        id: crypto.randomUUID(),
+        name: 'Electric Bill',
+        amount: 95,
+        dueDate: new Date(today.getFullYear(), today.getMonth(), 12).toISOString().split('T')[0],
+        frequency: 'monthly',
+        category: 'Utilities',
+        isPaid: false,
+        paidDates: []
+      },
+      {
+        id: crypto.randomUUID(),
+        name: 'Water Bill',
+        amount: 45,
+        dueDate: new Date(today.getFullYear(), today.getMonth(), 20).toISOString().split('T')[0],
+        frequency: 'monthly',
+        category: 'Utilities',
+        isPaid: false,
+        paidDates: []
+      },
+      {
+        id: crypto.randomUUID(),
+        name: 'Phone Bill',
+        amount: 55,
+        dueDate: new Date(today.getFullYear(), today.getMonth(), 10).toISOString().split('T')[0],
+        frequency: 'monthly',
+        category: 'Phone',
+        isPaid: false,
+        paidDates: []
+      },
+      {
+        id: crypto.randomUUID(),
+        name: 'Student Loan',
+        amount: 285,
+        dueDate: new Date(today.getFullYear(), today.getMonth(), 10).toISOString().split('T')[0],
+        frequency: 'monthly',
+        category: 'Debt Payments',
+        isPaid: false,
+        paidDates: []
+      },
+      {
+        id: crypto.randomUUID(),
+        name: 'Credit Card Payment',
+        amount: 200,
+        dueDate: new Date(today.getFullYear(), today.getMonth(), 20).toISOString().split('T')[0],
+        frequency: 'monthly',
+        category: 'Debt Payments',
+        isPaid: false,
+        paidDates: []
+      },
+      {
+        id: crypto.randomUUID(),
+        name: 'Netflix',
+        amount: 22.99,
+        dueDate: new Date(today.getFullYear(), today.getMonth(), 8).toISOString().split('T')[0],
+        frequency: 'monthly',
+        category: 'Subscriptions',
+        isPaid: false,
+        paidDates: []
+      },
+      {
+        id: crypto.randomUUID(),
+        name: 'Spotify',
+        amount: 11.99,
+        dueDate: new Date(today.getFullYear(), today.getMonth(), 12).toISOString().split('T')[0],
+        frequency: 'monthly',
+        category: 'Subscriptions',
+        isPaid: false,
+        paidDates: []
+      },
+      {
+        id: crypto.randomUUID(),
+        name: 'Gym Membership',
+        amount: 24.99,
+        dueDate: new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0],
+        frequency: 'monthly',
+        category: 'Fitness & Gym',
+        isPaid: false,
+        paidDates: []
       }
-    });
+    ];
 
-    // Calculate total expenses per category and set realistic mixed budgets
-    const categoryTotals: { [category: string]: number } = {};
-    Object.keys(categoryExpenses).forEach(category => {
-      categoryTotals[category] = categoryExpenses[category].reduce((sum, amount) => sum + amount, 0) / 12; // Average per month
-    });
+    setBills(demoBills);
 
-    // Define realistic budget strategies for each category type
-    const budgetStrategies: { [category: string]: 'under' | 'on-target' | 'over' | 'tight' } = {
-      'Food & Dining': 'tight',       // Slightly over budget on food/dining
-      'Housing': 'on-target',         // Fixed costs, usually on target
-      'Transportation': 'under',      // Good at staying under budget
-      'Shopping': 'tight',            // Discretionary, slightly over
-      'Bills & Fees': 'on-target',    // Fixed costs, predictable
-      'Entertainment': 'on-target',   // Generally on target
-      'Personal Care': 'under',       // Usually under budget
-      'Healthcare': 'on-target',      // Unpredictable but averages out
-      'Education': 'on-target',
-      'Uncategorized': 'on-target'
+    // Create realistic recurring income for average American family
+    // Bi-weekly paychecks (every other Friday) - $1,500 per paycheck = ~$3,000/month
+    const nextFriday = new Date(today);
+    nextFriday.setDate(today.getDate() + ((5 - today.getDay() + 7) % 7));
+
+    const demoIncomes: RecurringIncome[] = [
+      {
+        id: crypto.randomUUID(),
+        name: 'Primary Income - Salary',
+        amount: 1500,
+        startDate: nextFriday.toISOString().split('T')[0],
+        frequency: 'bi-weekly'
+      }
+    ];
+
+    setRecurringIncomes(demoIncomes);
+
+    // Set realistic monthly budgets with variation
+    // Total income: ~$6,000/month (4 paychecks), Total bills: ~$3,030
+    // Leaving ~$2,970 for other expenses
+    const demoMonthlyBudgets: { [key: string]: number } = {};
+
+    // Create budgets for the past 6 months and current month
+    for (let i = 0; i <= 6; i++) {
+      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const key = `${date.getFullYear()}-${date.getMonth()}`;
+
+      // Vary budgets slightly month to month
+      let budget: number;
+
+      if (i === 0) {
+        // Current month - slightly over budget (spending more than planned)
+        budget = 5200;
+      } else if (i === 1) {
+        // Last month - right on the money
+        budget = 5500;
+      } else if (i === 2) {
+        // 2 months ago - under budget (good month!)
+        budget = 6200;
+      } else if (i === 3) {
+        // 3 months ago - over budget (had some unexpected expenses)
+        budget = 4800;
+      } else if (i === 4) {
+        // 4 months ago - right on target
+        budget = 5600;
+      } else if (i === 5) {
+        // 5 months ago - slightly under
+        budget = 5900;
+      } else {
+        // 6 months ago - over budget
+        budget = 5000;
+      }
+
+      demoMonthlyBudgets[key] = budget;
+    }
+
+    setMonthlyBudgets(demoMonthlyBudgets);
+
+    // Set realistic category budgets based on demo data spending patterns
+    // These are designed so some are over, some under, and some on target
+    const demoCategoryBudgets: { [categoryName: string]: number } = {
+      'Groceries': 700,           // Under budget (~$600/mo avg)
+      'Dining Out': 400,           // Over budget (~$500/mo avg)
+      'Gas & Fuel': 200,           // On target (~$200/mo avg)
+      'Subscriptions': 120,        // On target (~$115/mo avg)
+      'General Shopping': 200,     // Over budget (~$250/mo avg)
+      'Housing': 2100,             // On target (~$2100/mo)
+      'Utilities': 220,            // Slightly under (~$210/mo avg)
+      'Phone': 55,                 // On target (~$55/mo)
+      'Insurance': 120,            // On target (~$120/mo)
+      'Healthcare': 80,            // Under budget (~$40/mo avg)
+      'Personal Care': 100,        // Over budget (~$120/mo avg)
+      'Entertainment': 40,         // Under budget (~$20/mo avg)
+      'Fitness & Gym': 25,         // On target (~$25/mo)
+      'Debt Payments': 500,        // Under budget (~$450/mo avg)
+      'Electronics': 80,           // Under budget (~$50/mo avg)
+      'Clothing': 60,              // Over budget (~$80/mo avg)
+      'Gaming': 30,                // Under budget (~$20/mo avg)
+      'Income': 0                  // Income category, no budget needed
     };
 
-    const updatedCategories = categories.map(cat => {
-      const avgExpense = categoryTotals[cat.name] || 0;
-      if (avgExpense === 0) return { ...cat, budgeted: 0 };
+    // Update existing categories with budgets
+    const updatedCategories = categories.map(cat => ({
+      ...cat,
+      budgeted: demoCategoryBudgets[cat.name] || 0
+    }));
 
-      const strategy = budgetStrategies[cat.name] || 'on-target';
-      let budgetPercent: number;
-
-      switch (strategy) {
-        case 'under':
-          // Budget is 110-120% of actual (spending less than budgeted)
-          budgetPercent = 1.1 + Math.random() * 0.1;
-          break;
-        case 'on-target':
-          // Budget is 98-108% of actual (right on target)
-          budgetPercent = 0.98 + Math.random() * 0.1;
-          break;
-        case 'tight':
-          // Budget is 90-95% of actual (slightly over budget)
-          budgetPercent = 0.9 + Math.random() * 0.05;
-          break;
-        case 'over':
-          // Budget is 75-85% of actual (moderately over budget)
-          budgetPercent = 0.75 + Math.random() * 0.1;
-          break;
-        default:
-          budgetPercent = 1.0;
-      }
-
-      const budget = Math.round(avgExpense * budgetPercent);
-
-      return {
-        ...cat,
-        budgeted: budget
-      };
-    });
     setCategories(updatedCategories);
   };
 
@@ -438,6 +574,7 @@ function App() {
             onDateChange={handleDateChange}
             onUpdateBudget={handleUpdateBudget}
             onNavigate={setActiveSection}
+            onImportDemoData={handleImportDemoData}
             onMarkBillPaid={(billId: string, dueDate: string) => {
               setTransactions(prev => prev.map(t => {
                 if (t.id === billId) {

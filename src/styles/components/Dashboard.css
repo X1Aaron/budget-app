@@ -90,6 +90,12 @@
   color: var(--text-secondary);
 }
 
+.alert-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
 .alert-action {
   padding: 0.5rem 1rem;
   background: var(--text-primary);
@@ -107,6 +113,18 @@
 .alert-action:hover {
   opacity: 0.85;
   transform: scale(1.05);
+}
+
+.alert-action-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 2px solid var(--text-primary);
+}
+
+.alert-action-secondary:hover {
+  background: var(--text-primary);
+  color: var(--card-bg);
+  opacity: 1;
 }
 
 .dashboard-empty {
