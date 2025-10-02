@@ -206,10 +206,31 @@ function Transactions({
           return
         }
 
-        // Parse CSV
-        const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
+        // Parse CSV - properly handle quoted fields
+        const parseCSVLine = (line) => {
+          const values = []
+          let current = ''
+          let inQuotes = false
+
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i]
+
+            if (char === '"') {
+              inQuotes = !inQuotes
+            } else if (char === ',' && !inQuotes) {
+              values.push(current.trim())
+              current = ''
+            } else {
+              current += char
+            }
+          }
+          values.push(current.trim())
+          return values
+        }
+
+        const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase())
         const data = lines.slice(1).map(line => {
-          const values = line.split(',').map(v => v.trim())
+          const values = parseCSVLine(line)
           const row = {}
           headers.forEach((header, i) => {
             row[header] = values[i] || ''
