@@ -24,6 +24,7 @@ function Bills({
   })
   const [suggestedTransactions, setSuggestedTransactions] = useState([])
   const [selectedSuggestion, setSelectedSuggestion] = useState(null)
+  const [confirmLinkTransaction, setConfirmLinkTransaction] = useState(false)
   const [editingInlineId, setEditingInlineId] = useState(null)
   const [inlineFormData, setInlineFormData] = useState({})
 
@@ -66,6 +67,7 @@ function Bills({
     setEditingBill(null)
     setSuggestedTransactions([])
     setSelectedSuggestion(null)
+    setConfirmLinkTransaction(false)
     setAddModalOpen(true)
   }
 
@@ -152,8 +154,8 @@ function Bills({
         payments: []
       }
 
-      // If a transaction was selected, match it to the bill
-      if (selectedSuggestion) {
+      // If a transaction was selected AND user confirmed the link, match it to the bill
+      if (selectedSuggestion && confirmLinkTransaction) {
         const selectedTransaction = selectedSuggestion.transaction
         const occurrenceDate = formData.dueDate
 
@@ -197,6 +199,7 @@ function Bills({
     setEditingBill(null)
     setSuggestedTransactions([])
     setSelectedSuggestion(null)
+    setConfirmLinkTransaction(false)
     setAddModalOpen(false)
   }
 
@@ -395,7 +398,10 @@ function Bills({
                         <div
                           key={suggestion.transaction.id || idx}
                           className={`suggestion-item ${isSelected ? 'selected' : ''}`}
-                          onClick={() => setSelectedSuggestion(isSelected ? null : suggestion)}
+                          onClick={() => {
+                            setSelectedSuggestion(isSelected ? null : suggestion)
+                            setConfirmLinkTransaction(false) // Reset confirmation when changing selection
+                          }}
                         >
                           <div className="suggestion-header">
                             <span className="suggestion-date">{suggestion.transaction.date}</span>
@@ -408,7 +414,19 @@ function Bills({
                             {suggestion.matchReason} (score: {suggestion.matchScore})
                           </div>
                           {isSelected && (
-                            <div className="suggestion-selected-indicator">✓ Will be matched when bill is created</div>
+                            <div className="suggestion-selected-indicator">
+                              <label className="link-checkbox-label">
+                                <input
+                                  type="checkbox"
+                                  checked={confirmLinkTransaction}
+                                  onChange={(e) => {
+                                    e.stopPropagation()
+                                    setConfirmLinkTransaction(e.target.checked)
+                                  }}
+                                />
+                                Link this transaction to the bill
+                              </label>
+                            </div>
                           )}
                         </div>
                       )
