@@ -16,7 +16,8 @@ function Dashboard({
   accountStartingBalance,
   onDateChange,
   onUpdateBudget,
-  onMarkBillPaid
+  onMarkBillPaid,
+  onNavigate
 }) {
   const { theme } = useTheme()
   const [isEditingBudget, setIsEditingBudget] = useState(false)
@@ -422,7 +423,7 @@ function Dashboard({
                   <div className="alert-title">No Transactions Yet</div>
                   <div className="alert-description">Import your bank transactions to get started</div>
                 </div>
-                <button className="alert-action" onClick={() => window.location.href = '#/transactions'}>Import</button>
+                <button className="alert-action" onClick={() => onNavigate?.('transactions')}>Import</button>
               </div>
             )}
             {categories.length === 0 && (
@@ -432,7 +433,7 @@ function Dashboard({
                   <div className="alert-title">Set Up Categories</div>
                   <div className="alert-description">Create categories to organize your budget</div>
                 </div>
-                <button className="alert-action" onClick={() => window.location.href = '#/categories'}>Set Up</button>
+                <button className="alert-action" onClick={() => onNavigate?.('categories')}>Set Up</button>
               </div>
             )}
             {bills.length === 0 && monthlyTransactions.length > 0 && (
@@ -442,7 +443,7 @@ function Dashboard({
                   <div className="alert-title">Add Your Bills</div>
                   <div className="alert-description">Track recurring payments</div>
                 </div>
-                <button className="alert-action" onClick={() => window.location.href = '#/bills'}>Add Bills</button>
+                <button className="alert-action" onClick={() => onNavigate?.('bills')}>Add Bills</button>
               </div>
             )}
             {alerts.uncategorizedCount > 0 && (
@@ -452,7 +453,7 @@ function Dashboard({
                   <div className="alert-title">{alerts.uncategorizedCount} Uncategorized Transaction{alerts.uncategorizedCount !== 1 ? 's' : ''}</div>
                   <div className="alert-description">Review and categorize your transactions</div>
                 </div>
-                <button className="alert-action" onClick={() => window.location.href = '#/transactions'}>Review</button>
+                <button className="alert-action" onClick={() => onNavigate?.('transactions')}>Review</button>
               </div>
             )}
             {alerts.overBudgetCategories > 0 && (
@@ -472,7 +473,7 @@ function Dashboard({
                   <div className="alert-title">{alerts.unpaidBillsThisMonth} Unpaid Bill{alerts.unpaidBillsThisMonth !== 1 ? 's' : ''}</div>
                   <div className="alert-description">You have bills due this month</div>
                 </div>
-                <button className="alert-action" onClick={() => window.location.href = '#/bills'}>Pay</button>
+                <button className="alert-action" onClick={() => onNavigate?.('bills')}>Pay</button>
               </div>
             )}
           </div>

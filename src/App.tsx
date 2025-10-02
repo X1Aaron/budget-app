@@ -437,6 +437,7 @@ function App() {
             accountStartingBalance={accountStartingBalance}
             onDateChange={handleDateChange}
             onUpdateBudget={handleUpdateBudget}
+            onNavigate={setActiveSection}
             onMarkBillPaid={(billId: string, dueDate: string) => {
               setTransactions(prev => prev.map(t => {
                 if (t.id === billId) {
