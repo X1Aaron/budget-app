@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { Dashboard } from './components/features/dashboard';
-import { SpendingAndBills, BillReconciliation } from './components/features/bills';
+import { SpendingAndBills, BillReconciliation, Bills } from './components/features/bills';
 import { Transactions } from './components/features/transactions';
 import { CategorySettings, AutoCategorization } from './components/features/categories';
 import { MonthYearSelector } from './components/ui/forms';
@@ -329,16 +329,22 @@ function App() {
             Dashboard
           </button>
           <button
-            className={'nav-btn' + (activeSection === 'spending' ? ' active' : '')}
-            onClick={() => setActiveSection('spending')}
-          >
-            Spending & Bills
-          </button>
-          <button
             className={'nav-btn' + (activeSection === 'transactions' ? ' active' : '')}
             onClick={() => setActiveSection('transactions')}
           >
             Transactions
+          </button>
+          <button
+            className={'nav-btn' + (activeSection === 'bills' ? ' active' : '')}
+            onClick={() => setActiveSection('bills')}
+          >
+            Bills
+          </button>
+          <button
+            className={'nav-btn' + (activeSection === 'spending' ? ' active' : '')}
+            onClick={() => setActiveSection('spending')}
+          >
+            Spending & Bills
           </button>
           <button
             className={'nav-btn' + (activeSection === 'reconciliation' ? ' active' : '')}
@@ -378,6 +384,25 @@ function App() {
             onDateChange={handleDateChange}
             onUpdateBudget={handleUpdateBudget}
           />
+        ) : activeSection === 'transactions' ? (
+          <Transactions
+            transactions={transactions}
+            categories={categories}
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
+            onUpdateTransaction={handleUpdateTransaction}
+            accountStartingBalance={accountStartingBalance}
+            onUpdateTransactions={setTransactions}
+          />
+        ) : activeSection === 'bills' ? (
+          <Bills
+            transactions={transactions}
+            categories={categories}
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
+            onUpdateTransactions={setTransactions}
+            billMatchingSettings={billMatchingSettings}
+          />
         ) : activeSection === 'spending' ? (
           <SpendingAndBills
             transactions={transactions}
@@ -389,16 +414,6 @@ function App() {
             accountStartingBalance={accountStartingBalance}
             onUpdateTransactions={setTransactions}
             billMatchingSettings={billMatchingSettings}
-          />
-        ) : activeSection === 'transactions' ? (
-          <Transactions
-            transactions={transactions}
-            categories={categories}
-            selectedYear={selectedYear}
-            selectedMonth={selectedMonth}
-            onUpdateTransaction={handleUpdateTransaction}
-            accountStartingBalance={accountStartingBalance}
-            onUpdateTransactions={setTransactions}
           />
         ) : activeSection === 'reconciliation' ? (
           <BillReconciliation

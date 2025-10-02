@@ -27,6 +27,8 @@ function Transactions({
     category: '',
     memo: ''
   })
+  const [importModalOpen, setImportModalOpen] = useState(false)
+  const [importPreview, setImportPreview] = useState(null)
 
   const handleSort = (key) => {
     let direction = 'asc'
@@ -187,6 +189,112 @@ function Transactions({
     setAddModalOpen(false)
   }
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      try {
+        const text = event.target.result
+        const lines = text.split('\n').filter(line => line.trim())
+
+        if (lines.length < 2) {
+          alert('CSV file must have at least a header row and one data row')
+          return
+        }
+
+        // Parse CSV
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
+        const data = lines.slice(1).map(line => {
+          const values = line.split(',').map(v => v.trim())
+          const row = {}
+          headers.forEach((header, i) => {
+            row[header] = values[i] || ''
+          })
+          return row
+        })
+
+        // Convert to transactions
+        const importedTransactions = data.map((row, index) => {
+          // Try to find date field (common variations)
+          const date = row.date || row.transactiondate || row['transaction date'] || row.posted || row['posted date']
+
+          // Try to find description field
+          const description = row.description || row.merchant || row.name || row.payee
+
+          // Try to find amount field
+          let amount = row.amount || row.debit || row.credit
+
+          // If separate debit/credit columns, handle them
+          if (row.debit && row.credit) {
+            amount = parseFloat(row.debit || 0) - parseFloat(row.credit || 0)
+          } else if (amount) {
+            amount = parseFloat(amount)
+          }
+
+          if (!date || !description || isNaN(amount)) {
+            console.warn('Skipping invalid row:', row)
+            return null
+          }
+
+          return {
+            id: `import-${Date.now()}-${index}`,
+            date: date,
+            description: description,
+            merchantName: description,
+            amount: amount,
+            category: row.category || 'Uncategorized',
+            memo: row.memo || row.notes || '',
+            autoCategorized: false
+          }
+        }).filter(t => t !== null)
+
+        setImportPreview(importedTransactions)
+        setImportModalOpen(true)
+      } catch (error) {
+        alert('Error parsing CSV file: ' + error.message)
+      }
+    }
+    reader.readAsText(file)
+  }
+
+  const handleConfirmImport = () => {
+    if (!importPreview || importPreview.length === 0) return
+
+    // Check for duplicates
+    const duplicates = []
+    const newTransactions = []
+
+    importPreview.forEach(imported => {
+      const isDuplicate = transactions.some(existing =>
+        existing.date === imported.date &&
+        existing.description === imported.description &&
+        existing.amount === imported.amount
+      )
+
+      if (isDuplicate) {
+        duplicates.push(imported)
+      } else {
+        newTransactions.push(imported)
+      }
+    })
+
+    if (duplicates.length > 0) {
+      if (!confirm(`Found ${duplicates.length} duplicate transaction(s). Import the remaining ${newTransactions.length} unique transaction(s)?`)) {
+        return
+      }
+    }
+
+    if (newTransactions.length > 0) {
+      onUpdateTransactions(prevTransactions => [...prevTransactions, ...newTransactions])
+      alert(`Successfully imported ${newTransactions.length} transaction(s)`)
+    }
+
+    setImportPreview(null)
+    setImportModalOpen(false)
+  }
+
   // Summary stats
   const summary = useMemo(() => {
     const income = monthlyTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0)
@@ -203,6 +311,56 @@ function Transactions({
 
   return (
     <div className="transactions-page">
+      {/* Import Preview Modal */}
+      {importModalOpen && importPreview && (
+        <div className="bill-modal-backdrop" onClick={() => setImportModalOpen(false)}>
+          <div className="bill-modal import-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Import Preview</h3>
+            <p className="import-info">
+              Importing {importPreview.length} transaction(s). Review before confirming.
+            </p>
+            <div className="import-preview-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {importPreview.slice(0, 10).map((trans, idx) => (
+                    <tr key={idx}>
+                      <td>{trans.date}</td>
+                      <td>{trans.description}</td>
+                      <td className={trans.amount < 0 ? 'negative' : 'positive'}>
+                        {formatCurrency(trans.amount)}
+                      </td>
+                      <td>{trans.category}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {importPreview.length > 10 && (
+                <p className="preview-note">Showing first 10 of {importPreview.length} transactions</p>
+              )}
+            </div>
+            <div className="bill-modal-actions">
+              <button className="cancel-btn" onClick={() => {
+                setImportPreview(null)
+                setImportModalOpen(false)
+              }}>
+                Cancel
+              </button>
+              <button className="save-btn" onClick={handleConfirmImport}>
+                Import {importPreview.length} Transaction(s)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Add Transaction Modal */}
       {addModalOpen && (
         <div className="bill-modal-backdrop" onClick={() => setAddModalOpen(false)}>
@@ -281,6 +439,15 @@ function Transactions({
             <button className="action-btn add-transaction-btn" onClick={handleOpenAddModal}>
               + Add Transaction
             </button>
+            <label className="action-btn import-btn">
+              📁 Import CSV
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+              />
+            </label>
             <div className="starting-balance-display">
               <span className="starting-balance-label">Starting Balance:</span>
               <span className="starting-balance-value">{formatCurrency(currentStartingBalance)}</span>
