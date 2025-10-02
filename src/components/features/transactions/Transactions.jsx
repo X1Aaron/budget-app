@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react'
 import '../../../styles/components/Transactions.css'
 import { getCategoryColor, autoCategorize, generateMerchantName } from '../../../utils/categories'
 import { calculateMonthStartingBalance } from '../../../utils/balanceCalculations'
-import { generateBillOccurrences } from '../../../utils/billMatching'
+import { generateBillOccurrences, findSuggestedTransactionsForBill } from '../../../utils/billMatching'
 
 function Transactions({
   transactions,
@@ -36,6 +36,9 @@ function Transactions({
   const [importItemsPerPage, setImportItemsPerPage] = useState(25)
   const [linkToBillModalOpen, setLinkToBillModalOpen] = useState(false)
   const [transactionToLink, setTransactionToLink] = useState(null)
+  const [smartLinkConfirmation, setSmartLinkConfirmation] = useState(null)
+  const [toastMessage, setToastMessage] = useState(null)
+  const [undoAction, setUndoAction] = useState(null)
 
   const handleSort = (key) => {
     let direction = 'asc'
@@ -405,6 +408,201 @@ function Transactions({
     setTransactionToLink(null)
   }
 
+  const showToast = (message, undoCallback = null) => {
+    setToastMessage(message)
+    setUndoAction(undoCallback ? () => undoCallback : null)
+    setTimeout(() => {
+      setToastMessage(null)
+      setUndoAction(null)
+    }, 5000)
+  }
+
+  const handleSmartLink = (transaction) => {
+    // Only link expense transactions
+    if (transaction.amount >= 0) {
+      showToast('Only expense transactions can be linked to bills')
+      return
+    }
+
+    // Check if already linked
+    if (transaction.matchedToBillId) {
+      showToast('This transaction is already linked to a bill')
+      return
+    }
+
+    const merchantName = transaction.merchantName || transaction.description
+    const amount = Math.abs(transaction.amount)
+
+    // Find matching bills using reverse lookup
+    const matchingBills = allBills.map(bill => {
+      const billName = bill.billName || bill.description
+      const billAmount = bill.billAmount || Math.abs(bill.amount)
+
+      let score = 0
+      const reasons = []
+
+      // Check name match
+      const nameLower = merchantName.toLowerCase()
+      const billNameLower = billName.toLowerCase()
+
+      if (nameLower === billNameLower) {
+        score += 50
+        reasons.push('exact name')
+      } else if (nameLower.includes(billNameLower) || billNameLower.includes(nameLower)) {
+        score += 40
+        reasons.push('name match')
+      } else {
+        // Check for word overlap
+        const nameWords = nameLower.split(/\s+/).filter(w => w.length > 3)
+        const billWords = billNameLower.split(/\s+/).filter(w => w.length > 3)
+        const hasCommonWord = nameWords.some(nw =>
+          billWords.some(bw => nw.includes(bw) || bw.includes(nw))
+        )
+        if (hasCommonWord) {
+          score += 30
+          reasons.push('similar name')
+        }
+      }
+
+      // Check amount match
+      const amountDiff = Math.abs(amount - billAmount)
+      if (amountDiff < 0.01) {
+        score += 40
+        reasons.push('exact amount')
+      } else if (amountDiff <= 5) {
+        score += 30
+        reasons.push('similar amount')
+      }
+
+      return {
+        bill,
+        score,
+        reasons: reasons.join(', ')
+      }
+    }).filter(m => m.score > 0).sort((a, b) => b.score - a.score)
+
+    if (matchingBills.length === 0) {
+      // No matches - create new bill automatically
+      createBillFromTransaction(transaction)
+    } else {
+      const bestMatch = matchingBills[0]
+
+      if (bestMatch.score >= 85) {
+        // High confidence - auto-link with undo
+        linkTransactionToBill(transaction, bestMatch.bill, true)
+      } else if (bestMatch.score >= 50) {
+        // Medium confidence - show confirmation
+        setSmartLinkConfirmation({
+          transaction,
+          suggestedBill: bestMatch.bill,
+          matchReason: bestMatch.reasons,
+          matchScore: bestMatch.score,
+          otherMatches: matchingBills.slice(1, 3)
+        })
+      } else {
+        // Low confidence - create new bill
+        createBillFromTransaction(transaction)
+      }
+    }
+  }
+
+  const linkTransactionToBill = (transaction, bill, showUndo = false) => {
+    const billId = bill.id || `${bill.date}-${bill.description}`
+    const billName = bill.billName || bill.description
+    const transactionId = transaction.id
+
+    // Store previous state for undo
+    const previousTransactions = [...transactions]
+
+    const updatedTransactions = transactions.map(t => {
+      if (t.id === transactionId) {
+        return { ...t, matchedToBillId: billId, hiddenAsBillPayment: true }
+      }
+      // Update bill with payment info
+      if (t.id === billId && t.isBill) {
+        const payments = t.payments || []
+        const occurrenceDate = bill.dueDate
+        const newPayment = {
+          occurrenceDate,
+          transactionDate: transaction.date,
+          transactionAmount: transaction.amount,
+          transactionDescription: transaction.description,
+          manuallyMarked: true
+        }
+        return {
+          ...t,
+          payments: [...payments, newPayment]
+        }
+      }
+      return t
+    })
+
+    onUpdateTransactions(updatedTransactions)
+
+    if (showUndo) {
+      showToast(
+        `Linked to ${billName} - ${formatCurrency(Math.abs(transaction.amount))}`,
+        () => {
+          onUpdateTransactions(previousTransactions)
+          showToast('Link undone')
+        }
+      )
+    } else {
+      showToast(`Linked to ${billName}`)
+    }
+
+    setSmartLinkConfirmation(null)
+  }
+
+  const createBillFromTransaction = (transaction) => {
+    const merchantName = transaction.merchantName || transaction.description
+    const amount = Math.abs(transaction.amount)
+
+    const billId = `bill-${Date.now()}`
+    const newBill = {
+      id: billId,
+      date: transaction.date,
+      description: merchantName,
+      amount: -amount,
+      category: transaction.category || 'Uncategorized',
+      memo: transaction.memo || '',
+      isBill: true,
+      billName: merchantName,
+      billAmount: amount,
+      dueDate: transaction.date,
+      frequency: 'monthly',
+      sourceDescription: transaction.description,
+      payments: [{
+        occurrenceDate: transaction.date,
+        transactionDate: transaction.date,
+        transactionAmount: transaction.amount,
+        transactionDescription: transaction.description,
+        manuallyMarked: true
+      }]
+    }
+
+    // Store previous state for undo
+    const previousTransactions = [...transactions]
+
+    // Update transactions: add bill and link transaction
+    const updatedTransactions = transactions.map(t => {
+      if (t.id === transaction.id) {
+        return { ...t, matchedToBillId: billId, hiddenAsBillPayment: true }
+      }
+      return t
+    }).concat([newBill])
+
+    onUpdateTransactions(updatedTransactions)
+
+    showToast(
+      `Created new bill: ${merchantName}`,
+      () => {
+        onUpdateTransactions(previousTransactions)
+        showToast('Bill creation undone')
+      }
+    )
+  }
+
   // Summary stats
   const summary = useMemo(() => {
     const income = monthlyTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0)
@@ -421,6 +619,93 @@ function Transactions({
 
   return (
     <div className="transactions-page">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="toast-notification">
+          <span className="toast-message">{toastMessage}</span>
+          {undoAction && (
+            <button
+              className="toast-undo-btn"
+              onClick={() => {
+                if (undoAction) undoAction()
+                setToastMessage(null)
+                setUndoAction(null)
+              }}
+            >
+              Undo
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Smart Link Confirmation Modal */}
+      {smartLinkConfirmation && (
+        <div className="bill-modal-backdrop" onClick={() => setSmartLinkConfirmation(null)}>
+          <div className="bill-modal smart-link-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Link Transaction to Bill?</h3>
+            <div className="smart-link-info">
+              <div className="smart-link-transaction">
+                <strong>Transaction:</strong>
+                <div>{smartLinkConfirmation.transaction.merchantName || smartLinkConfirmation.transaction.description}</div>
+                <div>{formatCurrency(smartLinkConfirmation.transaction.amount)} • {smartLinkConfirmation.transaction.date}</div>
+              </div>
+              <div className="smart-link-arrow">↓</div>
+              <div className="smart-link-bill">
+                <strong>Suggested Bill:</strong>
+                <div>{smartLinkConfirmation.suggestedBill.billName || smartLinkConfirmation.suggestedBill.description}</div>
+                <div>{formatCurrency(smartLinkConfirmation.suggestedBill.billAmount || Math.abs(smartLinkConfirmation.suggestedBill.amount))}</div>
+                <div className="match-confidence">
+                  Match: {smartLinkConfirmation.matchReason} (score: {smartLinkConfirmation.matchScore})
+                </div>
+              </div>
+            </div>
+            {smartLinkConfirmation.otherMatches.length > 0 && (
+              <div className="other-matches">
+                <strong>Other possible matches:</strong>
+                {smartLinkConfirmation.otherMatches.map((match, idx) => (
+                  <div key={idx} className="other-match-option">
+                    <button
+                      className="other-match-btn"
+                      onClick={() => linkTransactionToBill(smartLinkConfirmation.transaction, match.bill, false)}
+                    >
+                      {match.bill.billName || match.bill.description} - {formatCurrency(match.bill.billAmount || Math.abs(match.bill.amount))}
+                      <span className="match-score">({match.score})</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="bill-modal-actions">
+              <button
+                className="cancel-btn"
+                onClick={() => setSmartLinkConfirmation(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="create-bill-btn"
+                onClick={() => {
+                  setSmartLinkConfirmation(null)
+                  createBillFromTransaction(smartLinkConfirmation.transaction)
+                }}
+              >
+                Create New Bill Instead
+              </button>
+              <button
+                className="save-btn"
+                onClick={() => linkTransactionToBill(
+                  smartLinkConfirmation.transaction,
+                  smartLinkConfirmation.suggestedBill,
+                  false
+                )}
+              >
+                Link to {smartLinkConfirmation.suggestedBill.billName || smartLinkConfirmation.suggestedBill.description}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Import Preview Modal */}
       {importModalOpen && importPreview && (() => {
         const importTotalPages = Math.ceil(importPreview.length / importItemsPerPage)
@@ -837,7 +1122,21 @@ function Transactions({
                       </td>
 
                       <td className={`transaction-amount ${item.amount < 0 ? 'negative' : 'positive'}`}>
-                        {formatCurrency(Math.abs(item.amount))}
+                        <div className="amount-with-link">
+                          {formatCurrency(Math.abs(item.amount))}
+                          {item.amount < 0 && !isBillPayment && (
+                            <button
+                              className="smart-link-btn"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleSmartLink(item)
+                              }}
+                              title="Smart link to bill"
+                            >
+                              🔗
+                            </button>
+                          )}
+                        </div>
                       </td>
 
                       <td className="transaction-category-cell" onClick={(e) => e.stopPropagation()}>
