@@ -278,15 +278,19 @@ function Transactions({
             return null
           }
 
+          // Apply auto-categorization
+          const merchantName = generateMerchantName(description)
+          const result = autoCategorize(description, amount, row.category, categories)
+
           return {
             id: `import-${Date.now()}-${index}`,
             date: date,
             description: description,
-            merchantName: description,
+            merchantName: merchantName,
             amount: amount,
-            category: row.category || 'Uncategorized',
+            category: result.category,
             memo: row.memo || row.notes || '',
-            autoCategorized: false,
+            autoCategorized: result.wasAutoCategorized,
             isBill: false
           }
         }).filter(t => t !== null)
@@ -328,32 +332,28 @@ function Transactions({
     }
 
     if (newTransactions.length > 0) {
-      // Apply auto-categorization to imported transactions
-      const categorizedTransactions = newTransactions.map(t => {
-        const result = autoCategorize(t.description, t.amount, t.category, categories)
-        return {
-          ...t,
-          category: result.category,
-          autoCategorized: result.wasAutoCategorized,
-          merchantName: t.merchantName || generateMerchantName(t.description)
-        }
-      })
+      // Transactions are already categorized from the preview (with user edits)
+      onUpdateTransactions(prevTransactions => [...prevTransactions, ...newTransactions])
 
-      onUpdateTransactions(prevTransactions => [...prevTransactions, ...categorizedTransactions])
-
-      // Check how many transactions are in the current month view
-      const currentMonthTransactions = categorizedTransactions.filter(t => {
+      // Group transactions by month
+      const transactionsByMonth = {}
+      newTransactions.forEach(t => {
         const [year, month] = t.date.split('-').map(Number)
-        return year === selectedYear && month - 1 === selectedMonth
+        const key = `${monthNames[month - 1]} ${year}`
+        if (!transactionsByMonth[key]) {
+          transactionsByMonth[key] = 0
+        }
+        transactionsByMonth[key]++
       })
 
-      if (currentMonthTransactions.length === 0) {
-        alert(`Successfully imported ${newTransactions.length} transaction(s).\n\nNote: None of the imported transactions are in ${monthNames[selectedMonth]} ${selectedYear}. Switch to the appropriate month to view them.`)
-      } else if (currentMonthTransactions.length < newTransactions.length) {
-        alert(`Successfully imported ${newTransactions.length} transaction(s).\n\n${currentMonthTransactions.length} are in ${monthNames[selectedMonth]} ${selectedYear}. Switch months to view the others.`)
-      } else {
-        alert(`Successfully imported ${newTransactions.length} transaction(s) in ${monthNames[selectedMonth]} ${selectedYear}.`)
-      }
+      // Build the success message
+      const monthBreakdown = Object.entries(transactionsByMonth)
+        .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+        .map(([monthYear, count]) => `  • ${monthYear}: ${count} transaction${count !== 1 ? 's' : ''}`)
+        .join('\n')
+
+      const message = `Successfully imported ${newTransactions.length} transaction${newTransactions.length !== 1 ? 's' : ''}:\n\n${monthBreakdown}`
+      alert(message)
     }
 
     setImportPreview(null)
@@ -365,6 +365,16 @@ function Transactions({
     setImportPreview(null)
     setImportModalOpen(false)
     setImportCurrentPage(1)
+  }
+
+  const handleImportCategoryChange = (transactionId, newCategory) => {
+    setImportPreview(prevPreview =>
+      prevPreview.map(trans =>
+        trans.id === transactionId
+          ? { ...trans, category: newCategory, autoCategorized: false }
+          : trans
+      )
+    )
   }
 
   // Summary stats
@@ -420,15 +430,32 @@ function Transactions({
                   <tbody>
                     {importPaginatedData.map((trans, idx) => {
                       const globalIndex = importStartIndex + idx + 1
+                      const isUncategorized = !trans.category || trans.category === 'Uncategorized'
                       return (
                         <tr key={idx} className={trans.amount < 0 ? 'expense-row' : 'income-row'}>
                           <td className="row-number">{globalIndex}</td>
                           <td className="import-date">{trans.date}</td>
-                          <td className="import-description">{trans.description}</td>
+                          <td className="import-description">{trans.merchantName || trans.description}</td>
                           <td className={`import-amount ${trans.amount < 0 ? 'negative' : 'positive'}`}>
                             {formatCurrency(trans.amount)}
                           </td>
-                          <td className="import-category">{trans.category}</td>
+                          <td className="import-category" onClick={(e) => e.stopPropagation()}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <select
+                                className={`transaction-category-select${isUncategorized ? ' uncategorized-label' : ''}`}
+                                value={trans.category || 'Uncategorized'}
+                                onChange={(e) => handleImportCategoryChange(trans.id, e.target.value)}
+                                style={{ flex: 1 }}
+                              >
+                                <option value="Uncategorized">Uncategorized</option>
+                                {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
+                                  <option key={cat.id} value={cat.name}>{cat.name}</option>
+                                ))}
+                              </select>
+                              {trans.autoCategorized && <span className="auto-icon" title="Auto-categorized">🤖</span>}
+                              {isUncategorized && <span className="warning-icon">⚠️</span>}
+                            </div>
+                          </td>
                         </tr>
                       )
                     })}
