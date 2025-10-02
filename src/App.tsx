@@ -619,6 +619,93 @@ function App() {
             </div>
 
             <div className="settings-group">
+              <h3>Data Backup & Restore</h3>
+              <p className="settings-description">
+                All data is stored locally in your browser. Export your data to create a backup, and import it to restore.
+              </p>
+              <div className="settings-buttons">
+                <button className="export-data-btn" onClick={() => {
+                  const exportData = {
+                    version: '1.0',
+                    exportDate: new Date().toISOString(),
+                    data: {
+                      transactions,
+                      categories,
+                      monthlyBudgets,
+                      accountStartingBalance,
+                      merchantMappings,
+                      categoryMappings,
+                      disabledKeywords,
+                      billMatchingSettings,
+                      recurringIncomes
+                    }
+                  };
+
+                  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `budget-backup-${new Date().toISOString().split('T')[0]}.json`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}>
+                  Export All Data
+                </button>
+                <label className="import-data-btn">
+                  Import Data
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        try {
+                          const importedData = JSON.parse(event.target?.result as string);
+
+                          if (!importedData.version || !importedData.data) {
+                            alert('Invalid backup file format');
+                            return;
+                          }
+
+                          if (!confirm('This will replace ALL your current data. Are you sure? This cannot be undone!')) {
+                            return;
+                          }
+
+                          const data = importedData.data;
+
+                          // Import all data
+                          if (data.transactions) setTransactions(data.transactions);
+                          if (data.categories) setCategories(data.categories);
+                          if (data.monthlyBudgets) setMonthlyBudgets(data.monthlyBudgets);
+                          if (data.accountStartingBalance !== undefined) setAccountStartingBalance(data.accountStartingBalance);
+                          if (data.merchantMappings) setMerchantMappings(data.merchantMappings);
+                          if (data.categoryMappings) setCategoryMappings(data.categoryMappings);
+                          if (data.disabledKeywords) setDisabledKeywords(data.disabledKeywords);
+                          if (data.billMatchingSettings) setBillMatchingSettings(data.billMatchingSettings);
+                          if (data.recurringIncomes) setRecurringIncomes(data.recurringIncomes);
+
+                          alert(`Successfully imported data from backup created on ${new Date(importedData.exportDate).toLocaleDateString()}`);
+                        } catch (error) {
+                          alert('Error importing data: ' + (error as Error).message);
+                        }
+                      };
+                      reader.readAsText(file);
+                      // Reset input so same file can be selected again
+                      e.target.value = '';
+                    }}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+              </div>
+              <p className="settings-warning">
+                ⚠️ Importing will replace ALL existing data. Export a backup first!
+              </p>
+            </div>
+
+            <div className="settings-group">
               <h3>Demo Data</h3>
               <div className="settings-buttons">
                 <button className="demo-data-btn" onClick={handleImportDemoData}>

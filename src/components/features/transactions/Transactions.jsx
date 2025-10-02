@@ -348,6 +348,11 @@ function Transactions({
       // Transactions are already categorized from the preview (with user edits)
       onUpdateTransactions(prevTransactions => [...prevTransactions, ...newTransactions])
 
+      // Count categorization stats
+      const autoCategorized = newTransactions.filter(t => t.autoCategorized).length
+      const uncategorized = newTransactions.filter(t => !t.category || t.category === 'Uncategorized').length
+      const manuallyCategorized = newTransactions.length - autoCategorized - uncategorized
+
       // Group transactions by month
       const transactionsByMonth = {}
       newTransactions.forEach(t => {
@@ -365,7 +370,9 @@ function Transactions({
         .map(([monthYear, count]) => `  • ${monthYear}: ${count} transaction${count !== 1 ? 's' : ''}`)
         .join('\n')
 
-      const message = `Successfully imported ${newTransactions.length} transaction${newTransactions.length !== 1 ? 's' : ''}:\n\n${monthBreakdown}`
+      const categorizationStats = `\nCategorization:\n  • Automatically categorized: ${autoCategorized}\n  • Manually categorized: ${manuallyCategorized}\n  • Still need categorization: ${uncategorized}`
+
+      const message = `Successfully imported ${newTransactions.length} transaction${newTransactions.length !== 1 ? 's' : ''}:\n\n${monthBreakdown}${categorizationStats}`
       alert(message)
     }
 
