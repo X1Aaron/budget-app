@@ -345,13 +345,19 @@ function SpendingAndBills({
               <div className="type-toggle">
                 <button
                   className={`toggle-btn ${addType === 'transaction' ? 'active' : ''}`}
-                  onClick={() => setAddType('transaction')}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setAddType('transaction')
+                  }}
                 >
                   Transaction
                 </button>
                 <button
                   className={`toggle-btn ${addType === 'bill' ? 'active' : ''}`}
-                  onClick={() => setAddType('bill')}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setAddType('bill')
+                  }}
                 >
                   Bill
                 </button>
