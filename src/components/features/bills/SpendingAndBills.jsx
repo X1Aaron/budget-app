@@ -35,7 +35,7 @@ function SpendingAndBills({
     frequency: 'monthly'
   })
 
-  const cashRegisterSound = useMemo(() => new Audio('/cash-register.mp3'), [])
+  const cashRegisterSound = useMemo(() => new Audio(`${import.meta.env.BASE_URL}cash-register.mp3`), [])
 
   const handleSort = (key) => {
     let direction = 'asc'

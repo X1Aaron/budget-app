@@ -28,7 +28,7 @@ function Bills({
   const [editingInlineId, setEditingInlineId] = useState(null)
   const [inlineFormData, setInlineFormData] = useState({})
 
-  const cashRegisterSound = useMemo(() => new Audio('/cash-register.mp3'), [])
+  const cashRegisterSound = useMemo(() => new Audio(`${import.meta.env.BASE_URL}cash-register.mp3`), [])
 
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
