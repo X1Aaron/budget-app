@@ -5,10 +5,10 @@
 }
 
 .transactions-section {
-  background: var(--surface-color);
+  background: var(--card-bg);
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .transactions-header {
@@ -22,7 +22,7 @@
 
 .transactions-header h2 {
   margin: 0;
-  color: var(--text-color);
+  color: var(--text-primary);
   font-size: 1.5rem;
 }
 
@@ -35,17 +35,18 @@
 
 .action-btn {
   padding: 0.5rem 1rem;
-  background: var(--primary-color);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 }
 
 .action-btn:hover {
-  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .starting-balance-display {
@@ -53,9 +54,10 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: var(--background-color);
+  background: var(--bg-secondary);
   border-radius: 4px;
   font-size: 0.9rem;
+  border: 1px solid var(--border-color);
 }
 
 .starting-balance-label {
@@ -64,21 +66,21 @@
 
 .starting-balance-value {
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--text-primary);
 }
 
 .filter-select {
   padding: 0.5rem;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  background: var(--surface-color);
-  color: var(--text-color);
+  background: var(--card-bg);
+  color: var(--text-primary);
   font-size: 0.9rem;
 }
 
 .clear-filter-btn {
   padding: 0.5rem 1rem;
-  background: var(--danger-color);
+  background: #dc3545;
   color: white;
   border: none;
   border-radius: 4px;
@@ -99,7 +101,7 @@
 }
 
 .summary-card {
-  background: var(--background-color);
+  background: var(--bg-secondary);
   padding: 1rem;
   border-radius: 6px;
   border: 1px solid var(--border-color);
@@ -114,29 +116,32 @@
 .summary-value {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--text-primary);
 }
 
 .summary-value.income {
-  color: var(--success-color);
+  color: #28a745;
 }
 
 .summary-value.expenses {
-  color: var(--danger-color);
+  color: #dc3545;
 }
 
 .summary-value.positive {
-  color: var(--success-color);
+  color: #28a745;
 }
 
 .summary-value.negative {
-  color: var(--danger-color);
+  color: #dc3545;
 }
 
 /* Transactions Table */
 .transactions-table-container {
   overflow-x: auto;
   margin-bottom: 1rem;
+  background: var(--card-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
 }
 
 .transactions-table {
@@ -146,7 +151,7 @@
 }
 
 .transactions-table thead {
-  background: var(--background-color);
+  background: var(--table-header-bg);
   border-bottom: 2px solid var(--border-color);
 }
 
@@ -154,10 +159,10 @@
   padding: 0.75rem;
   text-align: left;
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--text-primary);
   position: sticky;
   top: 0;
-  background: var(--background-color);
+  background: var(--table-header-bg);
   z-index: 10;
 }
 
@@ -167,7 +172,7 @@
 }
 
 .transactions-table th.sortable:hover {
-  background: var(--surface-hover);
+  background: var(--table-row-hover-bg);
 }
 
 .sort-arrow {
@@ -185,11 +190,11 @@
 }
 
 .transaction-row:hover {
-  background: var(--surface-hover);
+  background: var(--table-row-hover-bg);
 }
 
 .transaction-row.expanded {
-  background: var(--surface-hover);
+  background: var(--table-row-hover-bg);
 }
 
 .transaction-row.uncategorized {
@@ -198,12 +203,20 @@
 
 .transaction-row.bill-payment {
   background: rgba(76, 175, 80, 0.05);
-  border-left: 3px solid var(--success-color);
+  border-left: 3px solid #28a745;
+}
+
+[data-theme="dark"] .transaction-row.uncategorized {
+  background: rgba(255, 193, 7, 0.15);
+}
+
+[data-theme="dark"] .transaction-row.bill-payment {
+  background: rgba(76, 175, 80, 0.1);
 }
 
 .transactions-table td {
   padding: 0.75rem;
-  color: var(--text-color);
+  color: var(--text-primary);
 }
 
 .transaction-date {
@@ -228,16 +241,16 @@
 
 .transaction-merchant.editable:hover {
   text-decoration: underline;
-  color: var(--primary-color);
+  color: #667eea;
 }
 
 .merchant-name-input {
   width: 100%;
   padding: 0.25rem;
-  border: 1px solid var(--primary-color);
+  border: 1px solid #667eea;
   border-radius: 3px;
-  background: var(--surface-color);
-  color: var(--text-color);
+  background: var(--card-bg);
+  color: var(--text-primary);
 }
 
 .bill-payment-indicator {
@@ -245,7 +258,7 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.15rem 0.5rem;
-  background: var(--success-color);
+  background: #28a745;
   color: white;
   border-radius: 3px;
   font-size: 0.75rem;
@@ -259,11 +272,11 @@
 }
 
 .transaction-amount.negative {
-  color: var(--danger-color);
+  color: #dc3545;
 }
 
 .transaction-amount.positive {
-  color: var(--success-color);
+  color: #28a745;
 }
 
 .transaction-category-cell {
@@ -274,13 +287,14 @@
   padding: 0.25rem;
   border: 1px solid var(--border-color);
   border-radius: 3px;
-  background: var(--surface-color);
+  background: var(--card-bg);
+  color: var(--text-primary);
   font-size: 0.9rem;
   font-weight: 500;
 }
 
 .transaction-category-select.uncategorized-label {
-  color: var(--warning-color);
+  color: #ffc107;
   font-style: italic;
 }
 
@@ -289,7 +303,7 @@
 }
 
 .warning-icon {
-  color: var(--warning-color);
+  color: #ffc107;
   font-size: 1rem;
 }
 
@@ -300,16 +314,16 @@
 }
 
 .transaction-balance.negative {
-  color: var(--danger-color);
+  color: #dc3545;
 }
 
 .transaction-balance.positive {
-  color: var(--success-color);
+  color: #28a745;
 }
 
 /* Expanded Row */
 .transaction-expanded-row {
-  background: var(--surface-hover);
+  background: var(--table-row-hover-bg);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -328,7 +342,7 @@
 
 .detail-label {
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--text-primary);
   font-size: 0.85rem;
 }
 
@@ -340,8 +354,8 @@
   padding: 0.5rem;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  background: var(--surface-color);
-  color: var(--text-color);
+  background: var(--card-bg);
+  color: var(--text-primary);
   font-size: 0.9rem;
   max-width: 300px;
 }
@@ -354,8 +368,8 @@
   padding: 0.5rem;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  background: var(--surface-color);
-  color: var(--text-color);
+  background: var(--card-bg);
+  color: var(--text-primary);
   font-family: inherit;
   resize: vertical;
   width: 100%;
@@ -366,7 +380,11 @@
   padding: 1rem;
   background: rgba(76, 175, 80, 0.1);
   border-radius: 4px;
-  border-left: 3px solid var(--success-color);
+  border-left: 3px solid #28a745;
+}
+
+[data-theme="dark"] .bill-payment-section {
+  background: rgba(76, 175, 80, 0.15);
 }
 
 .bill-payment-details {
@@ -379,7 +397,7 @@
 .bill-payment-row {
   display: flex;
   gap: 0.5rem;
-  color: var(--text-color);
+  color: var(--text-primary);
   font-size: 0.9rem;
 }
 
@@ -398,28 +416,31 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
+  color: var(--text-primary);
 }
 
 .page-size-select {
   padding: 0.25rem;
   border: 1px solid var(--border-color);
   border-radius: 3px;
-  background: var(--surface-color);
-  color: var(--text-color);
+  background: var(--card-bg);
+  color: var(--text-primary);
 }
 
 .pagination-btn {
   padding: 0.5rem 1rem;
-  background: var(--primary-color);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
+  transition: all 0.2s ease;
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .pagination-btn:disabled {
@@ -434,22 +455,23 @@
 
 .pagination-number {
   padding: 0.5rem 0.75rem;
-  background: var(--surface-color);
+  background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
-  color: var(--text-color);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
 }
 
 .pagination-number:hover {
-  background: var(--surface-hover);
+  background: var(--table-row-hover-bg);
 }
 
 .pagination-number.active {
-  background: var(--primary-color);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  border-color: var(--primary-color);
+  border-color: #667eea;
 }
 
 .transactions-footer {
