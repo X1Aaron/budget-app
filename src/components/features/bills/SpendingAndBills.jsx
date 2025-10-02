@@ -68,15 +68,32 @@ function SpendingAndBills({
 
   // Get actual non-bill transactions for the month
   const monthlyTransactions = useMemo(() => {
-    return transactions
+    console.log('Filtering transactions:', {
+      totalTransactions: transactions.length,
+      selectedYear,
+      selectedMonth,
+      showMatchedTransactions
+    })
+    const filtered = transactions
       .filter(t => {
         if (t.isBill) return false; // Exclude bill transactions
         // Include matched transactions if toggle is on, otherwise exclude them
         if (t.hiddenAsBillPayment && !showMatchedTransactions) return false;
         const date = new Date(t.date)
-        return date.getFullYear() === selectedYear && date.getMonth() === selectedMonth
+        const matchesDate = date.getFullYear() === selectedYear && date.getMonth() === selectedMonth
+        console.log('Transaction filter check:', {
+          date: t.date,
+          dateObj: date,
+          year: date.getFullYear(),
+          month: date.getMonth(),
+          matchesDate,
+          description: t.description
+        })
+        return matchesDate
       })
       .map(t => ({ ...t, type: 'transaction' }))
+    console.log('Filtered monthly transactions:', filtered.length)
+    return filtered
   }, [transactions, selectedYear, selectedMonth, showMatchedTransactions])
 
   // Merge transactions and bill occurrences into unified timeline
@@ -248,7 +265,12 @@ function SpendingAndBills({
         memo: formData.memo || '',
         autoCategorized: false
       }
-      onUpdateTransactions(prevTransactions => [...prevTransactions, newTransaction])
+      console.log('Adding new transaction:', newTransaction)
+      onUpdateTransactions(prevTransactions => {
+        const updated = [...prevTransactions, newTransaction]
+        console.log('Updated transactions array:', updated)
+        return updated
+      })
     } else {
       const newBill = {
         id: `bill-${Date.now()}`,
@@ -266,7 +288,12 @@ function SpendingAndBills({
         paidDates: [],
         payments: []
       }
-      onUpdateTransactions(prevTransactions => [...prevTransactions, newBill])
+      console.log('Adding new bill:', newBill)
+      onUpdateTransactions(prevTransactions => {
+        const updated = [...prevTransactions, newBill]
+        console.log('Updated transactions array:', updated)
+        return updated
+      })
     }
 
     // Reset form and close modal
