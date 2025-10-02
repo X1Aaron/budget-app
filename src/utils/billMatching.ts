@@ -650,3 +650,69 @@ export function unmatchTransactionFromBill(
     return t;
   });
 }
+
+export interface TransactionSuggestion {
+  transaction: Transaction;
+  matchScore: number;
+  matchReason: string;
+}
+
+/**
+ * Find suggested transactions that match a bill name and amount
+ * Used when creating a new bill to suggest which existing transactions might be for this bill
+ */
+export function findSuggestedTransactionsForBill(
+  transactions: Transaction[],
+  billName: string,
+  billAmount: number,
+  amountTolerance: number = 5
+): TransactionSuggestion[] {
+  // Only look at expense transactions that aren't already bills or matched to bills
+  const candidateTransactions = transactions.filter(t =>
+    !t.isBill &&
+    !t.matchedToBillId &&
+    t.amount < 0
+  );
+
+  const suggestions: TransactionSuggestion[] = [];
+  const billNameLower = billName.toLowerCase();
+
+  candidateTransactions.forEach(transaction => {
+    let score = 0;
+    const reasons: string[] = [];
+
+    const transDesc = (transaction.merchantName || transaction.description).toLowerCase();
+    const transAmount = Math.abs(transaction.amount);
+
+    // Check description match
+    const hasDescriptionMatch = checkDescriptionMatch(transaction, billName, undefined);
+    if (hasDescriptionMatch) {
+      score += 50;
+      reasons.push('name match');
+    }
+
+    // Check amount match
+    const amountDiff = Math.abs(transAmount - billAmount);
+    if (amountDiff <= amountTolerance) {
+      score += 40;
+      if (amountDiff < 0.01) {
+        score += 10; // Bonus for exact match
+        reasons.push('exact amount');
+      } else {
+        reasons.push('similar amount');
+      }
+    }
+
+    // Only include if we have at least one match
+    if (score > 0) {
+      suggestions.push({
+        transaction,
+        matchScore: score,
+        matchReason: reasons.join(', ')
+      });
+    }
+  });
+
+  // Sort by score descending
+  return suggestions.sort((a, b) => b.matchScore - a.matchScore);
+}

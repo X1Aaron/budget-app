@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import '../../../styles/components/Bills.css'
 import { getCategoryColor } from '../../../utils/categories'
-import { generateBillOccurrences } from '../../../utils/billMatching'
+import { generateBillOccurrences, findSuggestedTransactionsForBill } from '../../../utils/billMatching'
 
 function Bills({
   transactions,
@@ -22,6 +22,8 @@ function Bills({
     category: '',
     memo: ''
   })
+  const [suggestedTransactions, setSuggestedTransactions] = useState([])
+  const [selectedSuggestion, setSelectedSuggestion] = useState(null)
 
   const cashRegisterSound = useMemo(() => new Audio('/cash-register.mp3'), [])
 
@@ -60,8 +62,30 @@ function Bills({
       memo: ''
     })
     setEditingBill(null)
+    setSuggestedTransactions([])
+    setSelectedSuggestion(null)
     setAddModalOpen(true)
   }
+
+  // Update suggestions when bill name or amount changes
+  useEffect(() => {
+    if (addModalOpen && !editingBill && formData.billName && formData.amount) {
+      const amount = parseFloat(formData.amount)
+      if (!isNaN(amount) && amount > 0) {
+        const suggestions = findSuggestedTransactionsForBill(
+          transactions,
+          formData.billName,
+          amount,
+          billMatchingSettings?.amountTolerance || 5
+        )
+        setSuggestedTransactions(suggestions.slice(0, 5)) // Show top 5
+      } else {
+        setSuggestedTransactions([])
+      }
+    } else {
+      setSuggestedTransactions([])
+    }
+  }, [formData.billName, formData.amount, addModalOpen, editingBill, transactions, billMatchingSettings])
 
   const handleEditBill = (bill) => {
     setFormData({
@@ -109,8 +133,9 @@ function Bills({
       }))
     } else {
       // Create new bill
+      const billId = `bill-${Date.now()}`
       const newBill = {
-        id: `bill-${Date.now()}`,
+        id: billId,
         date: formData.dueDate,
         description: formData.billName,
         amount: -Math.abs(parseFloat(formData.amount)),
@@ -124,7 +149,39 @@ function Bills({
         paidDates: [],
         payments: []
       }
-      onUpdateTransactions(prevTransactions => [...prevTransactions, newBill])
+
+      // If a transaction was selected, match it to the bill
+      if (selectedSuggestion) {
+        const selectedTransaction = selectedSuggestion.transaction
+        const occurrenceDate = formData.dueDate
+
+        // Add payment to the new bill
+        newBill.payments = [{
+          occurrenceDate: occurrenceDate,
+          transactionDate: selectedTransaction.date,
+          transactionAmount: selectedTransaction.amount,
+          transactionDescription: selectedTransaction.description,
+          manuallyMarked: true
+        }]
+
+        // Update transactions: add bill and mark selected transaction as matched
+        onUpdateTransactions(prevTransactions => {
+          return prevTransactions.map(t => {
+            // Mark the selected transaction as matched
+            if (t.id === selectedTransaction.id) {
+              return {
+                ...t,
+                matchedToBillId: billId,
+                hiddenAsBillPayment: true
+              }
+            }
+            return t
+          }).concat([newBill]) // Add the new bill
+        })
+      } else {
+        // No transaction selected, just add the bill
+        onUpdateTransactions(prevTransactions => [...prevTransactions, newBill])
+      }
     }
 
     setFormData({
@@ -136,6 +193,8 @@ function Bills({
       memo: ''
     })
     setEditingBill(null)
+    setSuggestedTransactions([])
+    setSelectedSuggestion(null)
     setAddModalOpen(false)
   }
 
@@ -276,6 +335,40 @@ function Bills({
                   rows="2"
                 />
               </div>
+
+              {/* Transaction Suggestions */}
+              {!editingBill && suggestedTransactions.length > 0 && (
+                <div className="form-group suggestions-section">
+                  <label>Suggested Matching Transactions</label>
+                  <p className="field-help">These transactions might correspond to this bill based on the name and amount.</p>
+                  <div className="suggestions-list">
+                    {suggestedTransactions.map((suggestion, idx) => {
+                      const isSelected = selectedSuggestion?.transaction.id === suggestion.transaction.id
+                      return (
+                        <div
+                          key={suggestion.transaction.id || idx}
+                          className={`suggestion-item ${isSelected ? 'selected' : ''}`}
+                          onClick={() => setSelectedSuggestion(isSelected ? null : suggestion)}
+                        >
+                          <div className="suggestion-header">
+                            <span className="suggestion-date">{suggestion.transaction.date}</span>
+                            <span className="suggestion-amount">{formatCurrency(suggestion.transaction.amount)}</span>
+                          </div>
+                          <div className="suggestion-description">
+                            {suggestion.transaction.merchantName || suggestion.transaction.description}
+                          </div>
+                          <div className="suggestion-match-reason">
+                            {suggestion.matchReason} (score: {suggestion.matchScore})
+                          </div>
+                          {isSelected && (
+                            <div className="suggestion-selected-indicator">✓ Will be matched when bill is created</div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="bill-modal-actions">
               <button className="cancel-btn" onClick={() => setAddModalOpen(false)}>
