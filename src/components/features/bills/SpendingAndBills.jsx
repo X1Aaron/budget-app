@@ -18,6 +18,7 @@ function SpendingAndBills({
   const [editingMerchantIndex, setEditingMerchantIndex] = useState(null)
   const [filterCategory, setFilterCategory] = useState('all')
   const [filterType, setFilterType] = useState('all') // all, bills-only, transactions-only, unpaid-bills
+  const [showMatchedTransactions, setShowMatchedTransactions] = useState(true) // Toggle to show/hide bill-matched transactions
   const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'asc' })
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [addType, setAddType] = useState('transaction') // 'transaction' or 'bill'
@@ -65,17 +66,18 @@ function SpendingAndBills({
     })
   }, [transactions, selectedYear, selectedMonth])
 
-  // Get actual non-bill transactions for the month (excluding hidden ones matched to bills)
+  // Get actual non-bill transactions for the month
   const monthlyTransactions = useMemo(() => {
     return transactions
       .filter(t => {
         if (t.isBill) return false; // Exclude bill transactions
-        if (t.hiddenAsBillPayment) return false; // Exclude transactions matched to bills
+        // Include matched transactions if toggle is on, otherwise exclude them
+        if (t.hiddenAsBillPayment && !showMatchedTransactions) return false;
         const date = new Date(t.date)
         return date.getFullYear() === selectedYear && date.getMonth() === selectedMonth
       })
       .map(t => ({ ...t, type: 'transaction' }))
-  }, [transactions, selectedYear, selectedMonth])
+  }, [transactions, selectedYear, selectedMonth, showMatchedTransactions])
 
   // Merge transactions and bill occurrences into unified timeline
   const unifiedTimeline = useMemo(() => {
@@ -463,6 +465,14 @@ function SpendingAndBills({
               <option value="bills-only">Bills Only</option>
               <option value="unpaid-bills">Unpaid Bills</option>
             </select>
+            <label className="toggle-checkbox-label">
+              <input
+                type="checkbox"
+                checked={showMatchedTransactions}
+                onChange={(e) => setShowMatchedTransactions(e.target.checked)}
+              />
+              <span>Show Bill Payments</span>
+            </label>
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
@@ -566,10 +576,11 @@ function SpendingAndBills({
                   ? billMatches[originalIndex]
                   : null
                 const isMatchedToBill = billMatch && billMatch.matchedBill && billMatch.matchScore >= 60
+                const isBillPayment = item.hiddenAsBillPayment && item.matchedToBillId
 
                 const rowClassName = item.type === 'bill'
                   ? `timeline-row bill-row ${item.isPaid ? 'paid' : 'unpaid'}`
-                  : `timeline-row transaction-row ${item.amount < 0 ? 'expense' : 'income'}${isUncategorized ? ' uncategorized' : ''}${isExpanded ? ' expanded' : ''}${isMatchedToBill ? ' bill-matched' : ''}`
+                  : `timeline-row transaction-row ${item.amount < 0 ? 'expense' : 'income'}${isUncategorized ? ' uncategorized' : ''}${isExpanded ? ' expanded' : ''}${isBillPayment ? ' bill-payment' : ''}${isMatchedToBill ? ' bill-matched' : ''}`
 
                 // Get matched transactions for bills
                 const matchedTransactions = item.type === 'bill' && item.payment
@@ -654,18 +665,25 @@ function SpendingAndBills({
                                 autoFocus
                               />
                             ) : (
-                              <span
-                                className="timeline-merchant editable"
-                                onClick={() => setEditingMerchantIndex(index)}
-                                title="Click to edit merchant name"
-                              >
-                                {item.merchantName || item.description}
-                                {isMatchedToBill && (
-                                  <span className="bill-match-badge" title={`Matched to: ${billMatch.matchedBill.billName}`}>
-                                    📋 BILL
+                              <div className="transaction-description-wrapper">
+                                <span
+                                  className="timeline-merchant editable"
+                                  onClick={() => setEditingMerchantIndex(index)}
+                                  title="Click to edit merchant name"
+                                >
+                                  {item.merchantName || item.description}
+                                </span>
+                                {isBillPayment && (
+                                  <span className="bill-payment-indicator" title={`This transaction paid a bill`}>
+                                    💰 Bill Payment
                                   </span>
                                 )}
-                              </span>
+                                {isMatchedToBill && !isBillPayment && (
+                                  <span className="bill-match-badge" title={`Matched to: ${billMatch.matchedBill.billName}`}>
+                                    📋 Potential Match
+                                  </span>
+                                )}
+                              </div>
                             )}
                           </>
                         )}
@@ -735,6 +753,35 @@ function SpendingAndBills({
                               <label className="detail-label">Description:</label>
                               <span className="detail-value">{item.description}</span>
                             </div>
+
+                            {/* Show bill payment info if this transaction is matched to a bill */}
+                            {isBillPayment && (
+                              <div className="detail-section bill-payment-section">
+                                <label className="detail-label">Bill Payment:</label>
+                                <div className="bill-payment-details">
+                                  <div className="bill-payment-row">
+                                    <strong>✓ This transaction paid a bill</strong>
+                                  </div>
+                                  {item.matchedToBillId && (() => {
+                                    const matchedBill = billOccurrences.find(b => b.billId === item.matchedToBillId)
+                                    return matchedBill ? (
+                                      <>
+                                        <div className="bill-payment-row">
+                                          <strong>Bill Name:</strong> {matchedBill.billName}
+                                        </div>
+                                        <div className="bill-payment-row">
+                                          <strong>Expected Amount:</strong> {formatCurrency(matchedBill.billAmount)}
+                                        </div>
+                                        <div className="bill-payment-row">
+                                          <strong>Due Date:</strong> {matchedBill.occurrenceDate}
+                                        </div>
+                                      </>
+                                    ) : null
+                                  })()}
+                                </div>
+                              </div>
+                            )}
+
                             <div className="detail-section">
                               <label className="detail-label">Category:</label>
                               <select
@@ -769,9 +816,9 @@ function SpendingAndBills({
                                 rows="3"
                               />
                             </div>
-                            {isMatchedToBill && (
+                            {isMatchedToBill && !isBillPayment && (
                               <div className="detail-section bill-match-section">
-                                <label className="detail-label">Bill Match:</label>
+                                <label className="detail-label">Potential Bill Match:</label>
                                 <div className="bill-match-info">
                                   <div className="bill-match-row">
                                     <strong>Bill:</strong> {billMatch.matchedBill.billName}
