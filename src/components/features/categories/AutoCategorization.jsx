@@ -1,34 +1,81 @@
 import React, { useMemo, useState } from 'react'
 import '../../../styles/components/AutoCategorization.css'
 
-function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMerchantMapping, onDeleteCategoryMapping }) {
+function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMerchantMapping, onDeleteCategoryMapping, categories }) {
   const [searchTerm, setSearchTerm] = useState('')
+  const [filterType, setFilterType] = useState('all') // 'all', 'exact', 'keyword'
 
-  const combinedMappings = useMemo(() => {
+  // Combine exact match rules and keyword rules
+  const allRules = useMemo(() => {
+    const rules = []
+
+    // Exact match rules (from manual categorization)
     const allDescriptions = new Set([
       ...Object.keys(merchantMappings),
       ...Object.keys(categoryMappings)
     ])
 
-    return Array.from(allDescriptions).map(description => ({
-      description,
-      merchantName: merchantMappings[description],
-      category: categoryMappings[description],
-      hasCategory: !!categoryMappings[description],
-      hasMerchant: !!merchantMappings[description]
-    }))
-  }, [merchantMappings, categoryMappings])
+    Array.from(allDescriptions).forEach(description => {
+      rules.push({
+        type: 'exact',
+        description,
+        merchantName: merchantMappings[description],
+        category: categoryMappings[description],
+        hasCategory: !!categoryMappings[description],
+        hasMerchant: !!merchantMappings[description]
+      })
+    })
 
-  const filteredMappings = useMemo(() => {
-    if (!searchTerm) return combinedMappings
+    // Keyword rules (from category keywords)
+    if (categories) {
+      categories.forEach(category => {
+        if (category.keywords && category.keywords.length > 0 && category.id !== 'uncategorized') {
+          category.keywords.forEach(keyword => {
+            rules.push({
+              type: 'keyword',
+              keyword: keyword,
+              category: category.name,
+              categoryColor: category.color,
+              hasCategory: true,
+              hasMerchant: false
+            })
+          })
+        }
+      })
+    }
 
-    const lowerSearch = searchTerm.toLowerCase()
-    return combinedMappings.filter(mapping =>
-      mapping.description.toLowerCase().includes(lowerSearch) ||
-      (mapping.category && mapping.category.toLowerCase().includes(lowerSearch)) ||
-      (mapping.merchantName && mapping.merchantName.toLowerCase().includes(lowerSearch))
-    )
-  }, [combinedMappings, searchTerm])
+    return rules
+  }, [merchantMappings, categoryMappings, categories])
+
+  const filteredRules = useMemo(() => {
+    let filtered = allRules
+
+    // Filter by type
+    if (filterType !== 'all') {
+      filtered = filtered.filter(rule => rule.type === filterType)
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase()
+      filtered = filtered.filter(rule => {
+        if (rule.type === 'exact') {
+          return (
+            rule.description.toLowerCase().includes(lowerSearch) ||
+            (rule.category && rule.category.toLowerCase().includes(lowerSearch)) ||
+            (rule.merchantName && rule.merchantName.toLowerCase().includes(lowerSearch))
+          )
+        } else {
+          return (
+            rule.keyword.toLowerCase().includes(lowerSearch) ||
+            rule.category.toLowerCase().includes(lowerSearch)
+          )
+        }
+      })
+    }
+
+    return filtered
+  }, [allRules, searchTerm, filterType])
 
   const handleDeleteRule = (description, hasCategory, hasMerchant) => {
     if (hasCategory) {
@@ -39,73 +86,127 @@ function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMercha
     }
   }
 
+  const exactMatchCount = allRules.filter(r => r.type === 'exact').length
+  const keywordMatchCount = allRules.filter(r => r.type === 'keyword').length
+
   return (
     <div className="auto-categorization">
       <div className="auto-cat-header">
-        <h2>Auto Categorization Rules</h2>
+        <h2>Categorization Rules</h2>
         <p className="auto-cat-description">
-          These rules are automatically created when you manually change merchant names or categories.
-          They will be applied to future transactions with matching descriptions.
+          Rules are applied with priority: <strong>Exact Match</strong> (highest) → <strong>Keyword Match</strong> → Default.
+          Exact match rules are created when you manually categorize transactions.
         </p>
       </div>
 
       <div className="auto-cat-content">
-        {combinedMappings.length === 0 ? (
+        {allRules.length === 0 ? (
           <div className="empty-state">
             <p>No rules yet.</p>
-            <p className="empty-hint">When you manually assign a category or change a merchant name for a transaction, a rule will be created here.</p>
+            <p className="empty-hint">When you manually assign a category or change a merchant name for a transaction, an exact match rule will be created here. Keyword rules are managed in the Categories section.</p>
           </div>
         ) : (
           <>
-            <div className="search-bar">
-              <input
-                type="text"
-                placeholder="Search rules by description, category, or merchant..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
+            <div className="filters-bar">
+              <div className="search-bar">
+                <input
+                  type="text"
+                  placeholder="Search rules..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+              </div>
+              <div className="rule-type-filter">
+                <button
+                  className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
+                  onClick={() => setFilterType('all')}
+                >
+                  All ({allRules.length})
+                </button>
+                <button
+                  className={`filter-btn ${filterType === 'exact' ? 'active' : ''}`}
+                  onClick={() => setFilterType('exact')}
+                >
+                  Exact Match ({exactMatchCount})
+                </button>
+                <button
+                  className={`filter-btn ${filterType === 'keyword' ? 'active' : ''}`}
+                  onClick={() => setFilterType('keyword')}
+                >
+                  Keyword ({keywordMatchCount})
+                </button>
+              </div>
             </div>
 
             <div className="rules-grid">
-              {filteredMappings.length === 0 ? (
+              {filteredRules.length === 0 ? (
                 <div className="no-results">
                   No rules match your search.
                 </div>
               ) : (
-                filteredMappings.map((mapping, index) => (
-                  <div key={index} className="rule-card">
-                    <div className="rule-header">
-                      <span className="rule-label">When description matches:</span>
-                      <div className="rule-description">{mapping.description}</div>
+                filteredRules.map((rule, index) => (
+                  <div key={index} className={`rule-card ${rule.type}`}>
+                    <div className="rule-type-badge">
+                      {rule.type === 'exact' ? '🎯 Exact Match' : '🔍 Keyword Match'}
                     </div>
 
-                    <div className="rule-actions-list">
-                      {mapping.hasCategory && (
-                        <div className="rule-action">
-                          <span className="action-arrow">→</span>
-                          <span className="action-label">Category:</span>
-                          <span className="action-value category-badge">{mapping.category}</span>
+                    {rule.type === 'exact' ? (
+                      <>
+                        <div className="rule-header">
+                          <span className="rule-label">When description equals:</span>
+                          <div className="rule-description">{rule.description}</div>
                         </div>
-                      )}
-                      {mapping.hasMerchant && (
-                        <div className="rule-action">
-                          <span className="action-arrow">→</span>
-                          <span className="action-label">Merchant:</span>
-                          <span className="action-value merchant-badge">{mapping.merchantName}</span>
-                        </div>
-                      )}
-                    </div>
 
-                    <div className="rule-footer">
-                      <button
-                        className="delete-rule-btn"
-                        onClick={() => handleDeleteRule(mapping.description, mapping.hasCategory, mapping.hasMerchant)}
-                        title="Delete this rule"
-                      >
-                        Delete Rule
-                      </button>
-                    </div>
+                        <div className="rule-actions-list">
+                          {rule.hasCategory && (
+                            <div className="rule-action">
+                              <span className="action-arrow">→</span>
+                              <span className="action-label">Category:</span>
+                              <span className="action-value category-badge">{rule.category}</span>
+                            </div>
+                          )}
+                          {rule.hasMerchant && (
+                            <div className="rule-action">
+                              <span className="action-arrow">→</span>
+                              <span className="action-label">Merchant:</span>
+                              <span className="action-value merchant-badge">{rule.merchantName}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="rule-footer">
+                          <button
+                            className="delete-rule-btn"
+                            onClick={() => handleDeleteRule(rule.description, rule.hasCategory, rule.hasMerchant)}
+                            title="Delete this exact match rule"
+                          >
+                            Delete Rule
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="rule-header">
+                          <span className="rule-label">When description contains:</span>
+                          <div className="rule-keyword">{rule.keyword}</div>
+                        </div>
+
+                        <div className="rule-actions-list">
+                          <div className="rule-action">
+                            <span className="action-arrow">→</span>
+                            <span className="action-label">Category:</span>
+                            <span className="action-value category-badge" style={{ backgroundColor: rule.categoryColor }}>
+                              {rule.category}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="rule-footer">
+                          <span className="rule-note">Edit in Categories section</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))
               )}

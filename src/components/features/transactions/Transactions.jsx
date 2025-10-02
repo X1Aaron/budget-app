@@ -11,7 +11,8 @@ function Transactions({
   selectedMonth,
   onUpdateTransaction,
   accountStartingBalance,
-  onUpdateTransactions
+  onUpdateTransactions,
+  categoryMappings = {}
 }) {
   const [expandedIndex, setExpandedIndex] = useState(null)
   const [editingMerchantIndex, setEditingMerchantIndex] = useState(null)
@@ -280,7 +281,7 @@ function Transactions({
 
           // Apply auto-categorization
           const merchantName = generateMerchantName(description)
-          const result = autoCategorize(description, amount, row.category, categories)
+          const result = autoCategorize(description, amount, row.category, categories, categoryMappings)
 
           return {
             id: `import-${Date.now()}-${index}`,

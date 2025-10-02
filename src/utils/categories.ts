@@ -119,20 +119,31 @@ export const DEFAULT_CATEGORIES: CategoryWithKeywords[] = [
 interface AutoCategorizeResult {
   category: string;
   wasAutoCategorized: boolean;
+  matchType?: 'exact' | 'keyword' | 'default' | 'manual';
 }
 
 export const autoCategorize = (
   description: string,
   amount: number,
   existingCategory: string | undefined,
-  categories: CategoryWithKeywords[] = DEFAULT_CATEGORIES
+  categories: CategoryWithKeywords[] = DEFAULT_CATEGORIES,
+  categoryMappings: { [description: string]: string } = {}
 ): AutoCategorizeResult => {
   // If already has a valid category, keep it and mark as not auto-categorized
   if (existingCategory && existingCategory !== 'Uncategorized') {
-    return { category: existingCategory, wasAutoCategorized: false };
+    return { category: existingCategory, wasAutoCategorized: false, matchType: 'manual' };
   }
 
-  // Check keyword matching
+  // Priority 1: Check exact match rules (from manual categorization)
+  if (categoryMappings[description]) {
+    return {
+      category: categoryMappings[description],
+      wasAutoCategorized: true,
+      matchType: 'exact'
+    };
+  }
+
+  // Priority 2: Check keyword matching
   const desc = description.toLowerCase();
 
   for (const category of categories) {
@@ -141,30 +152,30 @@ export const autoCategorize = (
     if (category.type === 'income' && amount > 0) {
       for (const keyword of category.keywords || []) {
         if (desc.includes(keyword.toLowerCase())) {
-          return { category: category.name, wasAutoCategorized: true };
+          return { category: category.name, wasAutoCategorized: true, matchType: 'keyword' };
         }
       }
     } else if (category.type === 'expense' && amount < 0) {
       for (const keyword of category.keywords || []) {
         if (desc.includes(keyword.toLowerCase())) {
-          return { category: category.name, wasAutoCategorized: true };
+          return { category: category.name, wasAutoCategorized: true, matchType: 'keyword' };
         }
       }
     } else if (category.type === 'both') {
       for (const keyword of category.keywords || []) {
         if (desc.includes(keyword.toLowerCase())) {
-          return { category: category.name, wasAutoCategorized: true };
+          return { category: category.name, wasAutoCategorized: true, matchType: 'keyword' };
         }
       }
     }
   }
 
-  // Default: positive amounts are Income, negative amounts are Uncategorized
+  // Priority 3: Default fallback
   if (amount > 0) {
-    return { category: 'Income', wasAutoCategorized: true };
+    return { category: 'Income', wasAutoCategorized: true, matchType: 'default' };
   }
 
-  return { category: 'Uncategorized', wasAutoCategorized: false };
+  return { category: 'Uncategorized', wasAutoCategorized: false, matchType: 'default' };
 };
 
 export const getCategoryColor = (categoryName: string, categories: Category[] = DEFAULT_CATEGORIES): string => {

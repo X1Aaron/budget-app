@@ -131,7 +131,7 @@ function App() {
     }
 
     const categorizedTransactions = newTransactions.map(t => {
-      const result = autoCategorize(t.description, t.amount, t.category, categories);
+      const result = autoCategorize(t.description, t.amount, t.category, categories, categoryMappings);
       return {
         ...t,
         category: result.category,
@@ -344,7 +344,7 @@ function App() {
             className={'nav-btn' + (activeSection === 'auto-categorization' ? ' active' : '')}
             onClick={() => setActiveSection('auto-categorization')}
           >
-            Auto Categorization
+            Rules
           </button>
           <button
             className={'nav-btn' + (activeSection === 'settings' ? ' active' : '')}
@@ -376,6 +376,7 @@ function App() {
             onUpdateTransaction={handleUpdateTransaction}
             accountStartingBalance={accountStartingBalance}
             onUpdateTransactions={setTransactions}
+            categoryMappings={categoryMappings}
           />
         ) : activeSection === 'bills' ? (
           <Bills
@@ -404,6 +405,7 @@ function App() {
               onUpdateTransactions={setTransactions}
               selectedYear={selectedYear}
               selectedMonth={selectedMonth}
+              categoryMappings={categoryMappings}
             />
           </div>
         ) : activeSection === 'auto-categorization' ? (
@@ -412,6 +414,7 @@ function App() {
             categoryMappings={categoryMappings}
             onDeleteMerchantMapping={handleDeleteMerchantMapping}
             onDeleteCategoryMapping={handleDeleteCategoryMapping}
+            categories={categories}
           />
         ) : (
           <div className="settings-section">
