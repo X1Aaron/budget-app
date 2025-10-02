@@ -19,6 +19,8 @@ function Spending({
   const [editingMerchantIndex, setEditingMerchantIndex] = useState(null)
   const [filterCategory, setFilterCategory] = useState('all')
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
+  const [currentPage, setCurrentPage] = useState(1)
+  const [transactionsPerPage, setTransactionsPerPage] = useState(10)
   const [billModalOpen, setBillModalOpen] = useState(false)
   const [billFormData, setBillFormData] = useState(null)
 
@@ -105,6 +107,19 @@ function Spending({
 
     return filtered
   }, [transactionsWithBalance, filterCategory, sortConfig])
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage)
+  const paginatedTransactions = useMemo(() => {
+    const startIndex = (currentPage - 1) * transactionsPerPage
+    const endIndex = startIndex + transactionsPerPage
+    return filteredTransactions.slice(startIndex, endIndex)
+  }, [filteredTransactions, currentPage, transactionsPerPage])
+
+  // Reset to page 1 when filter, sort, or page size changes
+  React.useEffect(() => {
+    setCurrentPage(1)
+  }, [filterCategory, sortConfig, transactionsPerPage])
 
   const filteredTotal = useMemo(() => {
     return filteredTransactions.reduce((sum, t) => sum + t.amount, 0)
@@ -305,6 +320,7 @@ function Spending({
             )}
             <span className="transaction-count">
               {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? 's' : ''}
+              {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
             </span>
           </div>
         </div>
@@ -346,7 +362,7 @@ function Spending({
               </tr>
             </thead>
             <tbody>
-              {filteredTransactions.map((transaction, filteredIndex) => {
+              {paginatedTransactions.map((transaction, filteredIndex) => {
                 const originalIndex = transactions.findIndex(t =>
                   t.date === transaction.date &&
                   t.description === transaction.description &&
@@ -533,6 +549,58 @@ function Spending({
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {filteredTransactions.length > 0 && (
+          <div className="pagination-controls">
+            <div className="pagination-size-selector">
+              <label htmlFor="page-size">Show:</label>
+              <select
+                id="page-size"
+                value={transactionsPerPage}
+                onChange={(e) => setTransactionsPerPage(Number(e.target.value))}
+                className="page-size-select"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <span>per page</span>
+            </div>
+
+            {totalPages > 1 && (
+              <>
+                <button
+                  className="pagination-btn"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  ← Previous
+                </button>
+                <div className="pagination-info">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      className={`pagination-number ${page === currentPage ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  className="pagination-btn"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next →
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
         {filterCategory !== 'all' && (
           <div className="transactions-total">
             <span className="total-label">Total for {filterCategory}:</span>
