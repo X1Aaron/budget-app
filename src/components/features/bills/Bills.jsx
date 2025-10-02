@@ -125,7 +125,19 @@ function Bills({
 
   const handleDeleteBill = (billId) => {
     if (confirm('Are you sure you want to delete this bill?')) {
-      onUpdateTransactions(prevTransactions => prevTransactions.filter(t => t.id !== billId))
+      onUpdateTransactions(prevTransactions =>
+        prevTransactions.map(t => {
+          // If this transaction was linked to the deleted bill, unlink it
+          if (t.matchedToBillId === billId) {
+            return {
+              ...t,
+              matchedToBillId: undefined,
+              hiddenAsBillPayment: false
+            }
+          }
+          return t
+        }).filter(t => t.id !== billId) // Remove the bill itself
+      )
     }
   }
 
