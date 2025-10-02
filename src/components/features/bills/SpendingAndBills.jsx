@@ -79,13 +79,13 @@ function SpendingAndBills({
         if (t.isBill) return false; // Exclude bill transactions
         // Include matched transactions if toggle is on, otherwise exclude them
         if (t.hiddenAsBillPayment && !showMatchedTransactions) return false;
-        const date = new Date(t.date)
-        const matchesDate = date.getFullYear() === selectedYear && date.getMonth() === selectedMonth
+        // Parse date in local timezone by splitting the date string
+        const [year, month, day] = t.date.split('-').map(Number)
+        const matchesDate = year === selectedYear && month - 1 === selectedMonth
         console.log('Transaction filter check:', {
           date: t.date,
-          dateObj: date,
-          year: date.getFullYear(),
-          month: date.getMonth(),
+          year: year,
+          month: month - 1,
           matchesDate,
           description: t.description
         })
