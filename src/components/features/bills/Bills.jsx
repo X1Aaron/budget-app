@@ -24,6 +24,8 @@ function Bills({
   })
   const [suggestedTransactions, setSuggestedTransactions] = useState([])
   const [selectedSuggestion, setSelectedSuggestion] = useState(null)
+  const [editingInlineId, setEditingInlineId] = useState(null)
+  const [inlineFormData, setInlineFormData] = useState({})
 
   const cashRegisterSound = useMemo(() => new Audio('/cash-register.mp3'), [])
 
@@ -226,6 +228,51 @@ function Bills({
     }))
   }
 
+  const handleStartInlineEdit = (occ) => {
+    setEditingInlineId(occ.billId)
+    setInlineFormData({
+      billName: occ.billName,
+      amount: occ.billAmount,
+      dueDate: occ.billTransaction.dueDate,
+      frequency: occ.frequency,
+      category: occ.category,
+      memo: occ.billTransaction.memo || ''
+    })
+  }
+
+  const handleCancelInlineEdit = () => {
+    setEditingInlineId(null)
+    setInlineFormData({})
+  }
+
+  const handleSaveInlineEdit = (billId) => {
+    if (!inlineFormData.billName || !inlineFormData.amount || !inlineFormData.dueDate) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    onUpdateTransactions(prevTransactions => prevTransactions.map(t => {
+      if (t.id === billId) {
+        return {
+          ...t,
+          billName: inlineFormData.billName,
+          description: inlineFormData.billName,
+          billAmount: parseFloat(inlineFormData.amount),
+          amount: -Math.abs(parseFloat(inlineFormData.amount)),
+          dueDate: inlineFormData.dueDate,
+          date: inlineFormData.dueDate,
+          frequency: inlineFormData.frequency,
+          category: inlineFormData.category || 'Uncategorized',
+          memo: inlineFormData.memo
+        }
+      }
+      return t
+    }))
+
+    setEditingInlineId(null)
+    setInlineFormData({})
+  }
+
   const handleConvertTransaction = (transactionId) => {
     const transaction = transactions.find(t => t.id === transactionId)
     if (transaction) {
@@ -421,54 +468,117 @@ function Bills({
           ) : (
             billOccurrences.map((occ, index) => {
               const isExpanded = expandedBillId === occ.billId
+              const isEditing = editingInlineId === occ.billId
               const color = getCategoryColor(occ.category, categories)
 
               return (
-                <div key={`${occ.billId}-${occ.occurrenceDate}`} className={`bill-card ${occ.payment ? 'paid' : 'unpaid'}`}>
-                  <div className="bill-card-header" onClick={() => setExpandedBillId(isExpanded ? null : occ.billId)}>
-                    <div className="bill-info">
-                      <div className="bill-name">{occ.billName}</div>
-                      <div className="bill-date">Due: {occ.occurrenceDate}</div>
-                    </div>
-                    <div className="bill-amount">{formatCurrency(occ.billAmount)}</div>
-                    <div className="bill-category" style={{ color }}>{occ.category}</div>
-                    <div className="bill-status">
-                      {occ.payment ? (
-                        <span className="status-badge paid">✓ Paid</span>
-                      ) : (
-                        <span className="status-badge unpaid">⏳ Unpaid</span>
-                      )}
-                    </div>
-                    <div className="bill-actions" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        className="toggle-paid-btn"
-                        onClick={() => handleTogglePaid(occ)}
-                        title={occ.payment ? 'Mark as Unpaid' : 'Mark as Paid'}
+                <div key={`${occ.billId}-${occ.occurrenceDate}`} className={`bill-card ${occ.payment ? 'paid' : 'unpaid'} ${isEditing ? 'editing' : ''}`}>
+                  {isEditing ? (
+                    <div className="bill-card-inline-edit">
+                      <input
+                        type="text"
+                        className="inline-edit-name"
+                        value={inlineFormData.billName}
+                        onChange={(e) => setInlineFormData({ ...inlineFormData, billName: e.target.value })}
+                        placeholder="Bill name"
+                      />
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="inline-edit-amount"
+                        value={inlineFormData.amount}
+                        onChange={(e) => setInlineFormData({ ...inlineFormData, amount: e.target.value })}
+                        placeholder="Amount"
+                      />
+                      <input
+                        type="date"
+                        className="inline-edit-date"
+                        value={inlineFormData.dueDate}
+                        onChange={(e) => setInlineFormData({ ...inlineFormData, dueDate: e.target.value })}
+                      />
+                      <select
+                        className="inline-edit-frequency"
+                        value={inlineFormData.frequency}
+                        onChange={(e) => setInlineFormData({ ...inlineFormData, frequency: e.target.value })}
                       >
-                        {occ.payment ? '↶ Unpay' : '✓ Pay'}
-                      </button>
-                      <button
-                        className="edit-btn"
-                        onClick={() => handleEditBill(occ.billTransaction)}
-                        title="Edit Bill"
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="quarterly">Quarterly</option>
+                        <option value="yearly">Yearly</option>
+                        <option value="one-time">One-time</option>
+                      </select>
+                      <select
+                        className="inline-edit-category"
+                        value={inlineFormData.category}
+                        onChange={(e) => setInlineFormData({ ...inlineFormData, category: e.target.value })}
                       >
-                        ✎ Edit
-                      </button>
-                      <button
-                        className="delete-btn"
-                        onClick={() => handleDeleteBill(occ.billId)}
-                        title="Delete Bill"
-                      >
-                        🗑 Delete
-                      </button>
-                    </div>
-                  </div>
-
-                  {isExpanded && (
-                    <div className="bill-card-details">
-                      <div className="detail-row">
-                        <strong>Frequency:</strong> {occ.frequency}
+                        {categories && [...categories]
+                          .sort((a, b) => a.name.localeCompare(b.name))
+                          .map(cat => (
+                            <option key={cat.id} value={cat.name}>
+                              {cat.name}
+                            </option>
+                          ))}
+                      </select>
+                      <div className="inline-edit-actions">
+                        <button
+                          className="save-inline-btn"
+                          onClick={() => handleSaveInlineEdit(occ.billId)}
+                          title="Save"
+                        >
+                          ✓ Save
+                        </button>
+                        <button
+                          className="cancel-inline-btn"
+                          onClick={handleCancelInlineEdit}
+                          title="Cancel"
+                        >
+                          ✕ Cancel
+                        </button>
                       </div>
+                    </div>
+                  ) : (
+                    <div className="bill-card-header" onClick={() => setExpandedBillId(isExpanded ? null : occ.billId)}>
+                      <div className="bill-name">{occ.billName}</div>
+                      <div className="bill-amount">{formatCurrency(occ.billAmount)}</div>
+                      <div className="bill-date">Due: {occ.occurrenceDate}</div>
+                      <div className="bill-frequency">{occ.frequency}</div>
+                      <div className="bill-category" style={{ color }}>{occ.category}</div>
+                      <div className="bill-status">
+                        {occ.payment ? (
+                          <span className="status-badge paid">✓ Paid</span>
+                        ) : (
+                          <span className="status-badge unpaid">⏳ Unpaid</span>
+                        )}
+                      </div>
+                      <div className="bill-actions" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          className="toggle-paid-btn"
+                          onClick={() => handleTogglePaid(occ)}
+                          title={occ.payment ? 'Mark as Unpaid' : 'Mark as Paid'}
+                        >
+                          {occ.payment ? '↶ Unpay' : '✓ Pay'}
+                        </button>
+                        <button
+                          className="edit-btn"
+                          onClick={() => handleStartInlineEdit(occ)}
+                          title="Edit Bill"
+                        >
+                          ✎ Edit
+                        </button>
+                        <button
+                          className="delete-btn"
+                          onClick={() => handleDeleteBill(occ.billId)}
+                          title="Delete Bill"
+                        >
+                          🗑 Delete
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {isExpanded && !isEditing && (
+                    <div className="bill-card-details">
                       {occ.billTransaction.memo && (
                         <div className="detail-row">
                           <strong>Memo:</strong> {occ.billTransaction.memo}

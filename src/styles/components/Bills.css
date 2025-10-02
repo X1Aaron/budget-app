@@ -131,7 +131,7 @@
 
 .bill-card-header {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 120px auto;
+  grid-template-columns: 2fr 1fr 1.2fr 1fr 1fr 120px auto;
   gap: 1rem;
   align-items: center;
   padding: 1.25rem;
@@ -158,6 +158,12 @@
 .bill-date {
   font-size: 0.875rem;
   color: var(--text-secondary);
+}
+
+.bill-frequency {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-transform: capitalize;
 }
 
 .bill-amount {
@@ -364,11 +370,84 @@
   color: var(--text-primary);
 }
 
+/* Inline Editing */
+.bill-card.editing {
+  border-left-color: #3b82f6;
+}
+
+.bill-card-inline-edit {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.2fr 1fr 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 1.25rem;
+  background: var(--table-row-hover-bg);
+}
+
+.inline-edit-name,
+.inline-edit-amount,
+.inline-edit-date,
+.inline-edit-frequency,
+.inline-edit-category {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.inline-edit-name:focus,
+.inline-edit-amount:focus,
+.inline-edit-date:focus,
+.inline-edit-frequency:focus,
+.inline-edit-category:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.inline-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.save-inline-btn,
+.cancel-inline-btn {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.save-inline-btn:hover {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.cancel-inline-btn:hover {
+  background: #6b7280;
+  color: white;
+  border-color: #6b7280;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .bill-card-header {
     grid-template-columns: 1fr;
     gap: 0.75rem;
+  }
+
+  .bill-card-inline-edit {
+    grid-template-columns: 1fr;
   }
 
   .bill-actions {
