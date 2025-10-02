@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import '../../../styles/components/Dashboard.css'
 import { getCategoryColor } from '../../../utils/categories'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, ReferenceLine } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
 import { calculateMonthStartingBalance } from '../../../utils/balanceCalculations'
 import { useTheme } from '../../../contexts/ThemeContext'
 
@@ -23,7 +23,6 @@ function Dashboard({
   const [isEditingBudget, setIsEditingBudget] = useState(false)
   const [budgetInput, setBudgetInput] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all') // 'all', 'over-budget', 'approaching'
-  const [showCategoryChart, setShowCategoryChart] = useState(false)
 
   const monthlyTransactions = useMemo(() => {
     return transactions.filter(t => {
@@ -320,16 +319,6 @@ function Dashboard({
 
     return data
   }, [bills, recurringIncomes, selectedYear, selectedMonth, monthlyTransactions, accountStartingBalance, transactions])
-
-  const categorySpendingData = useMemo(() => {
-    return Object.entries(summary.categoryBreakdown)
-      .filter(([category, amount]) => amount < 0 && category !== 'Income')
-      .map(([category, amount]) => ({
-        category,
-        amount: Math.abs(amount)
-      }))
-      .sort((a, b) => b.amount - a.amount)
-  }, [summary.categoryBreakdown])
 
   const filteredCategories = useMemo(() => {
     return categories
@@ -656,7 +645,7 @@ function Dashboard({
                             <div className="progress-bar-container">
                               <div className="progress-bar">
                                 <div
-                                  className={'progress-fill ' + (isOverBudget ? 'over-budget' : '')}
+                                  className={'progress-fill ' + (isOverBudget ? 'over-budget' : spent >= budgeted * 0.75 ? 'approaching-budget' : '')}
                                   style={{ width: `${Math.min((spent / budgeted) * 100, 150)}%` }}
                                 ></div>
                                 <div className="progress-100-marker"></div>
@@ -682,49 +671,6 @@ function Dashboard({
         </div>
       </div>
 
-      <div className="cash-flow-section">
-        <div className="section-header-collapsible" onClick={() => setShowCategoryChart(!showCategoryChart)}>
-          <h2>Category Spending Chart</h2>
-          <button className="collapse-btn" aria-label={showCategoryChart ? 'Collapse' : 'Expand'}>
-            {showCategoryChart ? '▼' : '▶'}
-          </button>
-        </div>
-        {showCategoryChart && (
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={categorySpendingData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
-              <XAxis
-                dataKey="category"
-                angle={-45}
-                textAnchor="end"
-                height={100}
-                tick={{ fill: chartColors.text }}
-              />
-              <YAxis
-                label={{ value: 'Amount ($)', angle: -90, position: 'insideLeft', fill: chartColors.text }}
-                tickFormatter={(value) => `$${value.toLocaleString()}`}
-                tick={{ fill: chartColors.text }}
-              />
-              <Tooltip
-                formatter={(value) => [`$${value.toLocaleString()}`, 'Spent']}
-                contentStyle={{
-                  backgroundColor: chartColors.tooltipBg,
-                  border: `1px solid ${chartColors.tooltipBorder}`,
-                  color: chartColors.text
-                }}
-              />
-              <Bar dataKey="amount">
-                {categorySpendingData.map((entry) => (
-                  <Cell
-                    key={entry.category}
-                    fill={getCategoryColor(entry.category, categories)}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        )}
-      </div>
     </div>
   )
 }

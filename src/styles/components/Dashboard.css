@@ -611,12 +611,21 @@
   border: 1px solid var(--border-color);
 }
 
+[data-theme="dark"] .progress-bar {
+  background: #1f2937;
+  border: 1px solid #374151;
+}
+
 .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #10b981 0%, #059669 100%);
   transition: width 0.3s ease;
   border-radius: 5px;
   position: relative;
+}
+
+.progress-fill.approaching-budget {
+  background: linear-gradient(90deg, #f59e0b 0%, #f59e0b 100%);
 }
 
 .progress-fill.over-budget {
@@ -729,6 +738,10 @@
   border-bottom: 2px solid var(--border-color);
 }
 
+[data-theme="dark"] .categories-table thead {
+  background: #1f2937;
+}
+
 .categories-table th {
   text-align: left;
   padding: 0.75rem 1rem;
@@ -746,6 +759,10 @@
 
 .categories-table tbody tr:hover {
   background: var(--table-row-hover-bg, #f9fafb);
+}
+
+[data-theme="dark"] .categories-table tbody tr:hover {
+  background: #1f2937;
 }
 
 .categories-table .empty-state {
