@@ -497,7 +497,6 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
                             <th>Need/Want</th>
                             <th>Budget</th>
                             <th>3-Month Avg</th>
-                            <th>Keywords</th>
                             <th></th>
                           </tr>
                         </thead>
@@ -642,25 +641,6 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
                                   formatCurrency(threeMonthAverages[category.name])
                                 ) : (
                                   <span className="no-data">—</span>
-                                )}
-                              </td>
-                              <td className="keywords-cell">
-                                {category.keywords && category.keywords.length > 0 ? (
-                                  <span
-                                    className={category.id !== 'uncategorized' ? 'editable-text' : ''}
-                                    onClick={() => category.id !== 'uncategorized' && handleEditCategory(category)}
-                                    title={category.id !== 'uncategorized' ? 'Click to edit keywords' : ''}
-                                  >
-                                    {category.keywords.join(', ')}
-                                  </span>
-                                ) : (
-                                  <span
-                                    className={category.id !== 'uncategorized' ? 'no-keywords clickable' : 'no-keywords'}
-                                    onClick={() => category.id !== 'uncategorized' && handleEditCategory(category)}
-                                    title={category.id !== 'uncategorized' ? 'Click to add keywords' : ''}
-                                  >
-                                    —
-                                  </span>
                                 )}
                               </td>
                               <td className="actions-cell">

@@ -3,13 +3,11 @@ import '../../../styles/components/AutoCategorization.css'
 
 function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMerchantMapping, onDeleteCategoryMapping, categories }) {
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterType, setFilterType] = useState('all') // 'all', 'exact', 'keyword'
 
-  // Combine exact match rules and keyword rules
+  // Only show exact match rules (from manual categorization)
   const allRules = useMemo(() => {
     const rules = []
 
-    // Exact match rules (from manual categorization)
     const allDescriptions = new Set([
       ...Object.keys(merchantMappings),
       ...Object.keys(categoryMappings)
@@ -26,56 +24,26 @@ function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMercha
       })
     })
 
-    // Keyword rules (from category keywords)
-    if (categories) {
-      categories.forEach(category => {
-        if (category.keywords && category.keywords.length > 0 && category.id !== 'uncategorized') {
-          category.keywords.forEach(keyword => {
-            rules.push({
-              type: 'keyword',
-              keyword: keyword,
-              category: category.name,
-              categoryColor: category.color,
-              hasCategory: true,
-              hasMerchant: false
-            })
-          })
-        }
-      })
-    }
-
     return rules
-  }, [merchantMappings, categoryMappings, categories])
+  }, [merchantMappings, categoryMappings])
 
   const filteredRules = useMemo(() => {
     let filtered = allRules
-
-    // Filter by type
-    if (filterType !== 'all') {
-      filtered = filtered.filter(rule => rule.type === filterType)
-    }
 
     // Filter by search term
     if (searchTerm) {
       const lowerSearch = searchTerm.toLowerCase()
       filtered = filtered.filter(rule => {
-        if (rule.type === 'exact') {
-          return (
-            rule.description.toLowerCase().includes(lowerSearch) ||
-            (rule.category && rule.category.toLowerCase().includes(lowerSearch)) ||
-            (rule.merchantName && rule.merchantName.toLowerCase().includes(lowerSearch))
-          )
-        } else {
-          return (
-            rule.keyword.toLowerCase().includes(lowerSearch) ||
-            rule.category.toLowerCase().includes(lowerSearch)
-          )
-        }
+        return (
+          rule.description.toLowerCase().includes(lowerSearch) ||
+          (rule.category && rule.category.toLowerCase().includes(lowerSearch)) ||
+          (rule.merchantName && rule.merchantName.toLowerCase().includes(lowerSearch))
+        )
       })
     }
 
     return filtered
-  }, [allRules, searchTerm, filterType])
+  }, [allRules, searchTerm])
 
   const handleDeleteRule = (description, hasCategory, hasMerchant) => {
     if (hasCategory) {
@@ -86,16 +54,13 @@ function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMercha
     }
   }
 
-  const exactMatchCount = allRules.filter(r => r.type === 'exact').length
-  const keywordMatchCount = allRules.filter(r => r.type === 'keyword').length
-
   return (
     <div className="auto-categorization">
       <div className="auto-cat-header">
         <h2>Categorization Rules</h2>
         <p className="auto-cat-description">
-          Rules are applied with priority: <strong>Exact Match</strong> (highest) → <strong>Keyword Match</strong> → Default.
-          Exact match rules are created when you manually categorize transactions.
+          These rules are created when you manually categorize transactions or change merchant names.
+          They ensure consistent categorization for future transactions with the same description.
         </p>
       </div>
 
@@ -103,7 +68,7 @@ function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMercha
         {allRules.length === 0 ? (
           <div className="empty-state">
             <p>No rules yet.</p>
-            <p className="empty-hint">When you manually assign a category or change a merchant name for a transaction, an exact match rule will be created here. Keyword rules are managed in the Categories section.</p>
+            <p className="empty-hint">When you manually assign a category or change a merchant name for a transaction, a rule will be created here.</p>
           </div>
         ) : (
           <>
@@ -117,98 +82,57 @@ function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMercha
                   className="search-input"
                 />
               </div>
-              <div className="rule-type-filter">
-                <button
-                  className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
-                  onClick={() => setFilterType('all')}
-                >
-                  All ({allRules.length})
-                </button>
-                <button
-                  className={`filter-btn ${filterType === 'exact' ? 'active' : ''}`}
-                  onClick={() => setFilterType('exact')}
-                >
-                  Exact Match ({exactMatchCount})
-                </button>
-                <button
-                  className={`filter-btn ${filterType === 'keyword' ? 'active' : ''}`}
-                  onClick={() => setFilterType('keyword')}
-                >
-                  Keyword ({keywordMatchCount})
-                </button>
+              <div className="rule-count">
+                {allRules.length} {allRules.length === 1 ? 'rule' : 'rules'}
               </div>
             </div>
 
-            <div className="rules-grid">
+            <div className="rules-table-wrapper">
               {filteredRules.length === 0 ? (
                 <div className="no-results">
                   No rules match your search.
                 </div>
               ) : (
-                filteredRules.map((rule, index) => (
-                  <div key={index} className={`rule-card ${rule.type}`}>
-                    <div className="rule-type-badge">
-                      {rule.type === 'exact' ? '🎯 Exact Match' : '🔍 Keyword Match'}
-                    </div>
-
-                    {rule.type === 'exact' ? (
-                      <>
-                        <div className="rule-header">
-                          <span className="rule-label">When description equals:</span>
-                          <div className="rule-description">{rule.description}</div>
-                        </div>
-
-                        <div className="rule-actions-list">
-                          {rule.hasCategory && (
-                            <div className="rule-action">
-                              <span className="action-arrow">→</span>
-                              <span className="action-label">Category:</span>
-                              <span className="action-value category-badge">{rule.category}</span>
-                            </div>
+                <table className="rules-table">
+                  <thead>
+                    <tr>
+                      <th>Description</th>
+                      <th>Category</th>
+                      <th>Merchant</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredRules.map((rule, index) => (
+                      <tr key={index}>
+                        <td className="description-cell">{rule.description}</td>
+                        <td className="category-cell">
+                          {rule.hasCategory ? (
+                            <span className="category-badge">{rule.category}</span>
+                          ) : (
+                            <span className="no-value">—</span>
                           )}
-                          {rule.hasMerchant && (
-                            <div className="rule-action">
-                              <span className="action-arrow">→</span>
-                              <span className="action-label">Merchant:</span>
-                              <span className="action-value merchant-badge">{rule.merchantName}</span>
-                            </div>
+                        </td>
+                        <td className="merchant-cell">
+                          {rule.hasMerchant ? (
+                            <span className="merchant-badge">{rule.merchantName}</span>
+                          ) : (
+                            <span className="no-value">—</span>
                           )}
-                        </div>
-
-                        <div className="rule-footer">
+                        </td>
+                        <td className="actions-cell">
                           <button
-                            className="delete-rule-btn"
+                            className="delete-btn"
                             onClick={() => handleDeleteRule(rule.description, rule.hasCategory, rule.hasMerchant)}
-                            title="Delete this exact match rule"
+                            title="Delete this rule"
                           >
-                            Delete Rule
+                            ×
                           </button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="rule-header">
-                          <span className="rule-label">When description contains:</span>
-                          <div className="rule-keyword">{rule.keyword}</div>
-                        </div>
-
-                        <div className="rule-actions-list">
-                          <div className="rule-action">
-                            <span className="action-arrow">→</span>
-                            <span className="action-label">Category:</span>
-                            <span className="action-value category-badge" style={{ backgroundColor: rule.categoryColor }}>
-                              {rule.category}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="rule-footer">
-                          <span className="rule-note">Edit in Categories section</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
           </>
