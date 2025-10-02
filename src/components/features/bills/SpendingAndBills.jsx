@@ -12,7 +12,8 @@ function SpendingAndBills({
   onDateChange,
   onUpdateTransaction,
   accountStartingBalance,
-  onUpdateTransactions
+  onUpdateTransactions,
+  billMatchingSettings
 }) {
   const [expandedIndex, setExpandedIndex] = useState(null)
   const [editingMerchantIndex, setEditingMerchantIndex] = useState(null)
@@ -108,11 +109,20 @@ function SpendingAndBills({
 
   // Calculate bill matches for actual transactions
   const billMatches = useMemo(() => {
+    // Default settings if not provided
+    const settings = billMatchingSettings || {
+      amountTolerance: 5,
+      dateWindowDays: 7,
+      minimumScore: 60,
+      requireDescriptionMatch: true,
+      requireAmountMatch: true,
+      requireDateWindow: true
+    }
     return transactions.map((transaction, index) => {
-      const match = matchTransactionToBill(transaction, index, billOccurrences)
+      const match = matchTransactionToBill(transaction, index, billOccurrences, settings)
       return match
     })
-  }, [transactions, billOccurrences])
+  }, [transactions, billOccurrences, billMatchingSettings])
 
   // Calculate starting balance for the current month
   const currentStartingBalance = useMemo(() => {

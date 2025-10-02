@@ -375,6 +375,7 @@ function App() {
             onUpdateTransaction={handleUpdateTransaction}
             accountStartingBalance={accountStartingBalance}
             onUpdateTransactions={setTransactions}
+            billMatchingSettings={billMatchingSettings}
           />
         ) : activeSection === 'categories' ? (
           <div className="categories-section">
