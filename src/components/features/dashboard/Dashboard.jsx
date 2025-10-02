@@ -98,10 +98,20 @@ function Dashboard({
     const unlinkedCount = monthlyTransactions.filter(t => !t.billId && t.amount < 0).length
     const uncategorizedCount = monthlyTransactions.filter(t => !t.category || t.category === 'Uncategorized').length
 
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
     const unpaidBillsThisMonth = bills.filter(bill => {
       if (bill.isPaid) return false
       const dueDate = new Date(bill.dueDate)
       return dueDate.getFullYear() === selectedYear && dueDate.getMonth() === selectedMonth
+    }).length
+
+    const overdueBills = bills.filter(bill => {
+      if (bill.isPaid) return false
+      const dueDate = new Date(bill.dueDate)
+      dueDate.setHours(0, 0, 0, 0)
+      return dueDate < today
     }).length
 
     const overBudgetCategories = categories.filter(cat => {
@@ -111,25 +121,40 @@ function Dashboard({
       return spent > cat.budgeted
     }).length
 
+    const missingStartingBalance = accountStartingBalance === 0
+    const noRecurringIncome = recurringIncomes.length === 0 && monthlyTransactions.length > 0
+    const noBudgetedCategories = categories.length > 0 && categories.every(cat => (cat.budgeted || 0) === 0)
+    const noMonthlyBudget = currentBudget === 0 && monthlyTransactions.length > 0
+
     return {
       unlinkedCount,
       uncategorizedCount,
       unpaidBillsThisMonth,
-      overBudgetCategories
+      overdueBills,
+      overBudgetCategories,
+      missingStartingBalance,
+      noRecurringIncome,
+      noBudgetedCategories,
+      noMonthlyBudget
     }
-  }, [monthlyTransactions, bills, categories, summary.categoryBreakdown, selectedYear, selectedMonth])
+  }, [monthlyTransactions, bills, categories, summary.categoryBreakdown, selectedYear, selectedMonth, accountStartingBalance, recurringIncomes, currentBudget])
 
-  const cashFlowData = useMemo(() => {
-    const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate()
-    const data = []
-
-    // Calculate starting balance for this month
-    const startingBalance = calculateMonthStartingBalance(
+  // Calculate starting balance for this month (used in multiple places)
+  const monthStartingBalance = useMemo(() => {
+    return calculateMonthStartingBalance(
       accountStartingBalance,
       transactions,
       selectedYear,
       selectedMonth
     )
+  }, [accountStartingBalance, transactions, selectedYear, selectedMonth])
+
+  const cashFlowData = useMemo(() => {
+    const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate()
+    const data = []
+
+    // Use the pre-calculated starting balance
+    const startingBalance = monthStartingBalance
 
     // Generate all recurring bills for the selected month
     const monthlyBills = []
@@ -318,7 +343,7 @@ function Dashboard({
     }
 
     return data
-  }, [bills, recurringIncomes, selectedYear, selectedMonth, monthlyTransactions, accountStartingBalance, transactions])
+  }, [bills, recurringIncomes, selectedYear, selectedMonth, monthlyTransactions, monthStartingBalance])
 
   const filteredCategories = useMemo(() => {
     return categories
@@ -401,10 +426,20 @@ function Dashboard({
   return (
     <div className="dashboard">
       {/* Action Items Section */}
-      {(alerts.unlinkedCount > 0 || alerts.uncategorizedCount > 0 || alerts.unpaidBillsThisMonth > 0 || alerts.overBudgetCategories > 0 || monthlyTransactions.length === 0 || categories.length === 0 || bills.length === 0) && (
+      {(alerts.unlinkedCount > 0 || alerts.uncategorizedCount > 0 || alerts.unpaidBillsThisMonth > 0 || alerts.overdueBills > 0 || alerts.overBudgetCategories > 0 || alerts.missingStartingBalance || alerts.noRecurringIncome || alerts.noBudgetedCategories || alerts.noMonthlyBudget || monthlyTransactions.length === 0 || categories.length === 0 || bills.length === 0) && (
         <div className="action-alerts">
           <h2>Action Items</h2>
           <div className="alerts-grid">
+            {alerts.missingStartingBalance && (
+              <div className="alert-card alert-info">
+                <div className="alert-icon">💰</div>
+                <div className="alert-content">
+                  <div className="alert-title">Set Starting Balance</div>
+                  <div className="alert-description">Set your account balance when you started tracking for accurate cash flow</div>
+                </div>
+                <button className="alert-action" onClick={() => onNavigate?.('settings')}>Set Balance</button>
+              </div>
+            )}
             {monthlyTransactions.length === 0 && (
               <div className="alert-card alert-info">
                 <div className="alert-icon">📊</div>
@@ -433,6 +468,46 @@ function Dashboard({
                   <div className="alert-description">Track recurring payments</div>
                 </div>
                 <button className="alert-action" onClick={() => onNavigate?.('bills')}>Add Bills</button>
+              </div>
+            )}
+            {alerts.noRecurringIncome && (
+              <div className="alert-card alert-info">
+                <div className="alert-icon">💵</div>
+                <div className="alert-content">
+                  <div className="alert-title">Add Recurring Income</div>
+                  <div className="alert-description">Track your regular income sources for accurate projections</div>
+                </div>
+                <button className="alert-action" onClick={() => onNavigate?.('income')}>Add Income</button>
+              </div>
+            )}
+            {alerts.noBudgetedCategories && (
+              <div className="alert-card alert-info">
+                <div className="alert-icon">🎯</div>
+                <div className="alert-content">
+                  <div className="alert-title">Set Category Budgets</div>
+                  <div className="alert-description">Assign budgets to your categories to track spending</div>
+                </div>
+                <button className="alert-action" onClick={() => onNavigate?.('categories')}>Set Budgets</button>
+              </div>
+            )}
+            {alerts.noMonthlyBudget && (
+              <div className="alert-card alert-info">
+                <div className="alert-icon">📊</div>
+                <div className="alert-content">
+                  <div className="alert-title">Set Monthly Budget</div>
+                  <div className="alert-description">Set an overall spending budget for this month</div>
+                </div>
+                <button className="alert-action" onClick={handleEditBudget}>Set Budget</button>
+              </div>
+            )}
+            {alerts.overdueBills > 0 && (
+              <div className="alert-card alert-danger">
+                <div className="alert-icon">🚨</div>
+                <div className="alert-content">
+                  <div className="alert-title">{alerts.overdueBills} Overdue Bill{alerts.overdueBills !== 1 ? 's' : ''}</div>
+                  <div className="alert-description">You have bill{alerts.overdueBills !== 1 ? 's' : ''} past the due date</div>
+                </div>
+                <button className="alert-action" onClick={() => onNavigate?.('bills')}>View</button>
               </div>
             )}
             {alerts.uncategorizedCount > 0 && (
@@ -469,8 +544,13 @@ function Dashboard({
         </div>
       )}
 
-      {/* Summary Cards - Simplified to 3 */}
+      {/* Summary Cards */}
       <div className="summary-cards">
+        <div className="summary-card starting-balance">
+          <h3>Starting Balance</h3>
+          <p className="amount">{formatCurrency(monthStartingBalance)}</p>
+          <p className="card-subtitle">Balance at start of {monthNames[selectedMonth]}</p>
+        </div>
         <div className={`summary-card balance ${summary.balance >= 0 ? 'positive' : 'negative'}`}>
           <h3>Net Cash Flow</h3>
           <p className="amount">{formatCurrency(summary.balance)}</p>
