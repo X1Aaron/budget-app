@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import { Dashboard } from './components/features/dashboard';
 import { Bills } from './components/features/bills';
+import { Income } from './components/features/income';
 import { Transactions } from './components/features/transactions';
 import { CategorySettings, AutoCategorization } from './components/features/categories';
 import { MonthYearSelector } from './components/ui/forms';
@@ -15,7 +16,8 @@ import type {
   MerchantMapping,
   CategoryMapping,
   ActiveSection,
-  BillMatchingSettings
+  BillMatchingSettings,
+  RecurringIncome
 } from './types';
 
 function App() {
@@ -58,6 +60,10 @@ function App() {
       requireDateWindow: true
     };
   });
+  const [recurringIncomes, setRecurringIncomes] = useState<RecurringIncome[]>(() => {
+    const saved = localStorage.getItem('recurringIncomes');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   useEffect(() => {
     localStorage.setItem('categories', JSON.stringify(categories));
@@ -82,6 +88,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('billMatchingSettings', JSON.stringify(billMatchingSettings));
   }, [billMatchingSettings]);
+
+  useEffect(() => {
+    localStorage.setItem('recurringIncomes', JSON.stringify(recurringIncomes));
+  }, [recurringIncomes]);
 
   useEffect(() => {
     const saved = localStorage.getItem('transactions');
@@ -319,6 +329,12 @@ function App() {
             Bills
           </button>
           <button
+            className={'nav-btn' + (activeSection === 'income' ? ' active' : '')}
+            onClick={() => setActiveSection('income')}
+          >
+            Income
+          </button>
+          <button
             className={'nav-btn' + (activeSection === 'categories' ? ' active' : '')}
             onClick={() => setActiveSection('categories')}
           >
@@ -343,6 +359,7 @@ function App() {
           <Dashboard
             transactions={transactions}
             categories={categories}
+            recurringIncomes={recurringIncomes}
             selectedYear={selectedYear}
             selectedMonth={selectedMonth}
             monthlyBudgets={monthlyBudgets}
@@ -368,6 +385,14 @@ function App() {
             selectedMonth={selectedMonth}
             onUpdateTransactions={setTransactions}
             billMatchingSettings={billMatchingSettings}
+          />
+        ) : activeSection === 'income' ? (
+          <Income
+            recurringIncomes={recurringIncomes}
+            onUpdateRecurringIncomes={setRecurringIncomes}
+            categories={categories}
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
           />
         ) : activeSection === 'categories' ? (
           <div className="categories-section">

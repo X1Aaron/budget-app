@@ -28,8 +28,6 @@ function Bills({
   const [editingInlineId, setEditingInlineId] = useState(null)
   const [inlineFormData, setInlineFormData] = useState({})
 
-  const cashRegisterSound = useMemo(() => new Audio(`${import.meta.env.BASE_URL}cash-register.mp3`), [])
-
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
@@ -224,7 +222,6 @@ function Bills({
           }
         } else {
           // Add manual payment
-          cashRegisterSound.play().catch(err => console.log('Sound play failed:', err))
           return {
             ...transaction,
             payments: [...payments, {

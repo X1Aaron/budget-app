@@ -9,6 +9,7 @@ function Dashboard({
   transactions,
   categories,
   bills = [],
+  recurringIncomes = [],
   selectedYear,
   selectedMonth,
   monthlyBudgets,
@@ -103,6 +104,76 @@ function Dashboard({
 
     // Generate all recurring bills for the selected month
     const monthlyBills = []
+    const monthlyIncomes = []
+
+    // Process recurring incomes
+    recurringIncomes.forEach(income => {
+      const startDate = new Date(income.startDate)
+      const startDay = startDate.getDate()
+      const startMonth = startDate.getMonth()
+      const startYear = startDate.getFullYear()
+
+      if (income.frequency === 'weekly') {
+        const weekMs = 7 * 24 * 60 * 60 * 1000
+        let currentDate = new Date(startDate)
+        const monthEnd = new Date(selectedYear, selectedMonth + 1, 0)
+        const monthStart = new Date(selectedYear, selectedMonth, 1)
+
+        while (currentDate <= monthEnd) {
+          if (currentDate >= monthStart && currentDate >= startDate) {
+            monthlyIncomes.push({
+              day: currentDate.getDate(),
+              amount: income.amount
+            })
+          }
+          currentDate = new Date(currentDate.getTime() + weekMs)
+        }
+      } else if (income.frequency === 'bi-weekly') {
+        const biWeekMs = 14 * 24 * 60 * 60 * 1000
+        let currentDate = new Date(startDate)
+        const monthEnd = new Date(selectedYear, selectedMonth + 1, 0)
+        const monthStart = new Date(selectedYear, selectedMonth, 1)
+
+        while (currentDate <= monthEnd) {
+          if (currentDate >= monthStart && currentDate >= startDate) {
+            monthlyIncomes.push({
+              day: currentDate.getDate(),
+              amount: income.amount
+            })
+          }
+          currentDate = new Date(currentDate.getTime() + biWeekMs)
+        }
+      } else if (income.frequency === 'monthly') {
+        if (new Date(selectedYear, selectedMonth, startDay) >= startDate) {
+          monthlyIncomes.push({
+            day: startDay <= daysInMonth ? startDay : daysInMonth,
+            amount: income.amount
+          })
+        }
+      } else if (income.frequency === 'quarterly') {
+        for (let quarter = 0; quarter < 4; quarter++) {
+          const month = startMonth + (quarter * 3)
+          if (month === selectedMonth) {
+            if (new Date(selectedYear, selectedMonth, startDay) >= startDate) {
+              monthlyIncomes.push({
+                day: startDay <= daysInMonth ? startDay : daysInMonth,
+                amount: income.amount
+              })
+            }
+          }
+        }
+      } else if (income.frequency === 'yearly') {
+        if (startMonth === selectedMonth) {
+          if (new Date(selectedYear, selectedMonth, startDay) >= startDate) {
+            monthlyIncomes.push({
+              day: startDay <= daysInMonth ? startDay : daysInMonth,
+              amount: income.amount
+            })
+          }
+        }
+      }
+    })
+
     bills.forEach(bill => {
       const startDate = new Date(bill.dueDate)
       const billYear = startDate.getFullYear()
@@ -200,6 +271,11 @@ function Dashboard({
       const transactionsAmount = dailyTransactions[day] || 0
       balance += transactionsAmount
 
+      // Add recurring income for this day
+      const incomesToday = monthlyIncomes.filter(i => i.day === day)
+      const incomeAmount = incomesToday.reduce((sum, i) => sum + i.amount, 0)
+      balance += incomeAmount
+
       // Subtract bills due on this day
       const billsToday = monthlyBills.filter(b => b.day === day)
       const billsAmount = billsToday.reduce((sum, b) => sum + b.amount, 0)
@@ -213,7 +289,7 @@ function Dashboard({
     }
 
     return data
-  }, [bills, selectedYear, selectedMonth, monthlyTransactions, accountStartingBalance, transactions])
+  }, [bills, recurringIncomes, selectedYear, selectedMonth, monthlyTransactions, accountStartingBalance, transactions])
 
   const categorySpendingData = useMemo(() => {
     return Object.entries(summary.categoryBreakdown)

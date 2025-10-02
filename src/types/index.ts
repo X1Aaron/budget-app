@@ -86,6 +86,7 @@ export type ActiveSection =
   | 'dashboard'
   | 'spending'
   | 'bills'
+  | 'income'
   | 'transactions'
   | 'reconciliation'
   | 'categories'
@@ -99,4 +100,14 @@ export interface BillMatchingSettings {
   requireDescriptionMatch: boolean; // Must have description match
   requireAmountMatch: boolean; // Must have amount match (within tolerance)
   requireDateWindow: boolean; // Must be within date window
+}
+
+export interface RecurringIncome {
+  id: string;
+  name: string; // e.g., "Paycheck - ABC Corp", "Freelance Income"
+  amount: number; // Expected income amount (positive number)
+  startDate: string; // YYYY-MM-DD format (first occurrence date)
+  frequency: 'weekly' | 'bi-weekly' | 'monthly' | 'quarterly' | 'yearly';
+  category?: string; // Optional category (defaults to "Income")
+  memo?: string; // Optional notes
 }

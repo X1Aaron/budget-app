@@ -35,8 +35,6 @@ function SpendingAndBills({
     frequency: 'monthly'
   })
 
-  const cashRegisterSound = useMemo(() => new Audio(`${import.meta.env.BASE_URL}cash-register.mp3`), [])
-
   const handleSort = (key) => {
     let direction = 'asc'
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -355,7 +353,6 @@ function SpendingAndBills({
           }
         } else {
           // Add manual payment
-          cashRegisterSound.play().catch(err => console.log('Sound play failed:', err))
           return {
             ...transaction,
             payments: [...payments, {
