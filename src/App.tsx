@@ -97,6 +97,7 @@ function App() {
   }, [transactions]);
 
   // Auto-match transactions to bills
+  // This searches through ALL historical transactions to match against bills in the selected month
   useEffect(() => {
     if (transactions.length > 0) {
       const billTransactions = transactions.filter(t => t.isBill);
@@ -108,14 +109,14 @@ function App() {
           billMatchingSettings
         );
 
-        // Only update if there are actual changes
+        // Only update if there are actual changes to prevent infinite loop
         const hasChanges = JSON.stringify(updatedTransactions) !== JSON.stringify(transactions);
         if (hasChanges) {
           setTransactions(updatedTransactions);
         }
       }
     }
-  }, [selectedYear, selectedMonth, billMatchingSettings]); // Removed transactions from dependencies to avoid infinite loop
+  }, [transactions, selectedYear, selectedMonth, billMatchingSettings]);
 
   const handleImport = (importedTransactions: Transaction[], existingTransactions: Transaction[] = transactions) => {
     // Check for duplicate transactions

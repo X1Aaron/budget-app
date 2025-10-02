@@ -307,7 +307,7 @@ function SpendingAndBills({
         isBill: true,
         billName: formData.description,
         billAmount: parseFloat(formData.amount),
-        dueDate: formData.date,
+        dueDate: formData.date, // Use the due date as the start date
         frequency: formData.frequency,
         sourceDescription: formData.sourceDescription,
         paidDates: [],
@@ -423,6 +423,9 @@ function SpendingAndBills({
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                 />
+                {addType === 'bill' && (
+                  <p className="field-help">Set the date of the first bill occurrence. Historical transactions will be matched automatically.</p>
+                )}
               </div>
               <div className="form-group">
                 <label>{addType === 'bill' ? 'Bill Name' : 'Description'} *</label>

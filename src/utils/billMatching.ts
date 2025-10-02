@@ -62,26 +62,26 @@ export function generateBillOccurrences(
         });
       }
     } else if (frequency === 'monthly') {
-      // Check if this month should have an occurrence
+      // For monthly bills, always create an occurrence for the requested month if it's the right day
+      // This allows historical matching - bills can match to transactions from before the bill was created
       const occurrenceDate = new Date(year, month, billDay);
-      if (occurrenceDate >= startDate) {
-        const occurrenceDateStr = formatDate(occurrenceDate);
-        const payment = getPaymentForOccurrence(bill, occurrenceDateStr);
-        occurrences.push({
-          billId: bill.id || `${bill.date}-${bill.description}`,
-          billName: bill.billName || bill.description,
-          billAmount: bill.billAmount || Math.abs(bill.amount),
-          occurrenceDate: occurrenceDateStr,
-          dueDay: billDay,
-          category: bill.category,
-          sourceDescription: bill.sourceDescription,
-          payment,
-          billTransaction: bill
-        });
-      }
+      const occurrenceDateStr = formatDate(occurrenceDate);
+      const payment = getPaymentForOccurrence(bill, occurrenceDateStr);
+      occurrences.push({
+        billId: bill.id || `${bill.date}-${bill.description}`,
+        billName: bill.billName || bill.description,
+        billAmount: bill.billAmount || Math.abs(bill.amount),
+        occurrenceDate: occurrenceDateStr,
+        dueDay: billDay,
+        category: bill.category,
+        sourceDescription: bill.sourceDescription,
+        payment,
+        billTransaction: bill
+      });
     } else if (frequency === 'quarterly') {
+      // Calculate months since start, allowing negative values for historical matching
       const monthsSinceStart = (year - billYear) * 12 + (month - (billMonth - 1));
-      if (monthsSinceStart >= 0 && monthsSinceStart % 3 === 0) {
+      if (monthsSinceStart % 3 === 0) {
         const occurrenceDate = new Date(year, month, billDay);
         const occurrenceDateStr = formatDate(occurrenceDate);
         const payment = getPaymentForOccurrence(bill, occurrenceDateStr);
@@ -98,7 +98,8 @@ export function generateBillOccurrences(
         });
       }
     } else if (frequency === 'yearly') {
-      if (billMonth - 1 === month && year >= billYear) {
+      // For yearly bills, create occurrence if month matches (allow historical matching)
+      if (billMonth - 1 === month) {
         const occurrenceDate = new Date(year, month, billDay);
         const occurrenceDateStr = formatDate(occurrenceDate);
         const payment = getPaymentForOccurrence(bill, occurrenceDateStr);
@@ -116,12 +117,30 @@ export function generateBillOccurrences(
       }
     } else if (frequency === 'weekly') {
       const weekMs = 7 * 24 * 60 * 60 * 1000;
-      let currentDate = new Date(startDate);
       const monthStart = new Date(year, month, 1);
       const monthEnd = new Date(year, month + 1, 0);
 
+      // For historical matching, start from the beginning of the requested month
+      // and work forward in weekly intervals from the bill's day of week
+      let currentDate = new Date(startDate);
+
+      // If we're looking at a month before the bill start date,
+      // calculate what the occurrence would have been
+      if (monthStart < startDate) {
+        // Go backward from startDate to find an occurrence in the target month
+        let backDate = new Date(startDate);
+        while (backDate > monthEnd) {
+          backDate = new Date(backDate.getTime() - weekMs);
+        }
+        while (backDate >= monthStart && backDate <= monthEnd) {
+          currentDate = backDate;
+          backDate = new Date(backDate.getTime() - weekMs);
+        }
+      }
+
+      // Add all weekly occurrences in this month
       while (currentDate <= monthEnd) {
-        if (currentDate >= monthStart && currentDate >= startDate) {
+        if (currentDate >= monthStart) {
           const occurrenceDateStr = formatDate(currentDate);
           const payment = getPaymentForOccurrence(bill, occurrenceDateStr);
           occurrences.push({
@@ -311,6 +330,7 @@ function checkDescriptionMatch(
  * Update bill transactions with automatic payment matching
  * Now works with transactions that have isBill = true
  * Marks matched transactions as hidden (they'll show when you expand the bill)
+ * Searches across ALL transactions in history, not just the current month
  */
 export function updateBillsWithTransactionMatches(
   transactions: Transaction[],
@@ -318,14 +338,28 @@ export function updateBillsWithTransactionMatches(
   month: number,
   settings: BillMatchingSettings
 ): Transaction[] {
-  const billOccurrences = generateBillOccurrences(transactions, year, month);
-
-  // Separate bill transactions from regular transactions
+  // Generate bill occurrences for ALL months that have transactions
+  // This allows matching historical transactions to their corresponding bill occurrences
   const regularTransactions = transactions.filter(t => !t.isBill);
+
+  // Find all unique year-month combinations in transactions
+  const monthsWithTransactions = new Set<string>();
+  regularTransactions.forEach(t => {
+    const [tYear, tMonth] = t.date.split('-').map(Number);
+    monthsWithTransactions.add(`${tYear}-${tMonth - 1}`); // month - 1 because JS months are 0-indexed
+  });
+
+  // Generate bill occurrences for all those months
+  const allBillOccurrences: BillOccurrence[] = [];
+  monthsWithTransactions.forEach(yearMonth => {
+    const [y, m] = yearMonth.split('-').map(Number);
+    const occurrences = generateBillOccurrences(transactions, y, m);
+    allBillOccurrences.push(...occurrences);
+  });
 
   // Find all transaction matches (regular transactions matching to bills)
   const matches: TransactionBillMatch[] = regularTransactions
-    .map((t, i) => matchTransactionToBill(t, i, billOccurrences, settings))
+    .map((t, i) => matchTransactionToBill(t, i, allBillOccurrences, settings))
     .filter(m => m.matchedBill !== null && m.matchScore >= settings.minimumScore);
 
   // Prevent duplicate matches: ensure one transaction per bill occurrence
