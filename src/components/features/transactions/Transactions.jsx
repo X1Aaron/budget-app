@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import '../../../styles/components/Transactions.css'
-import { getCategoryColor } from '../../../utils/categories'
+import { getCategoryColor, autoCategorize, generateMerchantName } from '../../../utils/categories'
 import { calculateMonthStartingBalance } from '../../../utils/balanceCalculations'
 import { generateBillOccurrences } from '../../../utils/billMatching'
 
@@ -328,8 +328,32 @@ function Transactions({
     }
 
     if (newTransactions.length > 0) {
-      onUpdateTransactions(prevTransactions => [...prevTransactions, ...newTransactions])
-      alert(`Successfully imported ${newTransactions.length} transaction(s)`)
+      // Apply auto-categorization to imported transactions
+      const categorizedTransactions = newTransactions.map(t => {
+        const result = autoCategorize(t.description, t.amount, t.category, categories)
+        return {
+          ...t,
+          category: result.category,
+          autoCategorized: result.wasAutoCategorized,
+          merchantName: t.merchantName || generateMerchantName(t.description)
+        }
+      })
+
+      onUpdateTransactions(prevTransactions => [...prevTransactions, ...categorizedTransactions])
+
+      // Check how many transactions are in the current month view
+      const currentMonthTransactions = categorizedTransactions.filter(t => {
+        const [year, month] = t.date.split('-').map(Number)
+        return year === selectedYear && month - 1 === selectedMonth
+      })
+
+      if (currentMonthTransactions.length === 0) {
+        alert(`Successfully imported ${newTransactions.length} transaction(s).\n\nNote: None of the imported transactions are in ${monthNames[selectedMonth]} ${selectedYear}. Switch to the appropriate month to view them.`)
+      } else if (currentMonthTransactions.length < newTransactions.length) {
+        alert(`Successfully imported ${newTransactions.length} transaction(s).\n\n${currentMonthTransactions.length} are in ${monthNames[selectedMonth]} ${selectedYear}. Switch months to view the others.`)
+      } else {
+        alert(`Successfully imported ${newTransactions.length} transaction(s) in ${monthNames[selectedMonth]} ${selectedYear}.`)
+      }
     }
 
     setImportPreview(null)
