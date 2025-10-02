@@ -13,11 +13,9 @@
 }
 
 .custom-tooltip {
-  background: var(--card-bg);
   padding: 0.75rem 1rem;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border: 2px solid #667eea;
 }
 
 .tooltip-label {
@@ -29,8 +27,12 @@
 .tooltip-value {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #667eea;
+  color: #3b82f6;
   margin: 0;
+}
+
+[data-theme="dark"] .tooltip-value {
+  color: #60a5fa;
 }
 
 .recharts-legend-wrapper {

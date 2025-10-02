@@ -30,7 +30,7 @@
 
 .bill-modal h3 {
   margin: 0 0 1.5rem 0;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .bill-modal-form {
@@ -48,7 +48,7 @@
 .bill-modal-form label {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .bill-modal-form input,
@@ -58,6 +58,8 @@
   border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 1rem;
+  background: var(--card-bg);
+  color: var(--text-primary);
 }
 
 .bill-modal-form textarea {
@@ -82,12 +84,21 @@
 }
 
 .bill-modal-actions .cancel-btn {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--btn-secondary-bg, #e5e7eb);
+  color: var(--btn-secondary-text, #374151);
 }
 
 .bill-modal-actions .cancel-btn:hover {
-  background: #d1d5db;
+  background: var(--btn-secondary-hover, #d1d5db);
+}
+
+[data-theme="dark"] .bill-modal-actions .cancel-btn {
+  background: #374151;
+  color: #e5e7eb;
+}
+
+[data-theme="dark"] .bill-modal-actions .cancel-btn:hover {
+  background: #4b5563;
 }
 
 .bill-modal-actions .save-btn {
@@ -141,7 +152,7 @@
 
 .starting-balance-header h3 {
   margin: 0 0 1rem 0;
-  color: #374151;
+  color: var(--text-primary);
   font-size: 1.2rem;
 }
 
@@ -154,7 +165,7 @@
 .starting-balance-label {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .starting-balance-value {
@@ -305,7 +316,7 @@
 
 .balance-label {
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   font-size: 1.1rem;
 }
 
@@ -323,7 +334,11 @@
 }
 
 .balance-amount.editable:hover {
-  background: #dbeafe;
+  background: var(--hover-bg, #dbeafe);
+}
+
+[data-theme="dark"] .balance-amount.editable:hover {
+  background: rgba(59, 130, 246, 0.2);
 }
 
 .balance-edit {
@@ -339,6 +354,8 @@
   width: 150px;
   text-align: right;
   font-weight: 600;
+  background: var(--card-bg);
+  color: var(--text-primary);
 }
 
 .balance-edit input:focus {
@@ -456,10 +473,14 @@
 }
 
 .transactions-table thead {
-  background: linear-gradient(to bottom, var(--card-bg), #f9fafb);
+  background: linear-gradient(to bottom, var(--card-bg), var(--table-header-bg, #f9fafb));
   position: sticky;
   top: 0;
   z-index: 10;
+}
+
+[data-theme="dark"] .transactions-table thead {
+  background: linear-gradient(to bottom, var(--card-bg), #1f2937);
 }
 
 .transactions-table th {
@@ -481,8 +502,12 @@
 }
 
 .transactions-table th.sortable:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--hover-bg, #f3f4f6);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .transactions-table th.sortable:hover {
+  background: #374151;
 }
 
 .sort-arrow {
@@ -492,27 +517,39 @@
 }
 
 .transactions-table tbody tr.transaction-row {
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-color);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .transactions-table tbody tr.transaction-row:hover {
-  background: #fafbfc;
+  background: var(--table-row-hover-bg, #fafbfc);
   transform: scale(1.001);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
+[data-theme="dark"] .transactions-table tbody tr.transaction-row:hover {
+  background: #1f2937;
+}
+
 .transactions-table tbody tr.transaction-row.expanded {
-  background: #eff6ff;
+  background: var(--expanded-bg, #eff6ff);
   border-bottom: none;
   box-shadow: inset 0 2px 4px rgba(59, 130, 246, 0.05);
 }
 
+[data-theme="dark"] .transactions-table tbody tr.transaction-row.expanded {
+  background: rgba(59, 130, 246, 0.15);
+}
+
 .transaction-expanded-row {
-  border-bottom: 1px solid #e5e7eb;
-  background: #f8fafc;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--expanded-detail-bg, #f8fafc);
   animation: slideDown 0.2s ease-out;
+}
+
+[data-theme="dark"] .transaction-expanded-row {
+  background: #1f2937;
 }
 
 @keyframes slideDown {
@@ -527,7 +564,11 @@
 }
 
 .transaction-expanded-row:hover {
-  background: #f8fafc;
+  background: var(--expanded-detail-bg, #f8fafc);
+}
+
+[data-theme="dark"] .transaction-expanded-row:hover {
+  background: #1f2937;
 }
 
 .transaction-expanded-row td {
@@ -535,13 +576,21 @@
 }
 
 .transactions-table tbody tr.uncategorized {
-  background: #fffbeb;
+  background: var(--uncategorized-bg, #fffbeb);
   border-left: 3px solid #f59e0b;
 }
 
+[data-theme="dark"] .transactions-table tbody tr.uncategorized {
+  background: rgba(245, 158, 11, 0.15);
+}
+
 .transactions-table tbody tr.uncategorized:hover {
-  background: #fef3c7;
+  background: var(--uncategorized-hover-bg, #fef3c7);
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);
+}
+
+[data-theme="dark"] .transactions-table tbody tr.uncategorized:hover {
+  background: rgba(245, 158, 11, 0.25);
 }
 
 .transactions-table td {
@@ -550,7 +599,7 @@
 }
 
 .transaction-date {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
@@ -581,8 +630,12 @@
 }
 
 .transaction-merchant.editable:hover {
-  background: #f3f4f6;
+  background: var(--hover-bg, #f3f4f6);
   color: #3b82f6;
+}
+
+[data-theme="dark"] .transaction-merchant.editable:hover {
+  background: #374151;
 }
 
 .merchant-name-input {
@@ -620,19 +673,23 @@
 
 .detail-label {
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .detail-value {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.95rem;
   font-style: italic;
-  background: #f9fafb;
+  background: var(--detail-bg, #f9fafb);
   padding: 0.625rem;
   border-radius: 6px;
+}
+
+[data-theme="dark"] .detail-value {
+  background: #374151;
 }
 
 .category-select-expanded {
@@ -652,7 +709,7 @@
 }
 
 .category-select-expanded:hover {
-  border-color: #d1d5db;
+  border-color: var(--border-hover, #d1d5db);
 }
 
 .memo-section {
@@ -670,6 +727,8 @@
   min-height: 100px;
   transition: all 0.2s ease;
   line-height: 1.5;
+  background: var(--card-bg);
+  color: var(--text-primary);
 }
 
 .memo-input:focus {
@@ -679,11 +738,11 @@
 }
 
 .memo-input:hover {
-  border-color: #d1d5db;
+  border-color: var(--border-hover, #d1d5db);
 }
 
 .memo-input::placeholder {
-  color: #9ca3af;
+  color: var(--placeholder-color, #9ca3af);
   font-style: italic;
 }
 
@@ -706,8 +765,12 @@
 }
 
 .transaction-category.editable:hover {
-  background: #f3f4f6;
+  background: var(--hover-bg, #f3f4f6);
   transform: translateX(2px);
+}
+
+[data-theme="dark"] .transaction-category.editable:hover {
+  background: #374151;
 }
 
 .transaction-category.uncategorized-label {
@@ -749,12 +812,16 @@
 }
 
 .transaction-category-select:hover {
-  background: #f3f4f6;
-  border-color: #e5e7eb;
+  background: var(--hover-bg, #f3f4f6);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .transaction-category-select:hover {
+  background: #374151;
 }
 
 .transaction-category-select:focus {
-  background: white;
+  background: var(--card-bg);
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
@@ -833,7 +900,7 @@
 }
 
 .total-label {
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .total-amount.positive {
@@ -888,8 +955,16 @@
   border-left: 3px solid #10b981;
 }
 
+[data-theme="dark"] .transaction-row.bill-matched {
+  background: linear-gradient(to right, rgba(16, 185, 129, 0.2), transparent 50%);
+}
+
 .transaction-row.bill-matched:hover {
   background: linear-gradient(to right, rgba(209, 250, 229, 0.5), transparent 50%);
+}
+
+[data-theme="dark"] .transaction-row.bill-matched:hover {
+  background: linear-gradient(to right, rgba(16, 185, 129, 0.3), transparent 50%);
 }
 
 /* Bill match details section */
@@ -898,6 +973,11 @@
   padding: 1rem;
   border-radius: 8px;
   border: 2px solid #10b981;
+}
+
+[data-theme="dark"] .bill-match-section {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+  border-color: #059669;
 }
 
 .bill-match-info {
@@ -914,7 +994,15 @@
   padding: 0.25rem 0;
 }
 
+[data-theme="dark"] .bill-match-row {
+  color: #6ee7b7;
+}
+
 .bill-match-row strong {
   min-width: 150px;
   color: #047857;
+}
+
+[data-theme="dark"] .bill-match-row strong {
+  color: #34d399;
 }

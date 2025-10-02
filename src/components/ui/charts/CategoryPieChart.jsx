@@ -1,8 +1,10 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 import { getCategoryColor } from '../../../utils/categories'
+import { useTheme } from '../../../contexts/ThemeContext'
 import '../../../styles/components/CategoryPieChart.css'
 
 function CategoryPieChart({ transactions, categories }) {
+  const { theme } = useTheme()
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -37,10 +39,20 @@ function CategoryPieChart({ transactions, categories }) {
     return null
   }
 
+  // Theme-aware chart colors
+  const chartColors = {
+    text: theme === 'dark' ? '#e5e7eb' : '#374151',
+    tooltipBg: theme === 'dark' ? '#1f2937' : '#ffffff',
+    tooltipBorder: theme === 'dark' ? '#374151' : '#e5e7eb'
+  }
+
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="custom-tooltip">
+        <div className="custom-tooltip" style={{
+          backgroundColor: chartColors.tooltipBg,
+          border: `2px solid ${chartColors.tooltipBorder}`
+        }}>
           <p className="tooltip-label">{payload[0].name}</p>
           <p className="tooltip-value">{formatCurrency(payload[0].value)}</p>
         </div>
@@ -74,6 +86,7 @@ function CategoryPieChart({ transactions, categories }) {
               const amount = entry.payload ? entry.payload.value : entry.value
               return value + ' (' + formatCurrency(amount) + ')'
             }}
+            wrapperStyle={{ color: chartColors.text }}
           />
         </PieChart>
       </ResponsiveContainer>
