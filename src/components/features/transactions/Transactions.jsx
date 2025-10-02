@@ -29,6 +29,8 @@ function Transactions({
   })
   const [importModalOpen, setImportModalOpen] = useState(false)
   const [importPreview, setImportPreview] = useState(null)
+  const [importCurrentPage, setImportCurrentPage] = useState(1)
+  const [importItemsPerPage, setImportItemsPerPage] = useState(25)
 
   const handleSort = (key) => {
     let direction = 'asc'
@@ -293,6 +295,13 @@ function Transactions({
 
     setImportPreview(null)
     setImportModalOpen(false)
+    setImportCurrentPage(1)
+  }
+
+  const handleCloseImportModal = () => {
+    setImportPreview(null)
+    setImportModalOpen(false)
+    setImportCurrentPage(1)
   }
 
   // Summary stats
@@ -312,54 +321,117 @@ function Transactions({
   return (
     <div className="transactions-page">
       {/* Import Preview Modal */}
-      {importModalOpen && importPreview && (
-        <div className="bill-modal-backdrop" onClick={() => setImportModalOpen(false)}>
-          <div className="bill-modal import-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Import Preview</h3>
-            <p className="import-info">
-              Importing {importPreview.length} transaction(s). Review before confirming.
-            </p>
-            <div className="import-preview-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Amount</th>
-                    <th>Category</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {importPreview.slice(0, 10).map((trans, idx) => (
-                    <tr key={idx}>
-                      <td>{trans.date}</td>
-                      <td>{trans.description}</td>
-                      <td className={trans.amount < 0 ? 'negative' : 'positive'}>
-                        {formatCurrency(trans.amount)}
-                      </td>
-                      <td>{trans.category}</td>
+      {importModalOpen && importPreview && (() => {
+        const importTotalPages = Math.ceil(importPreview.length / importItemsPerPage)
+        const importStartIndex = (importCurrentPage - 1) * importItemsPerPage
+        const importEndIndex = importStartIndex + importItemsPerPage
+        const importPaginatedData = importPreview.slice(importStartIndex, importEndIndex)
+
+        return (
+          <div className="import-modal-backdrop" onClick={handleCloseImportModal}>
+            <div className="import-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="import-modal-header">
+                <h2>Import Preview</h2>
+                <button className="close-btn" onClick={handleCloseImportModal}>×</button>
+              </div>
+
+              <div className="import-info-banner">
+                <span className="info-icon">ℹ️</span>
+                <p>
+                  Ready to import <strong>{importPreview.length}</strong> transaction(s).
+                  Review the data below and click "Import" to continue.
+                </p>
+              </div>
+
+              <div className="import-table-container">
+                <table className="import-preview-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Date</th>
+                      <th>Description</th>
+                      <th>Amount</th>
+                      <th>Category</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-              {importPreview.length > 10 && (
-                <p className="preview-note">Showing first 10 of {importPreview.length} transactions</p>
+                  </thead>
+                  <tbody>
+                    {importPaginatedData.map((trans, idx) => {
+                      const globalIndex = importStartIndex + idx + 1
+                      return (
+                        <tr key={idx} className={trans.amount < 0 ? 'expense-row' : 'income-row'}>
+                          <td className="row-number">{globalIndex}</td>
+                          <td className="import-date">{trans.date}</td>
+                          <td className="import-description">{trans.description}</td>
+                          <td className={`import-amount ${trans.amount < 0 ? 'negative' : 'positive'}`}>
+                            {formatCurrency(trans.amount)}
+                          </td>
+                          <td className="import-category">{trans.category}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {importTotalPages > 1 && (
+                <div className="import-pagination-controls">
+                  <div className="import-pagination-size">
+                    <label>Show:</label>
+                    <select
+                      value={importItemsPerPage}
+                      onChange={(e) => {
+                        setImportItemsPerPage(Number(e.target.value))
+                        setImportCurrentPage(1)
+                      }}
+                    >
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                      <option value={importPreview.length}>All ({importPreview.length})</option>
+                    </select>
+                    <span>per page</span>
+                  </div>
+
+                  <div className="import-pagination-nav">
+                    <button
+                      className="pagination-btn"
+                      onClick={() => setImportCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={importCurrentPage === 1}
+                    >
+                      ← Previous
+                    </button>
+                    <span className="pagination-current">
+                      Page {importCurrentPage} of {importTotalPages}
+                    </span>
+                    <button
+                      className="pagination-btn"
+                      onClick={() => setImportCurrentPage(prev => Math.min(prev + 1, importTotalPages))}
+                      disabled={importCurrentPage === importTotalPages}
+                    >
+                      Next →
+                    </button>
+                  </div>
+                </div>
               )}
-            </div>
-            <div className="bill-modal-actions">
-              <button className="cancel-btn" onClick={() => {
-                setImportPreview(null)
-                setImportModalOpen(false)
-              }}>
-                Cancel
-              </button>
-              <button className="save-btn" onClick={handleConfirmImport}>
-                Import {importPreview.length} Transaction(s)
-              </button>
+
+              <div className="import-modal-footer">
+                <div className="import-stats">
+                  <span>Showing {importStartIndex + 1}-{Math.min(importEndIndex, importPreview.length)} of {importPreview.length} transactions</span>
+                </div>
+                <div className="import-modal-actions">
+                  <button className="cancel-btn" onClick={handleCloseImportModal}>
+                    Cancel
+                  </button>
+                  <button className="import-btn" onClick={handleConfirmImport}>
+                    Import {importPreview.length} Transaction{importPreview.length !== 1 ? 's' : ''}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* Add Transaction Modal */}
       {addModalOpen && (
