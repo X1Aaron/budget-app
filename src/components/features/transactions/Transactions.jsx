@@ -385,13 +385,24 @@ function Transactions({
                 />
               </div>
               <div className="form-group">
-                <label>Amount *</label>
+                <label>Amount * (negative by default)</label>
                 <input
                   type="number"
                   step="0.01"
                   value={formData.amount}
-                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                  placeholder="Use negative for expenses"
+                  onChange={(e) => {
+                    let value = e.target.value
+                    // Only auto-negate if user enters a positive number without explicit + sign
+                    if (value && !value.startsWith('-') && !value.startsWith('+') && parseFloat(value) > 0) {
+                      value = '-' + value
+                    }
+                    // If user explicitly adds +, keep it positive
+                    if (value.startsWith('+')) {
+                      value = value.substring(1)
+                    }
+                    setFormData({ ...formData, amount: value })
+                  }}
+                  placeholder="Enter amount (automatically negative)"
                 />
               </div>
               <div className="form-group">
