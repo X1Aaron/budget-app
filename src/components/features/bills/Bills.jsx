@@ -232,6 +232,18 @@ function Bills({
     }
   }
 
+  const handleUnlinkTransaction = (transactionId) => {
+    if (confirm('Unlink this transaction from the bill?')) {
+      onUpdateTransactions(prevTransactions =>
+        prevTransactions.map(t =>
+          t.id === transactionId
+            ? { ...t, matchedToBillId: undefined, hiddenAsBillPayment: false }
+            : t
+        )
+      )
+    }
+  }
+
   const handleTogglePaid = (billOccurrence) => {
     onUpdateTransactions(prevTransactions => prevTransactions.map(transaction => {
       if (transaction.isBill && transaction.id === billOccurrence.billId) {
@@ -647,6 +659,35 @@ function Bills({
                           )}
                         </div>
                       )}
+                      {(() => {
+                        const linkedTransactions = transactions.filter(t => !t.isBill && t.matchedToBillId === occ.billId)
+                        if (linkedTransactions.length > 0) {
+                          return (
+                            <div className="detail-row linked-transactions">
+                              <strong>Linked Transactions:</strong>
+                              <div className="linked-transactions-list">
+                                {linkedTransactions.map(trans => (
+                                  <div key={trans.id} className="linked-transaction-item">
+                                    <div className="linked-transaction-info">
+                                      <span className="linked-transaction-date">{trans.date}</span>
+                                      <span className="linked-transaction-description">{trans.description}</span>
+                                      <span className="linked-transaction-amount">{formatCurrency(trans.amount)}</span>
+                                    </div>
+                                    <button
+                                      className="unlink-transaction-btn"
+                                      onClick={() => handleUnlinkTransaction(trans.id)}
+                                      title="Unlink transaction"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        }
+                        return null
+                      })()}
                     </div>
                   )}
                 </div>

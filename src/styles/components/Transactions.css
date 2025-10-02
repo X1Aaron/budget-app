@@ -993,3 +993,143 @@
     justify-content: center;
   }
 }
+
+/* Bill Action Buttons */
+.bill-action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.link-to-bill-btn,
+.create-bill-btn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: 180px;
+}
+
+.link-to-bill-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.link-to-bill-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.create-bill-btn {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+}
+
+.create-bill-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(17, 153, 142, 0.4);
+}
+
+/* Link to Bill Modal */
+.link-bill-info {
+  background: var(--hover-bg);
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.link-bill-info p {
+  margin: 0.5rem 0;
+  color: var(--text-primary);
+}
+
+.bill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.bill-option {
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  padding: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.bill-option:hover {
+  border-color: #667eea;
+  background: var(--hover-bg);
+  transform: translateX(4px);
+}
+
+.bill-option-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  font-size: 1rem;
+}
+
+.bill-option-details {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.no-bills-message {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 2rem;
+  font-style: italic;
+}
+
+/* Linked Bill Info in Transaction Details */
+.linked-bill-section {
+  background: var(--hover-bg);
+  padding: 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.linked-bill-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.linked-bill-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.linked-bill-details {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.unlink-bill-btn {
+  padding: 0.5rem 1rem;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  align-self: flex-start;
+}
+
+.unlink-bill-btn:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+}

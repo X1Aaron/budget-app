@@ -34,6 +34,8 @@ function Transactions({
   const [importPreview, setImportPreview] = useState(null)
   const [importCurrentPage, setImportCurrentPage] = useState(1)
   const [importItemsPerPage, setImportItemsPerPage] = useState(25)
+  const [linkToBillModalOpen, setLinkToBillModalOpen] = useState(false)
+  const [transactionToLink, setTransactionToLink] = useState(null)
 
   const handleSort = (key) => {
     let direction = 'asc'
@@ -47,6 +49,11 @@ function Transactions({
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ]
+
+  // Get all bills
+  const allBills = useMemo(() => {
+    return transactions.filter(t => t.isBill)
+  }, [transactions])
 
   // Get bill occurrences for this month (to identify matched transactions)
   const billOccurrences = useMemo(() => {
@@ -380,6 +387,24 @@ function Transactions({
     )
   }
 
+  const handleLinkToBill = (transaction) => {
+    setTransactionToLink(transaction)
+    setLinkToBillModalOpen(true)
+  }
+
+  const handleConfirmLinkToBill = (billId) => {
+    if (!transactionToLink) return
+
+    const updatedTransactions = transactions.map(t =>
+      t.id === transactionToLink.id
+        ? { ...t, matchedToBillId: billId }
+        : t
+    )
+    onUpdateTransactions(updatedTransactions)
+    setLinkToBillModalOpen(false)
+    setTransactionToLink(null)
+  }
+
   // Summary stats
   const summary = useMemo(() => {
     const income = monthlyTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0)
@@ -602,6 +627,50 @@ function Transactions({
               </button>
               <button className="save-btn" onClick={handleSaveForm}>
                 Add Transaction
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Link to Bill Modal */}
+      {linkToBillModalOpen && transactionToLink && (
+        <div className="bill-modal-backdrop" onClick={() => setLinkToBillModalOpen(false)}>
+          <div className="bill-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Link Transaction to Bill</h3>
+            <div className="link-bill-info">
+              <p><strong>Transaction:</strong> {transactionToLink.description}</p>
+              <p><strong>Amount:</strong> {formatCurrency(transactionToLink.amount)}</p>
+              <p><strong>Date:</strong> {transactionToLink.date}</p>
+            </div>
+            <div className="bill-modal-form">
+              <div className="form-group">
+                <label>Select Bill to Link</label>
+                <div className="bill-list">
+                  {allBills.length === 0 ? (
+                    <p className="no-bills-message">No bills found. Create a bill first.</p>
+                  ) : (
+                    allBills.map(bill => (
+                      <button
+                        key={bill.id}
+                        className="bill-option"
+                        onClick={() => handleConfirmLinkToBill(bill.id)}
+                      >
+                        <div className="bill-option-name">{bill.billName || bill.description}</div>
+                        <div className="bill-option-details">
+                          {formatCurrency(bill.billAmount || bill.amount)} •
+                          Due: {bill.dueDate} •
+                          {bill.frequency || 'one-time'}
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="bill-modal-actions">
+              <button className="cancel-btn" onClick={() => setLinkToBillModalOpen(false)}>
+                Cancel
               </button>
             </div>
           </div>
@@ -862,14 +931,59 @@ function Transactions({
                               />
                             </div>
 
+                            {item.matchedToBillId && !isBillPayment && (
+                              <div className="detail-section linked-bill-section">
+                                <label className="detail-label">Linked to Bill:</label>
+                                {(() => {
+                                  const linkedBill = transactions.find(t => t.isBill && t.id === item.matchedToBillId)
+                                  if (linkedBill) {
+                                    return (
+                                      <div className="linked-bill-info">
+                                        <div className="linked-bill-name">{linkedBill.billName || linkedBill.description}</div>
+                                        <div className="linked-bill-details">
+                                          {formatCurrency(linkedBill.billAmount || Math.abs(linkedBill.amount))} •
+                                          Due: {linkedBill.dueDate} •
+                                          {linkedBill.frequency || 'one-time'}
+                                        </div>
+                                        <button
+                                          className="unlink-bill-btn"
+                                          onClick={() => {
+                                            if (confirm('Unlink this transaction from the bill?')) {
+                                              onUpdateTransaction(item.originalIndex, {
+                                                ...item,
+                                                matchedToBillId: undefined,
+                                                hiddenAsBillPayment: false
+                                              })
+                                            }
+                                          }}
+                                        >
+                                          🔗 Unlink from Bill
+                                        </button>
+                                      </div>
+                                    )
+                                  }
+                                  return <span className="detail-value">Bill not found</span>
+                                })()}
+                              </div>
+                            )}
+
                             {onConvertToBill && !isBillPayment && item.amount < 0 && (
                               <div className="detail-section">
-                                <button
-                                  className="convert-to-bill-btn"
-                                  onClick={() => onConvertToBill(item.id)}
-                                >
-                                  🔄 Convert to Recurring Bill
-                                </button>
+                                <label className="detail-label">Bill Actions:</label>
+                                <div className="bill-action-buttons">
+                                  <button
+                                    className="link-to-bill-btn"
+                                    onClick={() => handleLinkToBill(item)}
+                                  >
+                                    🔗 Link to Existing Bill
+                                  </button>
+                                  <button
+                                    className="create-bill-btn"
+                                    onClick={() => onConvertToBill(item.id)}
+                                  >
+                                    ➕ Create New Bill from This
+                                  </button>
+                                </div>
                               </div>
                             )}
                           </div>
