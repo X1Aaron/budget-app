@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react'
 import '../../../styles/components/AutoCategorization.css'
 
 function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMerchantMapping, onDeleteCategoryMapping }) {
+  const [searchTerm, setSearchTerm] = useState('')
+
   const combinedMappings = useMemo(() => {
     const allDescriptions = new Set([
       ...Object.keys(merchantMappings),
@@ -10,10 +12,32 @@ function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMercha
 
     return Array.from(allDescriptions).map(description => ({
       description,
-      merchantName: merchantMappings[description] || '-',
-      category: categoryMappings[description] || '-'
+      merchantName: merchantMappings[description],
+      category: categoryMappings[description],
+      hasCategory: !!categoryMappings[description],
+      hasMerchant: !!merchantMappings[description]
     }))
   }, [merchantMappings, categoryMappings])
+
+  const filteredMappings = useMemo(() => {
+    if (!searchTerm) return combinedMappings
+
+    const lowerSearch = searchTerm.toLowerCase()
+    return combinedMappings.filter(mapping =>
+      mapping.description.toLowerCase().includes(lowerSearch) ||
+      (mapping.category && mapping.category.toLowerCase().includes(lowerSearch)) ||
+      (mapping.merchantName && mapping.merchantName.toLowerCase().includes(lowerSearch))
+    )
+  }, [combinedMappings, searchTerm])
+
+  const handleDeleteRule = (description, hasCategory, hasMerchant) => {
+    if (hasCategory) {
+      onDeleteCategoryMapping(description)
+    }
+    if (hasMerchant) {
+      onDeleteMerchantMapping(description)
+    }
+  }
 
   return (
     <div className="auto-categorization">
@@ -26,54 +50,68 @@ function AutoCategorization({ merchantMappings, categoryMappings, onDeleteMercha
       </div>
 
       <div className="auto-cat-content">
-        <div className="mappings-table-container">
-          {combinedMappings.length === 0 ? (
-            <div className="empty-state">
-              <p>No mappings yet.</p>
-              <p className="empty-hint">When you manually assign a category or change a merchant name for a transaction, a mapping will be created here.</p>
+        {combinedMappings.length === 0 ? (
+          <div className="empty-state">
+            <p>No rules yet.</p>
+            <p className="empty-hint">When you manually assign a category or change a merchant name for a transaction, a rule will be created here.</p>
+          </div>
+        ) : (
+          <>
+            <div className="search-bar">
+              <input
+                type="text"
+                placeholder="Search rules by description, category, or merchant..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
             </div>
-          ) : (
-            <table className="mappings-table">
-              <thead>
-                <tr>
-                  <th>Transaction Description</th>
-                  <th>Assigned Category</th>
-                  <th>Merchant Name</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {combinedMappings.map((mapping, index) => (
-                  <tr key={index}>
-                    <td className="description-cell">{mapping.description}</td>
-                    <td className="category-cell">{mapping.category}</td>
-                    <td className="merchant-cell">{mapping.merchantName}</td>
-                    <td className="actions-cell">
-                      {categoryMappings[mapping.description] && (
-                        <button
-                          className="delete-btn"
-                          onClick={() => onDeleteCategoryMapping(mapping.description)}
-                          title="Delete category mapping"
-                        >
-                          Delete Category
-                        </button>
+
+            <div className="rules-grid">
+              {filteredMappings.length === 0 ? (
+                <div className="no-results">
+                  No rules match your search.
+                </div>
+              ) : (
+                filteredMappings.map((mapping, index) => (
+                  <div key={index} className="rule-card">
+                    <div className="rule-header">
+                      <span className="rule-label">When description matches:</span>
+                      <div className="rule-description">{mapping.description}</div>
+                    </div>
+
+                    <div className="rule-actions-list">
+                      {mapping.hasCategory && (
+                        <div className="rule-action">
+                          <span className="action-arrow">→</span>
+                          <span className="action-label">Category:</span>
+                          <span className="action-value category-badge">{mapping.category}</span>
+                        </div>
                       )}
-                      {merchantMappings[mapping.description] && (
-                        <button
-                          className="delete-btn"
-                          onClick={() => onDeleteMerchantMapping(mapping.description)}
-                          title="Delete merchant mapping"
-                        >
-                          Delete Merchant
-                        </button>
+                      {mapping.hasMerchant && (
+                        <div className="rule-action">
+                          <span className="action-arrow">→</span>
+                          <span className="action-label">Merchant:</span>
+                          <span className="action-value merchant-badge">{mapping.merchantName}</span>
+                        </div>
                       )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+                    </div>
+
+                    <div className="rule-footer">
+                      <button
+                        className="delete-rule-btn"
+                        onClick={() => handleDeleteRule(mapping.description, mapping.hasCategory, mapping.hasMerchant)}
+                        title="Delete this rule"
+                      >
+                        Delete Rule
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
