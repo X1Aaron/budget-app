@@ -157,6 +157,13 @@ function Bills({
       // If a transaction was selected AND user confirmed the link, match it to the bill
       if (selectedSuggestion && confirmLinkTransaction) {
         const selectedTransaction = selectedSuggestion.transaction
+
+        // Verify the transaction isn't already matched (shouldn't happen, but safety check)
+        if (selectedTransaction.matchedToBillId) {
+          alert('This transaction is already matched to another bill. Please refresh and try again.')
+          return
+        }
+
         const occurrenceDate = formData.dueDate
 
         // Add payment to the new bill
@@ -318,78 +325,80 @@ function Bills({
         <div className="bill-modal-backdrop" onClick={() => setAddModalOpen(false)}>
           <div className="bill-modal" onClick={(e) => e.stopPropagation()}>
             <h3>{editingBill ? 'Edit Bill' : 'Add New Bill'}</h3>
-            <div className="bill-modal-form">
-              <div className="form-group">
-                <label>Bill Name *</label>
-                <input
-                  type="text"
-                  value={formData.billName}
-                  onChange={(e) => setFormData({ ...formData, billName: e.target.value })}
-                  placeholder="e.g., Netflix Subscription"
-                />
-              </div>
-              <div className="form-group">
-                <label>Amount *</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.amount}
-                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                  placeholder="Expected bill amount"
-                />
-              </div>
-              <div className="form-group">
-                <label>Due Date *</label>
-                <input
-                  type="date"
-                  value={formData.dueDate}
-                  onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                />
-                <p className="field-help">Set the date of the first bill occurrence.</p>
-              </div>
-              <div className="form-group">
-                <label>Frequency *</label>
-                <select
-                  value={formData.frequency}
-                  onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
-                >
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                  <option value="quarterly">Quarterly</option>
-                  <option value="yearly">Yearly</option>
-                  <option value="one-time">One-time</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Category</label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                >
-                  <option value="">Select a category</option>
-                  {categories && [...categories]
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map(cat => (
-                      <option key={cat.id} value={cat.name}>
-                        {cat.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Memo</label>
-                <textarea
-                  value={formData.memo}
-                  onChange={(e) => setFormData({ ...formData, memo: e.target.value })}
-                  placeholder="Optional note"
-                  rows="2"
-                />
+            <div className="bill-modal-content">
+              <div className="bill-modal-form">
+                <div className="form-group">
+                  <label>Bill Name *</label>
+                  <input
+                    type="text"
+                    value={formData.billName}
+                    onChange={(e) => setFormData({ ...formData, billName: e.target.value })}
+                    placeholder="e.g., Netflix Subscription"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Amount *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.amount}
+                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                    placeholder="Expected bill amount"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Due Date *</label>
+                  <input
+                    type="date"
+                    value={formData.dueDate}
+                    onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                  />
+                  <p className="field-help">Set the date of the first bill occurrence.</p>
+                </div>
+                <div className="form-group">
+                  <label>Frequency *</label>
+                  <select
+                    value={formData.frequency}
+                    onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
+                  >
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                    <option value="one-time">One-time</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Category</label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  >
+                    <option value="">Select a category</option>
+                    {categories && [...categories]
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map(cat => (
+                        <option key={cat.id} value={cat.name}>
+                          {cat.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Memo</label>
+                  <textarea
+                    value={formData.memo}
+                    onChange={(e) => setFormData({ ...formData, memo: e.target.value })}
+                    placeholder="Optional note"
+                    rows="2"
+                  />
+                </div>
               </div>
 
               {/* Transaction Suggestions */}
               {!editingBill && suggestedTransactions.length > 0 && (
-                <div className="form-group suggestions-section">
-                  <label>Suggested Matching Transactions</label>
+                <div className="suggestions-panel">
+                  <h4>Suggested Matches</h4>
                   <p className="field-help">These transactions might correspond to this bill based on the name and amount.</p>
                   <div className="suggestions-list">
                     {suggestedTransactions.map((suggestion, idx) => {

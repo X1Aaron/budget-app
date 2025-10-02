@@ -358,7 +358,10 @@ export function updateBillsWithTransactionMatches(
   });
 
   // Find all transaction matches (regular transactions matching to bills)
-  const matches: TransactionBillMatch[] = regularTransactions
+  // IMPORTANT: Only match transactions that aren't already matched to maintain 1:1 relationship
+  const unmatchedTransactions = regularTransactions.filter(t => !t.matchedToBillId);
+
+  const matches: TransactionBillMatch[] = unmatchedTransactions
     .map((t, i) => matchTransactionToBill(t, i, allBillOccurrences, settings))
     .filter(m => m.matchedBill !== null && m.matchScore >= settings.minimumScore);
 
@@ -379,9 +382,24 @@ export function updateBillsWithTransactionMatches(
   // Convert back to array of best matches only
   const bestMatches = Array.from(billOccurrenceToTransactionMap.values());
 
+  // Enforce 1:1 relationship: ensure each transaction is only matched once
+  // Key: transaction ID, Value: bill occurrence key
+  const transactionToOccurrenceMap = new Map<string, string>();
+  const finalMatches: TransactionBillMatch[] = [];
+
+  bestMatches.forEach(match => {
+    const transId = match.transaction.id || `${match.transaction.date}-${match.transaction.description}`;
+
+    // Only include if this transaction hasn't been matched yet
+    if (!transactionToOccurrenceMap.has(transId)) {
+      transactionToOccurrenceMap.set(transId, `${match.matchedBill!.billId}-${match.matchedBill!.occurrenceDate}`);
+      finalMatches.push(match);
+    }
+  });
+
   // Create a map of transaction ID -> matched bill ID (using only best matches)
   const transactionToBillMap = new Map<string, string>();
-  bestMatches.forEach(match => {
+  finalMatches.forEach(match => {
     const transId = match.transaction.id || `${match.transaction.date}-${match.transaction.description}`;
     transactionToBillMap.set(transId, match.matchedBill!.billId);
   });
@@ -405,7 +423,7 @@ export function updateBillsWithTransactionMatches(
 
     // For bill transactions: add payment info
     const billId = transaction.id || `${transaction.date}-${transaction.description}`;
-    const billMatches = bestMatches.filter(m => m.matchedBill?.billId === billId);
+    const billMatches = finalMatches.filter(m => m.matchedBill?.billId === billId);
 
     if (billMatches.length === 0) return transaction;
 
@@ -549,6 +567,24 @@ export function manuallyMatchTransactionToBill(
 
   if (!transaction || !billTransaction) {
     throw new Error('Transaction or bill not found');
+  }
+
+  // Enforce 1:1 relationship: check if transaction is already matched
+  if (transaction.matchedToBillId) {
+    throw new Error('This transaction is already matched to another bill. Each transaction can only be matched to one bill.');
+  }
+
+  // Check if this bill occurrence already has a payment
+  const existingPayment = billTransaction.payments?.find(p => p.occurrenceDate === occurrenceDate);
+  if (existingPayment && !existingPayment.manuallyMarked) {
+    // Allow replacing auto-matched payments, but warn about manual ones
+    const existingTransId = transactions.find(t =>
+      t.date === existingPayment.transactionDate &&
+      t.description === existingPayment.transactionDescription
+    )?.id;
+    if (existingTransId) {
+      throw new Error('This bill occurrence is already matched to another transaction. Please unmatch it first.');
+    }
   }
 
   // Validate amount match

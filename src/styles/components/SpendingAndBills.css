@@ -20,7 +20,7 @@
   background: var(--card-bg);
   border-radius: 8px;
   padding: 2rem;
-  max-width: 500px;
+  max-width: 1200px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
@@ -30,6 +30,16 @@
 .bill-modal h3 {
   margin: 0 0 1.5rem 0;
   color: var(--text-primary);
+}
+
+.bill-modal-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.bill-modal-content.single-column {
+  grid-template-columns: 1fr;
 }
 
 /* Modal Header with Toggle */
@@ -147,6 +157,114 @@
   background: #9ca3af;
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+/* Suggestions Panel */
+.suggestions-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--table-header-bg);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.suggestions-panel h4 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.suggestions-panel .field-help {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.suggestions-panel .suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.suggestions-panel .suggestion-item {
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.suggestions-panel .suggestion-item:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.suggestions-panel .suggestion-item.selected {
+  border-color: #10b981;
+  background: #d1fae5;
+}
+
+.suggestions-panel .suggestion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.suggestions-panel .suggestion-date {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.suggestions-panel .suggestion-amount {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.suggestions-panel .suggestion-description {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.375rem;
+}
+
+.suggestions-panel .suggestion-match-reason {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.suggestions-panel .suggestion-selected-indicator {
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  background: #10b981;
+  color: white;
+  border-radius: 4px;
+}
+
+.suggestions-panel .link-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+.suggestions-panel .link-checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: white;
 }
 
 .import-help {
