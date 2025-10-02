@@ -220,7 +220,7 @@ function Transactions({
         // Convert to transactions
         const importedTransactions = data.map((row, index) => {
           // Try to find date field (common variations)
-          const date = row.date || row.transactiondate || row['transaction date'] || row.posted || row['posted date']
+          let date = row.date || row.transactiondate || row['transaction date'] || row.posted || row['posted date']
 
           // Try to find description field
           const description = row.description || row.merchant || row.name || row.payee
@@ -233,6 +233,23 @@ function Transactions({
             amount = parseFloat(row.debit || 0) - parseFloat(row.credit || 0)
           } else if (amount) {
             amount = parseFloat(amount)
+          }
+
+          // Normalize date to YYYY-MM-DD format
+          if (date) {
+            try {
+              // Handle various date formats
+              const dateObj = new Date(date)
+              if (!isNaN(dateObj.getTime())) {
+                const year = dateObj.getFullYear()
+                const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+                const day = String(dateObj.getDate()).padStart(2, '0')
+                date = `${year}-${month}-${day}`
+              }
+            } catch (e) {
+              console.warn('Invalid date format:', date)
+              return null
+            }
           }
 
           if (!date || !description || isNaN(amount)) {
@@ -248,7 +265,8 @@ function Transactions({
             amount: amount,
             category: row.category || 'Uncategorized',
             memo: row.memo || row.notes || '',
-            autoCategorized: false
+            autoCategorized: false,
+            isBill: false
           }
         }).filter(t => t !== null)
 
