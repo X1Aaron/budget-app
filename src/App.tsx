@@ -7,7 +7,6 @@ import { CategorySettings, AutoCategorization } from './components/features/cate
 import { MonthYearSelector } from './components/ui/forms';
 import { DEFAULT_CATEGORIES, autoCategorize, generateMerchantName } from './utils/categories';
 import { generateDemoData } from './utils/demoData';
-import { updateBillsWithTransactionMatches } from './utils/billMatching';
 import { useTheme } from './contexts/ThemeContext';
 import type {
   Transaction,
@@ -97,27 +96,6 @@ function App() {
     }
   }, [transactions]);
 
-  // Auto-match transactions to bills
-  // This searches through ALL historical transactions to match against bills in the selected month
-  useEffect(() => {
-    if (transactions.length > 0) {
-      const billTransactions = transactions.filter(t => t.isBill);
-      if (billTransactions.length > 0) {
-        const updatedTransactions = updateBillsWithTransactionMatches(
-          transactions,
-          selectedYear,
-          selectedMonth,
-          billMatchingSettings
-        );
-
-        // Only update if there are actual changes to prevent infinite loop
-        const hasChanges = JSON.stringify(updatedTransactions) !== JSON.stringify(transactions);
-        if (hasChanges) {
-          setTransactions(updatedTransactions);
-        }
-      }
-    }
-  }, [transactions, selectedYear, selectedMonth, billMatchingSettings]);
 
   const handleImport = (importedTransactions: Transaction[], existingTransactions: Transaction[] = transactions) => {
     // Check for duplicate transactions

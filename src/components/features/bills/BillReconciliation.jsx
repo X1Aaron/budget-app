@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import {
   getUnmatchedExpenseTransactions,
   getUnpaidBillOccurrences,
-  getLowConfidenceMatches,
+  getAllPotentialMatches,
   manuallyMatchTransactionToBill,
   unmatchTransactionFromBill,
   generateBillOccurrences
@@ -30,7 +30,7 @@ export function BillReconciliation({
   );
 
   const suggestedMatches = useMemo(() =>
-    getLowConfidenceMatches(transactions, selectedYear, selectedMonth, billMatchingSettings),
+    getAllPotentialMatches(transactions, selectedYear, selectedMonth, billMatchingSettings),
     [transactions, selectedYear, selectedMonth, billMatchingSettings]
   );
 
@@ -101,7 +101,7 @@ export function BillReconciliation({
           className={`tab-btn ${selectedTab === 'suggested-matches' ? 'active' : ''}`}
           onClick={() => setSelectedTab('suggested-matches')}
         >
-          Suggested Matches ({suggestedMatches.length})
+          Potential Matches ({suggestedMatches.length})
         </button>
       </div>
 
@@ -238,12 +238,12 @@ export function BillReconciliation({
           <div className="suggested-matches-section">
             {suggestedMatches.length === 0 ? (
               <div className="empty-state">
-                <p>No suggested matches. All high-confidence matches have been applied automatically.</p>
+                <p>No potential matches found.</p>
               </div>
             ) : (
               <div className="suggestion-list">
                 <p className="suggestion-info">
-                  These transactions scored below the automatic matching threshold ({billMatchingSettings.minimumScore}) but may still be valid matches.
+                  Review these potential matches and manually accept the ones that are correct.
                 </p>
                 {suggestedMatches.map((match) => {
                   const transId = match.transaction.id || `${match.transaction.date}-${match.transaction.description}`;

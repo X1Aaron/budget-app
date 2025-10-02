@@ -500,10 +500,10 @@ export function getUnpaidBillOccurrences(
 }
 
 /**
- * Get low-confidence matches (potential matches that didn't meet threshold)
+ * Get all potential matches for manual review
  * Useful for suggesting manual matches
  */
-export function getLowConfidenceMatches(
+export function getAllPotentialMatches(
   transactions: Transaction[],
   year: number,
   month: number,
@@ -512,15 +512,14 @@ export function getLowConfidenceMatches(
   const billOccurrences = generateBillOccurrences(transactions, year, month);
   const regularTransactions = transactions.filter(t => !t.isBill && !t.matchedToBillId);
 
-  // Find matches that score between 30-minimumScore
+  // Find all matches that meet minimum threshold (no automatic matching)
   const lowConfidenceThreshold = 30;
 
   return regularTransactions
     .map((t, i) => matchTransactionToBill(t, i, billOccurrences, settings))
     .filter(m =>
       m.matchedBill !== null &&
-      m.matchScore >= lowConfidenceThreshold &&
-      m.matchScore < settings.minimumScore
+      m.matchScore >= lowConfidenceThreshold
     )
     .sort((a, b) => b.matchScore - a.matchScore); // Highest scores first
 }
