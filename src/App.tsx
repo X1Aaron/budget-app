@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { Dashboard } from './components/features/dashboard';
-import { SpendingAndBills, BillReconciliation, Bills } from './components/features/bills';
+import { Bills } from './components/features/bills';
 import { Transactions } from './components/features/transactions';
 import { CategorySettings, AutoCategorization } from './components/features/categories';
 import { MonthYearSelector } from './components/ui/forms';
@@ -341,18 +341,6 @@ function App() {
             Bills
           </button>
           <button
-            className={'nav-btn' + (activeSection === 'spending' ? ' active' : '')}
-            onClick={() => setActiveSection('spending')}
-          >
-            Spending & Bills
-          </button>
-          <button
-            className={'nav-btn' + (activeSection === 'reconciliation' ? ' active' : '')}
-            onClick={() => setActiveSection('reconciliation')}
-          >
-            Reconciliation
-          </button>
-          <button
             className={'nav-btn' + (activeSection === 'categories' ? ' active' : '')}
             onClick={() => setActiveSection('categories')}
           >
@@ -402,26 +390,6 @@ function App() {
             selectedMonth={selectedMonth}
             onUpdateTransactions={setTransactions}
             billMatchingSettings={billMatchingSettings}
-          />
-        ) : activeSection === 'spending' ? (
-          <SpendingAndBills
-            transactions={transactions}
-            categories={categories}
-            selectedYear={selectedYear}
-            selectedMonth={selectedMonth}
-            onDateChange={handleDateChange}
-            onUpdateTransaction={handleUpdateTransaction}
-            accountStartingBalance={accountStartingBalance}
-            onUpdateTransactions={setTransactions}
-            billMatchingSettings={billMatchingSettings}
-          />
-        ) : activeSection === 'reconciliation' ? (
-          <BillReconciliation
-            transactions={transactions}
-            selectedYear={selectedYear}
-            selectedMonth={selectedMonth}
-            billMatchingSettings={billMatchingSettings}
-            onUpdateTransactions={setTransactions}
           />
         ) : activeSection === 'categories' ? (
           <div className="categories-section">
