@@ -75,11 +75,41 @@
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .search-bar {
   flex: 1;
+  min-width: 250px;
   max-width: 400px;
+}
+
+.rule-type-filter {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.rule-type-filter button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.rule-type-filter button:hover {
+  background: var(--table-row-hover-bg);
+  color: var(--text-primary);
+}
+
+.rule-type-filter button.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
 }
 
 .search-input {
@@ -181,13 +211,44 @@
   font-weight: 500;
 }
 
+.type-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.type-badge.exact {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+.type-badge.keyword {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.category-type-badge {
+  display: inline-block;
+  background: var(--table-header-bg);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.625rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
 .no-value {
   color: var(--text-secondary);
   font-style: italic;
 }
 
 .actions-cell {
-  width: 50px;
+  width: 60px;
   text-align: right;
 }
 
@@ -204,6 +265,36 @@
 
 .delete-btn:hover {
   color: #ef4444;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0.25rem 0.5rem;
+  transition: color 0.15s ease;
+}
+
+.toggle-btn.enabled {
+  color: #10b981;
+}
+
+.toggle-btn.disabled {
+  color: var(--text-secondary);
+}
+
+.toggle-btn:hover {
+  opacity: 0.7;
+}
+
+.disabled-rule {
+  opacity: 0.5;
+}
+
+.disabled-rule td {
+  text-decoration: line-through;
 }
 
 .no-results {

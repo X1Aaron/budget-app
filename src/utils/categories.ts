@@ -120,6 +120,7 @@ interface AutoCategorizeResult {
   category: string;
   wasAutoCategorized: boolean;
   matchType?: 'exact' | 'keyword' | 'default' | 'manual';
+  matchedKeyword?: string;
 }
 
 export const autoCategorize = (
@@ -127,7 +128,8 @@ export const autoCategorize = (
   amount: number,
   existingCategory: string | undefined,
   categories: CategoryWithKeywords[] = DEFAULT_CATEGORIES,
-  categoryMappings: { [description: string]: string } = {}
+  categoryMappings: { [description: string]: string } = {},
+  disabledKeywords: { [category: string]: string[] } = {}
 ): AutoCategorizeResult => {
   // If already has a valid category, keep it and mark as not auto-categorized
   if (existingCategory && existingCategory !== 'Uncategorized') {
@@ -149,22 +151,24 @@ export const autoCategorize = (
   for (const category of categories) {
     if (category.id === 'uncategorized') continue;
 
+    const disabledCategoryKeywords = disabledKeywords[category.name] || [];
+
     if (category.type === 'income' && amount > 0) {
       for (const keyword of category.keywords || []) {
-        if (desc.includes(keyword.toLowerCase())) {
-          return { category: category.name, wasAutoCategorized: true, matchType: 'keyword' };
+        if (!disabledCategoryKeywords.includes(keyword) && desc.includes(keyword.toLowerCase())) {
+          return { category: category.name, wasAutoCategorized: true, matchType: 'keyword', matchedKeyword: keyword };
         }
       }
     } else if (category.type === 'expense' && amount < 0) {
       for (const keyword of category.keywords || []) {
-        if (desc.includes(keyword.toLowerCase())) {
-          return { category: category.name, wasAutoCategorized: true, matchType: 'keyword' };
+        if (!disabledCategoryKeywords.includes(keyword) && desc.includes(keyword.toLowerCase())) {
+          return { category: category.name, wasAutoCategorized: true, matchType: 'keyword', matchedKeyword: keyword };
         }
       }
     } else if (category.type === 'both') {
       for (const keyword of category.keywords || []) {
-        if (desc.includes(keyword.toLowerCase())) {
-          return { category: category.name, wasAutoCategorized: true, matchType: 'keyword' };
+        if (!disabledCategoryKeywords.includes(keyword) && desc.includes(keyword.toLowerCase())) {
+          return { category: category.name, wasAutoCategorized: true, matchType: 'keyword', matchedKeyword: keyword };
         }
       }
     }

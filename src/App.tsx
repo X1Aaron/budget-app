@@ -49,6 +49,10 @@ function App() {
     const saved = localStorage.getItem('categoryMappings');
     return saved ? JSON.parse(saved) : {};
   });
+  const [disabledKeywords, setDisabledKeywords] = useState<{ [category: string]: string[] }>(() => {
+    const saved = localStorage.getItem('disabledKeywords');
+    return saved ? JSON.parse(saved) : {};
+  });
   const [billMatchingSettings, setBillMatchingSettings] = useState<BillMatchingSettings>(() => {
     const saved = localStorage.getItem('billMatchingSettings');
     return saved ? JSON.parse(saved) : {
@@ -84,6 +88,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('categoryMappings', JSON.stringify(categoryMappings));
   }, [categoryMappings]);
+
+  useEffect(() => {
+    localStorage.setItem('disabledKeywords', JSON.stringify(disabledKeywords));
+  }, [disabledKeywords]);
 
   useEffect(() => {
     localStorage.setItem('billMatchingSettings', JSON.stringify(billMatchingSettings));
@@ -131,7 +139,7 @@ function App() {
     }
 
     const categorizedTransactions = newTransactions.map(t => {
-      const result = autoCategorize(t.description, t.amount, t.category, categories, categoryMappings);
+      const result = autoCategorize(t.description, t.amount, t.category, categories, categoryMappings, disabledKeywords);
       return {
         ...t,
         category: result.category,
@@ -211,6 +219,27 @@ function App() {
       const updated = { ...prev };
       delete updated[description];
       return updated;
+    });
+  };
+
+  const handleToggleKeyword = (category: string, keyword: string) => {
+    setDisabledKeywords(prev => {
+      const categoryKeywords = prev[category] || [];
+      const isCurrentlyDisabled = categoryKeywords.includes(keyword);
+
+      if (isCurrentlyDisabled) {
+        // Re-enable the keyword
+        return {
+          ...prev,
+          [category]: categoryKeywords.filter(k => k !== keyword)
+        };
+      } else {
+        // Disable the keyword
+        return {
+          ...prev,
+          [category]: [...categoryKeywords, keyword]
+        };
+      }
     });
   };
 
@@ -377,6 +406,7 @@ function App() {
             accountStartingBalance={accountStartingBalance}
             onUpdateTransactions={setTransactions}
             categoryMappings={categoryMappings}
+            disabledKeywords={disabledKeywords}
           />
         ) : activeSection === 'bills' ? (
           <Bills
@@ -406,6 +436,7 @@ function App() {
               selectedYear={selectedYear}
               selectedMonth={selectedMonth}
               categoryMappings={categoryMappings}
+              disabledKeywords={disabledKeywords}
             />
           </div>
         ) : activeSection === 'auto-categorization' ? (
@@ -415,6 +446,8 @@ function App() {
             onDeleteMerchantMapping={handleDeleteMerchantMapping}
             onDeleteCategoryMapping={handleDeleteCategoryMapping}
             categories={categories}
+            disabledKeywords={disabledKeywords}
+            onToggleKeyword={handleToggleKeyword}
           />
         ) : (
           <div className="settings-section">

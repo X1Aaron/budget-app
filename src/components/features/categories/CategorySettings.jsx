@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import '../../../styles/components/CategorySettings.css'
 import { autoCategorize } from '../../../utils/categories'
 
-function CategorySettings({ categories, onUpdateCategories, transactions, onUpdateTransactions, selectedYear, selectedMonth, categoryMappings = {} }) {
+function CategorySettings({ categories, onUpdateCategories, transactions, onUpdateTransactions, selectedYear, selectedMonth, categoryMappings = {}, disabledKeywords = {} }) {
   const [isAdding, setIsAdding] = useState(false)
   const [newCategory, setNewCategory] = useState({
     name: '',
@@ -146,7 +146,7 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
     if (transactions && onUpdateTransactions && category.keywords.length > 0) {
       const updatedTransactions = transactions.map(t => {
         if (t.autoCategorized || !t.category || t.category === 'Uncategorized') {
-          const result = autoCategorize(t.description, t.amount, 'Uncategorized', updatedCategories, categoryMappings)
+          const result = autoCategorize(t.description, t.amount, 'Uncategorized', updatedCategories, categoryMappings, disabledKeywords)
           return {
             ...t,
             category: result.category,
@@ -265,7 +265,7 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
     const updatedTransactions = transactions.map(t => {
       // Only reapply if the transaction was auto-categorized or uncategorized
       if (t.autoCategorized || !t.category || t.category === 'Uncategorized') {
-        const result = autoCategorize(t.description, t.amount, 'Uncategorized', categories, categoryMappings)
+        const result = autoCategorize(t.description, t.amount, 'Uncategorized', categories, categoryMappings, disabledKeywords)
         return {
           ...t,
           category: result.category,
