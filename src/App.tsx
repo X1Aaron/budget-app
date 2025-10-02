@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { Dashboard } from './components/features/dashboard';
-import { Spending } from './components/features/transactions';
-import { Bills, SpendingAndBills } from './components/features/bills';
+import { SpendingAndBills } from './components/features/bills';
 import { CategorySettings, AutoCategorization } from './components/features/categories';
 import { MonthYearSelector } from './components/ui/forms';
 import { DEFAULT_CATEGORIES, autoCategorize, generateMerchantName } from './utils/categories';

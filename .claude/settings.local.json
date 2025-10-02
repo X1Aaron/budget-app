@@ -32,7 +32,8 @@
       "Bash(tree:*)",
       "Bash(find:*)",
       "Bash(while read file)",
-      "Bash(do sed -i \"s|from ''''\\./\\(.*\\)\\.css''''|from ''''../../../styles/components/\\1.css''''|g\" \"$file\" sed -i 's|from \"\"\"\"\\./\\(.*\\)\\.css\"\"\"\"|from \"\"\"\"../../../styles/components/\\1.css\"\"\"\"|g' \"$file\" done)"
+      "Bash(do sed -i \"s|from ''''\\./\\(.*\\)\\.css''''|from ''''../../../styles/components/\\1.css''''|g\" \"$file\" sed -i 's|from \"\"\"\"\\./\\(.*\\)\\.css\"\"\"\"|from \"\"\"\"../../../styles/components/\\1.css\"\"\"\"|g' \"$file\" done)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []

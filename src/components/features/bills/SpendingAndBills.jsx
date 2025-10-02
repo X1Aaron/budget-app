@@ -21,6 +21,8 @@ function SpendingAndBills({
   const [filterType, setFilterType] = useState('all') // all, bills-only, transactions-only, unpaid-bills
   const [showMatchedTransactions, setShowMatchedTransactions] = useState(true) // Toggle to show/hide bill-matched transactions
   const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'asc' })
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [addType, setAddType] = useState('transaction') // 'transaction' or 'bill'
   const [formData, setFormData] = useState({
@@ -192,6 +194,19 @@ function SpendingAndBills({
 
     return filtered
   }, [timelineWithBalance, filterCategory, filterType, sortConfig])
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredTimeline.length / itemsPerPage)
+  const paginatedTimeline = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return filteredTimeline.slice(startIndex, endIndex)
+  }, [filteredTimeline, currentPage, itemsPerPage])
+
+  // Reset to page 1 when filter, sort, or page size changes
+  React.useEffect(() => {
+    setCurrentPage(1)
+  }, [filterCategory, filterType, sortConfig, itemsPerPage])
 
   const availableCategories = useMemo(() => {
     const categorySet = new Set()
@@ -600,7 +615,9 @@ function SpendingAndBills({
               </tr>
             </thead>
             <tbody>
-              {filteredTimeline.map((item, index) => {
+              {paginatedTimeline.map((item, paginatedIndex) => {
+                // Calculate the actual index in the filteredTimeline
+                const index = (currentPage - 1) * itemsPerPage + paginatedIndex
                 const originalIndex = item.type === 'transaction'
                   ? transactions.findIndex(t =>
                       t.date === item.date &&
@@ -964,9 +981,61 @@ function SpendingAndBills({
           </table>
         </div>
 
+        {/* Pagination Controls */}
+        {filteredTimeline.length > 0 && (
+          <div className="pagination-controls">
+            <div className="pagination-size-selector">
+              <label htmlFor="page-size">Show:</label>
+              <select
+                id="page-size"
+                value={itemsPerPage}
+                onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                className="page-size-select"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <span>per page</span>
+            </div>
+
+            {totalPages > 1 && (
+              <>
+                <button
+                  className="pagination-btn"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  ← Previous
+                </button>
+                <div className="pagination-info">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      className={`pagination-number ${page === currentPage ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  className="pagination-btn"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next →
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
         <div className="timeline-footer">
           <span className="item-count">
             {filteredTimeline.length} item{filteredTimeline.length !== 1 ? 's' : ''}
+            {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
           </span>
         </div>
       </div>
