@@ -11,8 +11,8 @@ import { generateDemoData } from './utils/demoData';
 import { useTheme } from './contexts/ThemeContext';
 import type {
   Transaction,
+  Bill,
   Category,
-  MonthlyBudget,
   MerchantMapping,
   CategoryMapping,
   ActiveSection,
@@ -24,14 +24,12 @@ function App() {
   const { theme, toggleTheme } = useTheme();
   const [activeSection, setActiveSection] = useState<ActiveSection>('dashboard');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [bills, setBills] = useState<Bill[]>(() => {
+    const saved = localStorage.getItem('bills');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
-  const [monthlyBudgets, setMonthlyBudgets] = useState<MonthlyBudget>(() => {
-    const saved = localStorage.getItem('monthlyBudgets');
-    return saved ? JSON.parse(saved) : {};
-  });
-  // Bills are now stored as transactions with isBill = true
-  // No separate bills state needed anymore
 
   const [categories, setCategories] = useState<Category[]>(() => {
     const saved = localStorage.getItem('categories');
@@ -75,12 +73,12 @@ function App() {
   }, [categories]);
 
   useEffect(() => {
-    localStorage.setItem('accountStartingBalance', JSON.stringify(accountStartingBalance));
-  }, [accountStartingBalance]);
+    localStorage.setItem('bills', JSON.stringify(bills));
+  }, [bills]);
 
   useEffect(() => {
-    localStorage.setItem('monthlyBudgets', JSON.stringify(monthlyBudgets));
-  }, [monthlyBudgets]);
+    localStorage.setItem('accountStartingBalance', JSON.stringify(accountStartingBalance));
+  }, [accountStartingBalance]);
 
   useEffect(() => {
     localStorage.setItem('merchantMappings', JSON.stringify(merchantMappings));
@@ -195,14 +193,6 @@ function App() {
     setSelectedMonth(month);
   };
 
-  const handleUpdateBudget = (year: number, month: number, budget: number) => {
-    const key = `${year}-${month}`;
-    setMonthlyBudgets(prev => ({
-      ...prev,
-      [key]: budget
-    }));
-  };
-
   const handleUpdateAccountStartingBalance = (balance: number) => {
     setAccountStartingBalance(balance);
   };
@@ -286,7 +276,6 @@ function App() {
 
   const handleImportDemoData = () => {
     const demoTransactions = generateDemoData();
-
     setTransactions(demoTransactions);
     setAccountStartingBalance(5000);
 
@@ -295,113 +284,146 @@ function App() {
     const demoBills: Bill[] = [
       {
         id: crypto.randomUUID(),
-        name: 'Rent/Mortgage',
-        amount: 2100,
+        date: new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0],
+        description: 'Rent/Mortgage',
+        amount: -2100,
+        category: 'Housing',
+        isBill: true,
+        billName: 'Rent/Mortgage',
+        billAmount: 2100,
         dueDate: new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0],
         frequency: 'monthly',
-        category: 'Housing',
-        isPaid: false,
-        paidDates: []
+        payments: []
       },
       {
         id: crypto.randomUUID(),
-        name: 'Car Insurance',
-        amount: 120,
+        date: new Date(today.getFullYear(), today.getMonth(), 15).toISOString().split('T')[0],
+        description: 'Car Insurance',
+        amount: -120,
+        category: 'Insurance',
+        isBill: true,
+        billName: 'Car Insurance',
+        billAmount: 120,
         dueDate: new Date(today.getFullYear(), today.getMonth(), 15).toISOString().split('T')[0],
         frequency: 'monthly',
-        category: 'Insurance',
-        isPaid: false,
-        paidDates: []
+        payments: []
       },
       {
         id: crypto.randomUUID(),
-        name: 'Internet',
-        amount: 70,
+        date: new Date(today.getFullYear(), today.getMonth(), 5).toISOString().split('T')[0],
+        description: 'Internet',
+        amount: -70,
+        category: 'Utilities',
+        isBill: true,
+        billName: 'Internet',
+        billAmount: 70,
         dueDate: new Date(today.getFullYear(), today.getMonth(), 5).toISOString().split('T')[0],
         frequency: 'monthly',
-        category: 'Utilities',
-        isPaid: false,
-        paidDates: []
+        payments: []
       },
       {
         id: crypto.randomUUID(),
-        name: 'Electric Bill',
-        amount: 95,
+        date: new Date(today.getFullYear(), today.getMonth(), 12).toISOString().split('T')[0],
+        description: 'Electric Bill',
+        amount: -95,
+        category: 'Utilities',
+        isBill: true,
+        billName: 'Electric Bill',
+        billAmount: 95,
         dueDate: new Date(today.getFullYear(), today.getMonth(), 12).toISOString().split('T')[0],
         frequency: 'monthly',
-        category: 'Utilities',
-        isPaid: false,
-        paidDates: []
+        payments: []
       },
       {
         id: crypto.randomUUID(),
-        name: 'Water Bill',
-        amount: 45,
+        date: new Date(today.getFullYear(), today.getMonth(), 20).toISOString().split('T')[0],
+        description: 'Water Bill',
+        amount: -45,
+        category: 'Utilities',
+        isBill: true,
+        billName: 'Water Bill',
+        billAmount: 45,
         dueDate: new Date(today.getFullYear(), today.getMonth(), 20).toISOString().split('T')[0],
         frequency: 'monthly',
-        category: 'Utilities',
-        isPaid: false,
-        paidDates: []
+        payments: []
       },
       {
         id: crypto.randomUUID(),
-        name: 'Phone Bill',
-        amount: 55,
-        dueDate: new Date(today.getFullYear(), today.getMonth(), 10).toISOString().split('T')[0],
-        frequency: 'monthly',
+        date: new Date(today.getFullYear(), today.getMonth(), 10).toISOString().split('T')[0],
+        description: 'Phone Bill',
+        amount: -55,
         category: 'Phone',
-        isPaid: false,
-        paidDates: []
-      },
-      {
-        id: crypto.randomUUID(),
-        name: 'Student Loan',
-        amount: 285,
+        isBill: true,
+        billName: 'Phone Bill',
+        billAmount: 55,
         dueDate: new Date(today.getFullYear(), today.getMonth(), 10).toISOString().split('T')[0],
         frequency: 'monthly',
-        category: 'Debt Payments',
-        isPaid: false,
-        paidDates: []
+        payments: []
       },
       {
         id: crypto.randomUUID(),
-        name: 'Credit Card Payment',
-        amount: 200,
+        date: new Date(today.getFullYear(), today.getMonth(), 10).toISOString().split('T')[0],
+        description: 'Student Loan',
+        amount: -285,
+        category: 'Debt Payments',
+        isBill: true,
+        billName: 'Student Loan',
+        billAmount: 285,
+        dueDate: new Date(today.getFullYear(), today.getMonth(), 10).toISOString().split('T')[0],
+        frequency: 'monthly',
+        payments: []
+      },
+      {
+        id: crypto.randomUUID(),
+        date: new Date(today.getFullYear(), today.getMonth(), 20).toISOString().split('T')[0],
+        description: 'Credit Card Payment',
+        amount: -200,
+        category: 'Debt Payments',
+        isBill: true,
+        billName: 'Credit Card Payment',
+        billAmount: 200,
         dueDate: new Date(today.getFullYear(), today.getMonth(), 20).toISOString().split('T')[0],
         frequency: 'monthly',
-        category: 'Debt Payments',
-        isPaid: false,
-        paidDates: []
+        payments: []
       },
       {
         id: crypto.randomUUID(),
-        name: 'Netflix',
-        amount: 22.99,
+        date: new Date(today.getFullYear(), today.getMonth(), 8).toISOString().split('T')[0],
+        description: 'Netflix',
+        amount: -22.99,
+        category: 'Subscriptions',
+        isBill: true,
+        billName: 'Netflix',
+        billAmount: 22.99,
         dueDate: new Date(today.getFullYear(), today.getMonth(), 8).toISOString().split('T')[0],
         frequency: 'monthly',
-        category: 'Subscriptions',
-        isPaid: false,
-        paidDates: []
+        payments: []
       },
       {
         id: crypto.randomUUID(),
-        name: 'Spotify',
-        amount: 11.99,
+        date: new Date(today.getFullYear(), today.getMonth(), 12).toISOString().split('T')[0],
+        description: 'Spotify',
+        amount: -11.99,
+        category: 'Subscriptions',
+        isBill: true,
+        billName: 'Spotify',
+        billAmount: 11.99,
         dueDate: new Date(today.getFullYear(), today.getMonth(), 12).toISOString().split('T')[0],
         frequency: 'monthly',
-        category: 'Subscriptions',
-        isPaid: false,
-        paidDates: []
+        payments: []
       },
       {
         id: crypto.randomUUID(),
-        name: 'Gym Membership',
-        amount: 24.99,
+        date: new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0],
+        description: 'Gym Membership',
+        amount: -24.99,
+        category: 'Fitness & Gym',
+        isBill: true,
+        billName: 'Gym Membership',
+        billAmount: 24.99,
         dueDate: new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0],
         frequency: 'monthly',
-        category: 'Fitness & Gym',
-        isPaid: false,
-        paidDates: []
+        payments: []
       }
     ];
 
@@ -423,47 +445,6 @@ function App() {
     ];
 
     setRecurringIncomes(demoIncomes);
-
-    // Set realistic monthly budgets with variation
-    // Total income: ~$6,000/month (4 paychecks), Total bills: ~$3,030
-    // Leaving ~$2,970 for other expenses
-    const demoMonthlyBudgets: { [key: string]: number } = {};
-
-    // Create budgets for the past 6 months and current month
-    for (let i = 0; i <= 6; i++) {
-      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      const key = `${date.getFullYear()}-${date.getMonth()}`;
-
-      // Vary budgets slightly month to month
-      let budget: number;
-
-      if (i === 0) {
-        // Current month - slightly over budget (spending more than planned)
-        budget = 5200;
-      } else if (i === 1) {
-        // Last month - right on the money
-        budget = 5500;
-      } else if (i === 2) {
-        // 2 months ago - under budget (good month!)
-        budget = 6200;
-      } else if (i === 3) {
-        // 3 months ago - over budget (had some unexpected expenses)
-        budget = 4800;
-      } else if (i === 4) {
-        // 4 months ago - right on target
-        budget = 5600;
-      } else if (i === 5) {
-        // 5 months ago - slightly under
-        budget = 5900;
-      } else {
-        // 6 months ago - over budget
-        budget = 5000;
-      }
-
-      demoMonthlyBudgets[key] = budget;
-    }
-
-    setMonthlyBudgets(demoMonthlyBudgets);
 
     // Set realistic category budgets based on demo data spending patterns
     // These are designed so some are over, some under, and some on target
@@ -565,25 +546,23 @@ function App() {
           <Dashboard
             transactions={transactions}
             categories={categories}
-            bills={transactions.filter(t => t.isBill)}
+            bills={bills}
             recurringIncomes={recurringIncomes}
             selectedYear={selectedYear}
             selectedMonth={selectedMonth}
-            monthlyBudgets={monthlyBudgets}
             accountStartingBalance={accountStartingBalance}
             onDateChange={handleDateChange}
-            onUpdateBudget={handleUpdateBudget}
             onNavigate={setActiveSection}
             onImportDemoData={handleImportDemoData}
             onMarkBillPaid={(billId: string, dueDate: string) => {
-              setTransactions(prev => prev.map(t => {
-                if (t.id === billId) {
-                  const paidDates = t.paidDates || [];
+              setBills(prev => prev.map(b => {
+                if (b.id === billId) {
+                  const paidDates = b.paidDates || [];
                   if (!paidDates.includes(dueDate)) {
-                    return { ...t, paidDates: [...paidDates, dueDate] };
+                    return { ...b, paidDates: [...paidDates, dueDate] };
                   }
                 }
-                return t;
+                return b;
               }));
             }}
           />
@@ -603,10 +582,12 @@ function App() {
         ) : activeSection === 'bills' ? (
           <Bills
             transactions={transactions}
+            bills={bills}
             categories={categories}
             selectedYear={selectedYear}
             selectedMonth={selectedMonth}
             onUpdateTransactions={setTransactions}
+            onUpdateBills={setBills}
             billMatchingSettings={billMatchingSettings}
             conversionData={billConversionData}
             onConversionComplete={() => setBillConversionData(null)}
@@ -780,8 +761,8 @@ function App() {
                     exportDate: new Date().toISOString(),
                     data: {
                       transactions,
+                      bills,
                       categories,
-                      monthlyBudgets,
                       accountStartingBalance,
                       merchantMappings,
                       categoryMappings,
@@ -828,8 +809,8 @@ function App() {
 
                           // Import all data
                           if (data.transactions) setTransactions(data.transactions);
+                          if (data.bills) setBills(data.bills);
                           if (data.categories) setCategories(data.categories);
-                          if (data.monthlyBudgets) setMonthlyBudgets(data.monthlyBudgets);
                           if (data.accountStartingBalance !== undefined) setAccountStartingBalance(data.accountStartingBalance);
                           if (data.merchantMappings) setMerchantMappings(data.merchantMappings);
                           if (data.categoryMappings) setCategoryMappings(data.categoryMappings);

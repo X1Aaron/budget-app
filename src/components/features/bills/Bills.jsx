@@ -5,10 +5,12 @@ import { generateBillOccurrences, findSuggestedTransactionsForBill } from '../..
 
 function Bills({
   transactions,
+  bills,
   categories,
   selectedYear,
   selectedMonth,
   onUpdateTransactions,
+  onUpdateBills,
   billMatchingSettings,
   conversionData,
   onConversionComplete
@@ -35,15 +37,10 @@ function Bills({
     'July', 'August', 'September', 'October', 'November', 'December'
   ]
 
-  // Get all bills (transactions with isBill = true)
-  const bills = useMemo(() => {
-    return transactions.filter(t => t.isBill)
-  }, [transactions])
-
   // Generate bill occurrences for the current month
   const billOccurrences = useMemo(() => {
-    return generateBillOccurrences(transactions, selectedYear, selectedMonth)
-  }, [transactions, selectedYear, selectedMonth])
+    return generateBillOccurrences(bills, selectedYear, selectedMonth)
+  }, [bills, selectedYear, selectedMonth])
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -125,9 +122,9 @@ function Bills({
 
   const handleDeleteBill = (billId) => {
     if (confirm('Are you sure you want to delete this bill?')) {
+      // Unlink any transactions from this bill
       onUpdateTransactions(prevTransactions =>
         prevTransactions.map(t => {
-          // If this transaction was linked to the deleted bill, unlink it
           if (t.matchedToBillId === billId) {
             return {
               ...t,
@@ -136,8 +133,10 @@ function Bills({
             }
           }
           return t
-        }).filter(t => t.id !== billId) // Remove the bill itself
+        })
       )
+      // Remove the bill
+      onUpdateBills(prevBills => prevBills.filter(b => b.id !== billId))
     }
   }
 
@@ -149,10 +148,10 @@ function Bills({
 
     if (editingBill) {
       // Update existing bill
-      onUpdateTransactions(prevTransactions => prevTransactions.map(t => {
-        if (t.id === editingBill.id) {
+      onUpdateBills(prevBills => prevBills.map(b => {
+        if (b.id === editingBill.id) {
           return {
-            ...t,
+            ...b,
             billName: formData.billName,
             description: formData.billName,
             billAmount: parseFloat(formData.amount),
@@ -164,7 +163,7 @@ function Bills({
             memo: formData.memo
           }
         }
-        return t
+        return b
       }))
     } else {
       // Create new bill
@@ -206,10 +205,9 @@ function Bills({
           manuallyMarked: true
         }]
 
-        // Update transactions: add bill and mark selected transaction as matched
+        // Mark selected transaction as matched
         onUpdateTransactions(prevTransactions => {
           return prevTransactions.map(t => {
-            // Mark the selected transaction as matched
             if (t.id === selectedTransaction.id) {
               return {
                 ...t,
@@ -218,11 +216,13 @@ function Bills({
               }
             }
             return t
-          }).concat([newBill]) // Add the new bill
+          })
         })
+        // Add the new bill
+        onUpdateBills(prevBills => [...prevBills, newBill])
       } else {
         // No transaction selected, just add the bill
-        onUpdateTransactions(prevTransactions => [...prevTransactions, newBill])
+        onUpdateBills(prevBills => [...prevBills, newBill])
       }
     }
 
@@ -257,21 +257,21 @@ function Bills({
   }
 
   const handleTogglePaid = (billOccurrence) => {
-    onUpdateTransactions(prevTransactions => prevTransactions.map(transaction => {
-      if (transaction.isBill && transaction.id === billOccurrence.billId) {
-        const payments = transaction.payments || []
+    onUpdateBills(prevBills => prevBills.map(bill => {
+      if (bill.id === billOccurrence.billId) {
+        const payments = bill.payments || []
         const existingPayment = payments.find(p => p.occurrenceDate === billOccurrence.occurrenceDate)
 
         if (existingPayment) {
           // Remove payment
           return {
-            ...transaction,
+            ...bill,
             payments: payments.filter(p => p.occurrenceDate !== billOccurrence.occurrenceDate)
           }
         } else {
           // Add manual payment
           return {
-            ...transaction,
+            ...bill,
             payments: [...payments, {
               occurrenceDate: billOccurrence.occurrenceDate,
               manuallyMarked: true
@@ -279,7 +279,7 @@ function Bills({
           }
         }
       }
-      return transaction
+      return bill
     }))
   }
 
@@ -306,10 +306,10 @@ function Bills({
       return
     }
 
-    onUpdateTransactions(prevTransactions => prevTransactions.map(t => {
-      if (t.id === billId) {
+    onUpdateBills(prevBills => prevBills.map(b => {
+      if (b.id === billId) {
         return {
-          ...t,
+          ...b,
           billName: inlineFormData.billName,
           description: inlineFormData.billName,
           billAmount: parseFloat(inlineFormData.amount),
@@ -321,7 +321,7 @@ function Bills({
           memo: inlineFormData.memo
         }
       }
-      return t
+      return b
     }))
 
     setEditingInlineId(null)

@@ -12,17 +12,13 @@ function Dashboard({
   recurringIncomes = [],
   selectedYear,
   selectedMonth,
-  monthlyBudgets,
   accountStartingBalance,
   onDateChange,
-  onUpdateBudget,
   onMarkBillPaid,
   onNavigate,
   onImportDemoData
 }) {
   const { theme } = useTheme()
-  const [isEditingBudget, setIsEditingBudget] = useState(false)
-  const [budgetInput, setBudgetInput] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all') // 'all', 'over-budget', 'approaching'
 
   const monthlyTransactions = useMemo(() => {
@@ -72,12 +68,6 @@ function Dashboard({
     return { income, expenses, balance, categoryBreakdown, necessarySpending, discretionarySpending }
   }, [monthlyTransactions, categories])
 
-  const currentBudget = useMemo(() => {
-    const key = `${selectedYear}-${selectedMonth}`
-    return monthlyBudgets[key] || 0
-  }, [monthlyBudgets, selectedYear, selectedMonth])
-
-
   const upcomingBills = useMemo(() => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -125,7 +115,6 @@ function Dashboard({
     const missingStartingBalance = accountStartingBalance === 0
     const noRecurringIncome = recurringIncomes.length === 0 && monthlyTransactions.length > 0
     const noBudgetedCategories = categories.length > 0 && categories.every(cat => (cat.budgeted || 0) === 0)
-    const noMonthlyBudget = currentBudget === 0 && monthlyTransactions.length > 0
 
     return {
       unlinkedCount,
@@ -135,10 +124,9 @@ function Dashboard({
       overBudgetCategories,
       missingStartingBalance,
       noRecurringIncome,
-      noBudgetedCategories,
-      noMonthlyBudget
+      noBudgetedCategories
     }
-  }, [monthlyTransactions, bills, categories, summary.categoryBreakdown, selectedYear, selectedMonth, accountStartingBalance, recurringIncomes, currentBudget])
+  }, [monthlyTransactions, bills, categories, summary.categoryBreakdown, selectedYear, selectedMonth, accountStartingBalance, recurringIncomes])
 
   // Calculate starting balance for this month (used in multiple places)
   const monthStartingBalance = useMemo(() => {
@@ -394,26 +382,10 @@ function Dashboard({
     }
   }
 
-  const handleSaveBudget = () => {
-    const budget = parseFloat(budgetInput)
-    if (!isNaN(budget) && budget >= 0) {
-      onUpdateBudget(selectedYear, selectedMonth, budget)
-      setIsEditingBudget(false)
-    }
-  }
-
-  const handleEditBudget = () => {
-    setBudgetInput(currentBudget.toString())
-    setIsEditingBudget(true)
-  }
-
-
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ]
-
-  const remaining = currentBudget - summary.expenses
 
   // Theme-aware chart colors
   const chartColors = {
@@ -427,7 +399,7 @@ function Dashboard({
   return (
     <div className="dashboard">
       {/* Action Items Section */}
-      {(alerts.unlinkedCount > 0 || alerts.uncategorizedCount > 0 || alerts.unpaidBillsThisMonth > 0 || alerts.overdueBills > 0 || alerts.overBudgetCategories > 0 || alerts.missingStartingBalance || alerts.noRecurringIncome || alerts.noBudgetedCategories || alerts.noMonthlyBudget || monthlyTransactions.length === 0 || categories.length === 0 || bills.length === 0) && (
+      {(alerts.unlinkedCount > 0 || alerts.uncategorizedCount > 0 || alerts.unpaidBillsThisMonth > 0 || alerts.overdueBills > 0 || alerts.overBudgetCategories > 0 || alerts.missingStartingBalance || alerts.noRecurringIncome || alerts.noBudgetedCategories || monthlyTransactions.length === 0 || categories.length === 0 || bills.length === 0) && (
         <div className="action-alerts">
           <h2>Action Items</h2>
           <div className="alerts-grid">
@@ -496,16 +468,6 @@ function Dashboard({
                 <button className="alert-action" onClick={() => onNavigate?.('categories')}>Set Budgets</button>
               </div>
             )}
-            {alerts.noMonthlyBudget && (
-              <div className="alert-card alert-info">
-                <div className="alert-icon">📊</div>
-                <div className="alert-content">
-                  <div className="alert-title">Set Monthly Budget</div>
-                  <div className="alert-description">Set an overall spending budget for this month</div>
-                </div>
-                <button className="alert-action" onClick={handleEditBudget}>Set Budget</button>
-              </div>
-            )}
             {alerts.overdueBills > 0 && (
               <div className="alert-card alert-danger">
                 <div className="alert-icon">🚨</div>
@@ -568,16 +530,6 @@ function Dashboard({
           <p className="card-subtitle">
             <span className="spending-breakdown">Need: {formatCurrency(summary.necessarySpending)} · Want: {formatCurrency(summary.discretionarySpending)}</span>
           </p>
-        </div>
-        <div className={`summary-card budget ${remaining >= 0 ? 'positive' : 'negative'}`}>
-          <h3>Budget Remaining</h3>
-          <p className="amount">{currentBudget > 0 ? formatCurrency(remaining) : '—'}</p>
-          {currentBudget > 0 && (
-            <p className="card-subtitle">{formatCurrency(currentBudget)} budgeted</p>
-          )}
-          {currentBudget === 0 && (
-            <p className="card-subtitle"><button onClick={handleEditBudget} className="set-budget-btn">Set Budget</button></p>
-          )}
         </div>
       </div>
 
