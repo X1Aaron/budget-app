@@ -637,7 +637,7 @@ function Dashboard({
                   <div className="alert-title">{alerts.uncategorizedCount} Uncategorized Transaction{alerts.uncategorizedCount !== 1 ? 's' : ''}</div>
                   <div className="alert-description">Review and categorize your transactions</div>
                 </div>
-                <button className="alert-action" onClick={() => onNavigate?.('transactions')}>Review</button>
+                <button className="alert-action" onClick={() => onNavigate?.('transactions', 'Uncategorized')}>Review</button>
               </div>
             )}
             {alerts.overBudgetCategories > 0 && (

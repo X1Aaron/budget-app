@@ -23,6 +23,7 @@ import type {
 function App() {
   const { theme, toggleTheme } = useTheme();
   const [activeSection, setActiveSection] = useState<ActiveSection>('dashboard');
+  const [transactionFilter, setTransactionFilter] = useState<string>('all');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [bills, setBills] = useState<Bill[]>(() => {
     const saved = localStorage.getItem('bills');
@@ -558,7 +559,12 @@ function App() {
             selectedMonth={selectedMonth}
             accountStartingBalance={accountStartingBalance}
             onDateChange={handleDateChange}
-            onNavigate={setActiveSection}
+            onNavigate={(section: ActiveSection, filter?: string) => {
+              setActiveSection(section);
+              if (section === 'transactions' && filter) {
+                setTransactionFilter(filter);
+              }
+            }}
             onImportDemoData={handleImportDemoData}
             onMarkBillPaid={(billId: string, dueDate: string) => {
               setBills(prev => prev.map(b => {
@@ -585,6 +591,8 @@ function App() {
             disabledKeywords={disabledKeywords}
             onConvertToBill={handleConvertTransactionToBill}
             onUpdateCategories={setCategories}
+            initialFilter={transactionFilter}
+            onFilterChange={setTransactionFilter}
           />
         ) : activeSection === 'bills' ? (
           <Bills

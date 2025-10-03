@@ -14,11 +14,13 @@ function Transactions({
   onUpdateTransactions,
   categoryMappings = {},
   disabledKeywords = {},
-  onUpdateCategories
+  onUpdateCategories,
+  initialFilter = 'all',
+  onFilterChange
 }) {
   const [expandedIndex, setExpandedIndex] = useState(null)
   const [editingMerchantIndex, setEditingMerchantIndex] = useState(null)
-  const [filterCategory, setFilterCategory] = useState('all')
+  const [filterCategory, setFilterCategory] = useState(initialFilter)
   const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'asc' })
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(25)
@@ -37,6 +39,11 @@ function Transactions({
   const [ruleInfoModal, setRuleInfoModal] = useState(null)
   const [addCategoryModal, setAddCategoryModal] = useState(false)
   const [pendingTransactionUpdate, setPendingTransactionUpdate] = useState(null)
+
+  // Update filter when initialFilter changes
+  React.useEffect(() => {
+    setFilterCategory(initialFilter)
+  }, [initialFilter])
 
   const handleSort = (key) => {
     let direction = 'asc'
@@ -799,7 +806,10 @@ function Transactions({
             </div>
             <select
               value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
+              onChange={(e) => {
+                setFilterCategory(e.target.value)
+                onFilterChange?.(e.target.value)
+              }}
               className="filter-select"
             >
               <option value="all">All Categories</option>
@@ -808,7 +818,10 @@ function Transactions({
               ))}
             </select>
             {filterCategory !== 'all' && (
-              <button className="clear-filter-btn" onClick={() => setFilterCategory('all')}>
+              <button className="clear-filter-btn" onClick={() => {
+                setFilterCategory('all')
+                onFilterChange?.('all')
+              }}>
                 Clear Filter
               </button>
             )}
