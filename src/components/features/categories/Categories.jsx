@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react'
-import '../../../styles/components/CategorySettings.css'
+import '../../../styles/components/Categories.css'
 import { autoCategorize } from '../../../utils/categories'
 
-function CategorySettings({ categories, onUpdateCategories, transactions, onUpdateTransactions, selectedYear, selectedMonth, categoryMappings = {}, disabledKeywords = {} }) {
+function Categories({ categories, onUpdateCategories, transactions, onUpdateTransactions, selectedYear, selectedMonth, categoryMappings = {}, disabledKeywords = {} }) {
   const [isAdding, setIsAdding] = useState(false)
   const [newCategory, setNewCategory] = useState({
     name: '',
@@ -28,6 +28,8 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
   const [inlineEditingId, setInlineEditingId] = useState(null)
   const [inlineEditField, setInlineEditField] = useState(null)
   const [inlineEditValue, setInlineEditValue] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(25)
 
   const threeMonthAverages = useMemo(() => {
     if (!transactions || !selectedYear || selectedMonth === undefined) return {}
@@ -284,7 +286,6 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
       <div className="category-settings-content">
                   <div className="list-section">
                     <div className="categories-header">
-                      <h3>Your Categories ({categories.length})</h3>
                       {!isAdding && (
                         <button className="add-category-btn" onClick={() => setIsAdding(true)}>
                           + Add Category
@@ -501,7 +502,14 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
                           </tr>
                         </thead>
                         <tbody>
-                          {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(category => (
+                          {(() => {
+                            const sortedCategories = [...categories].sort((a, b) => a.name.localeCompare(b.name))
+                            const totalPages = Math.ceil(sortedCategories.length / itemsPerPage)
+                            const startIndex = (currentPage - 1) * itemsPerPage
+                            const endIndex = startIndex + itemsPerPage
+                            const paginatedCategories = sortedCategories.slice(startIndex, endIndex)
+
+                            return paginatedCategories.map(category => (
                             <tr key={category.id}>
                               <td className="color-cell">
                                 {inlineEditingId === category.id && inlineEditField === 'color' ? (
@@ -655,9 +663,77 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
                                 )}
                               </td>
                             </tr>
-                          ))}
+                          ))
+                          })()}
                         </tbody>
                       </table>
+                    </div>
+
+                    {/* Pagination Controls */}
+                    {categories.length > 0 && (
+                      <div className="pagination-controls">
+                        <div className="pagination-size-selector">
+                          <label htmlFor="page-size">Show:</label>
+                          <select
+                            id="page-size"
+                            value={itemsPerPage}
+                            onChange={(e) => {
+                              setItemsPerPage(Number(e.target.value))
+                              setCurrentPage(1)
+                            }}
+                            className="page-size-select"
+                          >
+                            <option value={10}>10</option>
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                            <option value={100}>100</option>
+                          </select>
+                          <span>per page</span>
+                        </div>
+
+                        {(() => {
+                          const totalPages = Math.ceil(categories.length / itemsPerPage)
+                          return totalPages > 1 && (
+                            <>
+                              <button
+                                className="pagination-btn"
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                              >
+                                ← Previous
+                              </button>
+                              <div className="pagination-info">
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                  <button
+                                    key={page}
+                                    className={`pagination-number ${page === currentPage ? 'active' : ''}`}
+                                    onClick={() => setCurrentPage(page)}
+                                  >
+                                    {page}
+                                  </button>
+                                ))}
+                              </div>
+                              <button
+                                className="pagination-btn"
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                              >
+                                Next →
+                              </button>
+                            </>
+                          )
+                        })()}
+                      </div>
+                    )}
+
+                    <div className="categories-footer">
+                      <span className="item-count">
+                        {categories.length} categor{categories.length !== 1 ? 'ies' : 'y'}
+                        {(() => {
+                          const totalPages = Math.ceil(categories.length / itemsPerPage)
+                          return totalPages > 1 ? ` (Page ${currentPage} of ${totalPages})` : ''
+                        })()}
+                      </span>
                     </div>
                   </div>
       </div>
@@ -665,4 +741,4 @@ function CategorySettings({ categories, onUpdateCategories, transactions, onUpda
   )
 }
 
-export default CategorySettings
+export default Categories

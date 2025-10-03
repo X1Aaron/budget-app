@@ -4,7 +4,7 @@ import { Dashboard } from './components/features/dashboard';
 import { Bills } from './components/features/bills';
 import { Income } from './components/features/income';
 import { Transactions } from './components/features/transactions';
-import { CategorySettings, AutoCategorization } from './components/features/categories';
+import { Categories, AutoCategorization } from './components/features/categories';
 import { MonthYearSelector } from './components/ui/forms';
 import { DEFAULT_CATEGORIES, autoCategorize, generateMerchantName } from './utils/categories';
 import { generateDemoData } from './utils/demoData';
@@ -609,7 +609,7 @@ function App() {
         ) : activeSection === 'categories' ? (
           <div className="categories-section">
             <h2>Categories</h2>
-            <CategorySettings
+            <Categories
               categories={categories}
               onUpdateCategories={setCategories}
               transactions={transactions}
