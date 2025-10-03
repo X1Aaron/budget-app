@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react'
 import '../../../styles/components/Categories.css'
+import AutoCategorization from './AutoCategorization'
 
-function Categories({ categories, onUpdateCategories, transactions, onUpdateTransactions, selectedYear, selectedMonth, categoryMappings = {}, disabledKeywords = {} }) {
+function Categories({ categories, onUpdateCategories, transactions, onUpdateTransactions, selectedYear, selectedMonth, categoryMappings = {}, disabledKeywords = {}, merchantMappings = {}, onDeleteMerchantMapping, onDeleteCategoryMapping, onToggleKeyword, onAddExactRule, onAddKeywordToCategory }) {
+  const [activeTab, setActiveTab] = useState('categories')
   const [isAdding, setIsAdding] = useState(false)
   const [newCategory, setNewCategory] = useState({
     name: '',
@@ -187,8 +189,24 @@ function Categories({ categories, onUpdateCategories, transactions, onUpdateTran
 
   return (
     <div className="category-settings">
+      <div className="category-tabs">
+        <button
+          className={`tab-btn ${activeTab === 'categories' ? 'active' : ''}`}
+          onClick={() => setActiveTab('categories')}
+        >
+          Manage Categories
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'rules' ? 'active' : ''}`}
+          onClick={() => setActiveTab('rules')}
+        >
+          Categorization Rules
+        </button>
+      </div>
+
       <div className="category-settings-content">
-                  <div className="list-section">
+        {activeTab === 'categories' ? (
+          <div className="list-section">
                     <div className="categories-header">
                       {!isAdding && (
                         <button className="add-category-btn" onClick={() => setIsAdding(true)}>
@@ -587,6 +605,19 @@ function Categories({ categories, onUpdateCategories, transactions, onUpdateTran
                       </span>
                     </div>
                   </div>
+        ) : (
+          <AutoCategorization
+            merchantMappings={merchantMappings}
+            categoryMappings={categoryMappings}
+            onDeleteMerchantMapping={onDeleteMerchantMapping}
+            onDeleteCategoryMapping={onDeleteCategoryMapping}
+            categories={categories}
+            disabledKeywords={disabledKeywords}
+            onToggleKeyword={onToggleKeyword}
+            onAddExactRule={onAddExactRule}
+            onAddKeywordToCategory={onAddKeywordToCategory}
+          />
+        )}
       </div>
     </div>
   )

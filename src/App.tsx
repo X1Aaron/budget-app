@@ -620,6 +620,12 @@ function App() {
               selectedMonth={selectedMonth}
               categoryMappings={categoryMappings}
               disabledKeywords={disabledKeywords}
+              merchantMappings={merchantMappings}
+              onDeleteMerchantMapping={handleDeleteMerchantMapping}
+              onDeleteCategoryMapping={handleDeleteCategoryMapping}
+              onToggleKeyword={handleToggleKeyword}
+              onAddExactRule={handleAddExactRule}
+              onAddKeywordToCategory={handleAddKeywordToCategory}
             />
           </div>
         ) : (
