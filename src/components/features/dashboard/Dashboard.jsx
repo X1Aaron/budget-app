@@ -153,16 +153,13 @@ function Dashboard({
     // Use the pre-calculated starting balance
     const startingBalance = monthStartingBalance
 
-    // Generate all recurring bills for the selected month
-    const monthlyBills = []
+    // Generate projected recurring income for the selected month
     const monthlyIncomes = []
 
-    // Process recurring incomes
     recurringIncomes.forEach(income => {
       const startDate = new Date(income.startDate)
       const startDay = startDate.getDate()
       const startMonth = startDate.getMonth()
-      const startYear = startDate.getFullYear()
 
       if (income.frequency === 'weekly') {
         const weekMs = 7 * 24 * 60 * 60 * 1000
@@ -224,6 +221,9 @@ function Dashboard({
         }
       }
     })
+
+    // Generate all UNPAID bills for the selected month
+    const monthlyBills = []
 
     bills.forEach(bill => {
       const startDate = new Date(bill.dueDate)
@@ -305,29 +305,35 @@ function Dashboard({
       }
     })
 
-    // Group transactions by day
-    const dailyTransactions = {}
+    // Group EXPENSE transactions by day (exclude income to avoid double-counting with recurring income)
+    const dailyExpenses = {}
+
     monthlyTransactions.forEach(t => {
-      const day = new Date(t.date).getDate()
-      if (!dailyTransactions[day]) {
-        dailyTransactions[day] = 0
+      // Only include expenses (negative amounts), skip income transactions
+      if (t.amount < 0) {
+        const day = new Date(t.date).getDate()
+        if (!dailyExpenses[day]) {
+          dailyExpenses[day] = 0
+        }
+        dailyExpenses[day] += t.amount // This is negative, so it reduces balance
       }
-      dailyTransactions[day] += t.amount
     })
 
     // Calculate cumulative cash flow for each day, starting with the starting balance
     let balance = startingBalance
     for (let day = 1; day <= daysInMonth; day++) {
-      // Add transactions for this day (income is positive, expenses are negative)
-      const transactionsAmount = dailyTransactions[day] || 0
-      balance += transactionsAmount
-
-      // Add recurring income for this day
+      // Add projected recurring income for this day
       const incomesToday = monthlyIncomes.filter(i => i.day === day)
       const incomeAmount = incomesToday.reduce((sum, i) => sum + i.amount, 0)
       balance += incomeAmount
 
-      // Subtract bills due on this day
+      // Subtract actual expenses that have occurred (from transactions)
+      // This includes all expense transactions: bills that were paid, groceries, gas, etc.
+      const expensesAmount = dailyExpenses[day] || 0
+      balance += expensesAmount // expensesAmount is already negative
+
+      // Subtract unpaid bills due on this day (future expenses)
+      // Bills are only included here if they haven't been paid yet
       const billsToday = monthlyBills.filter(b => b.day === day)
       const billsAmount = billsToday.reduce((sum, b) => sum + b.amount, 0)
       balance -= billsAmount

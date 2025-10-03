@@ -349,9 +349,9 @@
 
 .upcoming-bills-section {
   background: var(--card-bg);
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   margin-bottom: 2.5rem;
 }
 
@@ -359,44 +359,51 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border-color);
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
 .bills-header h2 {
   margin: 0;
   color: var(--text-primary);
+  font-size: 1.4rem;
+  font-weight: 700;
 }
 
 .bills-total {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  padding: 0.5rem 1rem;
-  background: rgba(245, 158, 11, 0.1);
-  border-radius: 6px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #d97706;
+  padding: 0.6rem 1.25rem;
+  background: rgba(245, 158, 11, 0.12);
+  border-radius: 8px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
 [data-theme="dark"] .bills-total {
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.3);
 }
 
 .upcoming-bills-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .upcoming-bill-item {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  background: rgba(59, 130, 246, 0.08);
+  gap: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  background: rgba(59, 130, 246, 0.05);
   border-left: 4px solid #3b82f6;
-  border-radius: 6px;
+  border-radius: 8px;
   transition: all 0.2s;
 }
 
@@ -471,93 +478,107 @@
 }
 
 .mark-paid-btn {
-  padding: 0.5rem 0.75rem;
+  padding: 0.6rem 1rem;
   background: #10b981;
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: bold;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
 }
 
 .mark-paid-btn:hover {
   background: #059669;
-  transform: scale(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
 }
 
 .upcoming-bill-item .bill-info {
-  flex: 1;
   min-width: 0;
 }
 
 .upcoming-bill-item .bill-name {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
 }
 
 .upcoming-bill-item .bill-details {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
   flex-wrap: wrap;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .upcoming-bill-item .bill-due {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
+  padding: 0.15rem 0.5rem;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 4px;
 }
 
 .upcoming-bill-item.due-soon .bill-due {
   color: #d97706;
+  background: rgba(245, 158, 11, 0.15);
 }
 
 .upcoming-bill-item.due-today .bill-due {
   color: #ea580c;
+  background: rgba(249, 115, 22, 0.15);
 }
 
 .upcoming-bill-item.overdue .bill-due {
   color: #dc2626;
+  background: rgba(239, 68, 68, 0.15);
 }
 
 [data-theme="dark"] .upcoming-bill-item.due-soon .bill-due {
   color: #fbbf24;
+  background: rgba(245, 158, 11, 0.2);
 }
 
 [data-theme="dark"] .upcoming-bill-item.due-today .bill-due {
   color: #fb923c;
+  background: rgba(249, 115, 22, 0.2);
 }
 
 [data-theme="dark"] .upcoming-bill-item.overdue .bill-due {
   color: #f87171;
+  background: rgba(239, 68, 68, 0.2);
 }
 
 .upcoming-bill-item .bill-separator {
   color: var(--text-secondary);
-  opacity: 0.5;
+  opacity: 0.4;
+  font-weight: 400;
 }
 
 .upcoming-bill-item .bill-category {
   color: var(--text-secondary);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .upcoming-bill-item .bill-frequency {
   color: var(--text-secondary);
-  font-style: italic;
+  font-weight: 500;
   text-transform: capitalize;
 }
 
 .upcoming-bill-item .bill-amount {
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: 1.35rem;
+  font-weight: 800;
   color: var(--text-primary);
   white-space: nowrap;
+  letter-spacing: -0.02em;
 }
 
 .categories-section {
