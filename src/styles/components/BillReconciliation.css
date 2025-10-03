@@ -24,7 +24,7 @@
   border: none;
   border-bottom: 3px solid transparent;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: var(--font-medium);
   color: var(--text-secondary);
   transition: all 0.2s;
   margin-bottom: -2px;
@@ -42,7 +42,7 @@
 
 .reconciliation-content {
   background: var(--background-primary);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 20px;
   border: 1px solid var(--border-color);
 }
@@ -54,7 +54,7 @@
 }
 
 .empty-state p {
-  font-size: 16px;
+  font-size: var(--text-base);
 }
 
 /* Unpaid Bills Section */
@@ -66,7 +66,7 @@
 
 .unpaid-bill-item, .unmatched-expense-item {
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background: var(--background-secondary);
   overflow: hidden;
 }
@@ -92,13 +92,13 @@
 }
 
 .bill-name, .expense-desc {
-  font-weight: 600;
+  font-weight: var(--font-semibold);
   flex: 1;
   min-width: 200px;
 }
 
 .bill-amount, .expense-amount {
-  font-weight: 500;
+  font-weight: var(--font-medium);
   color: var(--expense-color);
   min-width: 100px;
   text-align: right;
@@ -106,14 +106,14 @@
 
 .bill-date, .expense-date {
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: var(--text-sm);
   min-width: 120px;
 }
 
 .expense-category {
   padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
   background: var(--background-primary);
   border: 1px solid var(--border-color);
 }
@@ -124,7 +124,7 @@
   cursor: pointer;
   padding: 4px 8px;
   color: var(--text-secondary);
-  font-size: 16px;
+  font-size: var(--text-base);
 }
 
 .bill-matches, .expense-matches {
@@ -141,10 +141,10 @@
 }
 
 .matches-header {
-  font-weight: 600;
+  font-weight: var(--font-semibold);
   margin-bottom: 12px;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: var(--text-sm);
 }
 
 .potential-match {
@@ -153,7 +153,7 @@
   align-items: center;
   padding: 12px;
   background: var(--background-secondary);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   margin-bottom: 8px;
   border: 1px solid var(--border-color);
 }
@@ -171,14 +171,14 @@
 }
 
 .match-amount {
-  font-weight: 500;
+  font-weight: var(--font-medium);
   min-width: 100px;
   text-align: right;
 }
 
 .match-date {
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: var(--text-sm);
   min-width: 120px;
 }
 
@@ -187,9 +187,9 @@
   background: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  font-weight: 500;
+  font-weight: var(--font-medium);
   transition: background 0.2s;
 }
 
@@ -205,7 +205,7 @@
 .suggestion-info {
   background: var(--info-background);
   padding: 12px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   margin-bottom: 16px;
   color: var(--text-secondary);
   border-left: 4px solid var(--primary-color);
@@ -213,7 +213,7 @@
 
 .suggested-match-item {
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background: var(--background-secondary);
   padding: 16px;
   display: flex;
@@ -224,9 +224,9 @@
 .match-score-badge {
   align-self: flex-start;
   padding: 6px 12px;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 14px;
+  border-radius: var(--radius-xl);
+  font-weight: var(--font-bold);
+  font-size: var(--text-sm);
 }
 
 .match-score-badge[data-score="high"] {
@@ -250,7 +250,7 @@
   align-items: center;
   padding: 12px;
   background: var(--background-primary);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .transaction-side, .bill-side {
@@ -261,15 +261,15 @@
 }
 
 .transaction-side label, .bill-side label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .match-arrow {
-  font-size: 24px;
+  font-size: var(--text-3xl);
   color: var(--text-secondary);
   flex-shrink: 0;
 }
@@ -279,13 +279,13 @@
   gap: 16px;
   padding: 8px;
   background: var(--background-primary);
-  border-radius: 4px;
-  font-size: 14px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
 }
 
 .match-breakdown span {
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .match-yes {

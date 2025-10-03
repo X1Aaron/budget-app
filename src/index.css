@@ -1,17 +1,84 @@
 :root {
+  /* Color Palette */
+  --primary-gradient-start: #667eea;
+  --primary-gradient-end: #764ba2;
+  --primary-color: #667eea;
+  --primary-hover: #5568d3;
+
+  --success-color: #10b981;
+  --success-hover: #059669;
+  --success-light: #d1fae5;
+  --success-dark: #065f46;
+
+  --danger-color: #ef4444;
+  --danger-hover: #dc2626;
+  --danger-light: #fee2e2;
+  --danger-dark: #991b1b;
+
+  --warning-color: #f59e0b;
+  --warning-hover: #d97706;
+  --warning-light: #fef3c7;
+  --warning-dark: #92400e;
+
+  --info-color: #3b82f6;
+  --info-hover: #2563eb;
+
   /* Light mode colors */
   --bg-primary: #f5f5f5;
   --bg-secondary: #ffffff;
   --bg-gradient-start: #f9fafb;
   --bg-gradient-end: #ffffff;
-  --text-primary: #333;
-  --text-secondary: #666;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
   --border-color: #e5e7eb;
   --shadow-color: rgba(0, 0, 0, 0.1);
   --card-bg: #ffffff;
   --table-header-bg: #f3f4f6;
   --table-row-hover-bg: #f9fafb;
   --progress-bar-bg: #f3f4f6;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;      /* 12px */
+  --text-sm: 0.875rem;     /* 14px */
+  --text-base: 0.9375rem;  /* 15px */
+  --text-lg: 1rem;         /* 16px */
+  --text-xl: 1.125rem;     /* 18px */
+  --text-2xl: 1.25rem;     /* 20px */
+  --text-3xl: 1.5rem;      /* 24px */
+  --text-4xl: 1.75rem;     /* 28px */
+  --text-5xl: 2rem;        /* 32px */
+
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 0.75rem;   /* 12px */
+  --spacing-lg: 1rem;      /* 16px */
+  --spacing-xl: 1.5rem;    /* 24px */
+  --spacing-2xl: 2rem;     /* 32px */
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --shadow-2xl: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
 [data-theme="dark"] {
@@ -21,13 +88,20 @@
   --bg-gradient-start: #1a1a1a;
   --bg-gradient-end: #2d2d2d;
   --text-primary: #e5e5e5;
-  --text-secondary: #a0a0a0;
+  --text-secondary: #9ca3af;
   --border-color: #404040;
   --shadow-color: rgba(0, 0, 0, 0.3);
   --card-bg: #2d2d2d;
   --table-header-bg: #1f1f1f;
   --table-row-hover-bg: #353535;
   --progress-bar-bg: #1f1f1f;
+
+  --success-color: #10b981;
+  --success-light: #064e3b;
+  --danger-color: #f87171;
+  --danger-light: #7f1d1d;
+  --warning-color: #fbbf24;
+  --warning-light: #78350f;
 }
 
 * {
@@ -37,9 +111,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-primary);

@@ -3,12 +3,12 @@
 }
 
 .manage-categories-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 500;
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-medium);
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -34,7 +34,7 @@
 
 .category-modal-content {
   background: var(--card-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   max-width: 800px;
   width: 100%;
   max-height: 90vh;
@@ -52,14 +52,14 @@
 
 .modal-header h2 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: var(--text-3xl);
   color: var(--text-primary);
 }
 
 .close-btn {
   background: none;
   border: none;
-  font-size: 2rem;
+  font-size: var(--text-5xl);
   cursor: pointer;
   color: var(--text-secondary);
   padding: 0;
@@ -68,7 +68,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   transition: background 0.2s;
 }
 
@@ -86,7 +86,7 @@
 
 .add-category-section h3 {
   margin-bottom: 1rem;
-  font-size: 1.1rem;
+  font-size: var(--text-xl);
   color: var(--text-primary);
 }
 
@@ -101,8 +101,8 @@
 .add-category-form select {
   padding: 0.5rem;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
   background: var(--bg-secondary);
   color: var(--text-primary);
 }
@@ -111,7 +111,7 @@
   width: 50px;
   height: 38px;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
 }
 
@@ -120,23 +120,23 @@
 }
 
 .add-btn {
-  background: #10b981;
+  background: var(--success-color);
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-weight: 500;
+  font-weight: var(--font-medium);
   transition: background 0.2s;
 }
 
 .add-btn:hover {
-  background: #059669;
+  background: var(--success-hover);
 }
 
 .categories-list-section h3 {
   margin-bottom: 1rem;
-  font-size: 1.1rem;
+  font-size: var(--text-xl);
   color: var(--text-primary);
 }
 
@@ -148,7 +148,7 @@
 
 .category-card {
   background: var(--table-row-hover-bg);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 1rem;
   border: 1px solid var(--border-color);
 }
@@ -163,22 +163,22 @@
 .category-color {
   width: 20px;
   height: 20px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .category-card-name {
   flex: 1;
-  font-weight: 500;
+  font-weight: var(--font-medium);
   color: var(--text-primary);
 }
 
 .delete-btn {
-  background: #ef4444;
+  background: var(--danger-color);
   color: white;
   border: none;
   width: 24px;
   height: 24px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 1.2rem;
   line-height: 1;
@@ -186,21 +186,21 @@
 }
 
 .delete-btn:hover {
-  background: #dc2626;
+  background: var(--danger-hover);
 }
 
 .category-card-info {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: var(--text-secondary);
 }
 
 .category-type {
   text-transform: capitalize;
-  font-weight: 500;
-  color: #667eea;
+  font-weight: var(--font-medium);
+  color: var(--primary-color);
 }
 
 .category-keywords {

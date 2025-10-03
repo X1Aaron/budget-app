@@ -8,7 +8,7 @@
 .action-alerts {
   background: var(--card-bg);
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
 }
@@ -17,7 +17,7 @@
   margin-top: 0;
   margin-bottom: 1rem;
   color: var(--text-primary);
-  font-size: 1.3rem;
+  font-size: var(--text-2xl);
 }
 
 .alerts-grid {
@@ -31,7 +31,7 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border-left: 4px solid;
   transition: all 0.2s;
 }
@@ -43,7 +43,7 @@
 
 .alert-card.alert-info {
   background: rgba(59, 130, 246, 0.1);
-  border-left-color: #3b82f6;
+  border-left-color: var(--info-color);
 }
 
 [data-theme="dark"] .alert-card.alert-info {
@@ -52,7 +52,7 @@
 
 .alert-card.alert-warning {
   background: rgba(245, 158, 11, 0.1);
-  border-left-color: #f59e0b;
+  border-left-color: var(--warning-color);
 }
 
 [data-theme="dark"] .alert-card.alert-warning {
@@ -61,7 +61,7 @@
 
 .alert-card.alert-danger {
   background: rgba(239, 68, 68, 0.1);
-  border-left-color: #ef4444;
+  border-left-color: var(--danger-color);
 }
 
 [data-theme="dark"] .alert-card.alert-danger {
@@ -69,7 +69,7 @@
 }
 
 .alert-icon {
-  font-size: 1.5rem;
+  font-size: var(--text-3xl);
   flex-shrink: 0;
 }
 
@@ -79,14 +79,14 @@
 }
 
 .alert-title {
-  font-weight: 600;
+  font-weight: var(--font-semibold);
   color: var(--text-primary);
   margin-bottom: 0.25rem;
-  font-size: 0.95rem;
+  font-size: var(--text-base);
 }
 
 .alert-description {
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: var(--text-secondary);
 }
 
@@ -101,9 +101,9 @@
   background: var(--text-primary);
   color: var(--card-bg);
   border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
@@ -131,7 +131,7 @@
   text-align: center;
   padding: 3rem;
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: var(--text-xl);
 }
 
 .month-selector {
@@ -142,13 +142,13 @@
   margin-bottom: 2rem;
   background: var(--card-bg);
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .month-display {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: var(--text-3xl);
   color: var(--text-primary);
   min-width: 250px;
   text-align: center;
@@ -156,17 +156,17 @@
 
 .month-nav-btn {
   padding: 0.5rem 1rem;
-  background: #3b82f6;
+  background: var(--info-color);
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 1.2rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-xl);
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .month-nav-btn:hover {
-  background: #2563eb;
+  background: var(--info-hover);
 }
 
 .budget-section {
@@ -179,30 +179,30 @@
 .budget-card {
   background: var(--card-bg);
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .budget-card h3 {
   margin: 0 0 0.5rem 0;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   text-transform: uppercase;
 }
 
 .budget-card .amount {
   margin: 0;
-  font-size: 1.8rem;
+  font-size: var(--text-4xl);
   font-weight: bold;
-  color: #3b82f6;
+  color: var(--info-color);
 }
 
 .budget-card.positive .amount {
-  color: #10b981;
+  color: var(--success-color);
 }
 
 .budget-card.negative .amount {
-  color: #ef4444;
+  color: var(--danger-color);
 }
 
 .budget-display {
@@ -215,7 +215,7 @@
 }
 
 .budget-display .edit-hint {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: #9ca3af;
   font-style: italic;
 }
@@ -230,28 +230,28 @@
   flex: 1;
   min-width: 100px;
   padding: 0.5rem;
-  border: 2px solid #3b82f6;
-  border-radius: 6px;
+  border: 2px solid var(--info-color);
+  border-radius: var(--radius-md);
   font-size: 1rem;
 }
 
 .budget-edit button {
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .budget-edit button:first-of-type {
-  background: #10b981;
+  background: var(--success-color);
   color: white;
 }
 
 .budget-edit button:first-of-type:hover {
-  background: #059669;
+  background: var(--success-hover);
 }
 
 .budget-edit button:last-of-type {
@@ -273,26 +273,26 @@
 .summary-card {
   background: var(--card-bg);
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .summary-card h3 {
   margin: 0 0 0.5rem 0;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   text-transform: uppercase;
 }
 
 .summary-card .amount {
   margin: 0 0 0.5rem 0;
-  font-size: 1.8rem;
+  font-size: var(--text-4xl);
   font-weight: bold;
 }
 
 .summary-card .card-subtitle {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: var(--text-secondary);
 }
 
@@ -301,27 +301,27 @@
 }
 
 .summary-card.income .amount {
-  color: #10b981;
+  color: var(--success-color);
 }
 
 .summary-card.expenses .amount {
-  color: #ef4444;
+  color: var(--danger-color);
 }
 
 .summary-card.balance.positive .amount {
-  color: #10b981;
+  color: var(--success-color);
 }
 
 .summary-card.balance.negative .amount {
-  color: #ef4444;
+  color: var(--danger-color);
 }
 
 .summary-card.budget.positive .amount {
-  color: #10b981;
+  color: var(--success-color);
 }
 
 .summary-card.budget.negative .amount {
-  color: #ef4444;
+  color: var(--danger-color);
 }
 
 .summary-card.necessary .amount {
@@ -329,28 +329,28 @@
 }
 
 .summary-card.discretionary .amount {
-  color: #f59e0b;
+  color: var(--warning-color);
 }
 
 .set-budget-btn {
   padding: 0.4rem 0.8rem;
-  background: #3b82f6;
+  background: var(--info-color);
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .set-budget-btn:hover {
-  background: #2563eb;
+  background: var(--info-hover);
 }
 
 .upcoming-bills-section {
   background: var(--card-bg);
   padding: 2rem;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   margin-bottom: 2.5rem;
 }
@@ -369,17 +369,17 @@
 .bills-header h2 {
   margin: 0;
   color: var(--text-primary);
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
 }
 
 .bills-total {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #d97706;
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--warning-hover);
   padding: 0.6rem 1.25rem;
   background: rgba(245, 158, 11, 0.12);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
@@ -402,8 +402,8 @@
   gap: 1.5rem;
   padding: 1.25rem 1.5rem;
   background: rgba(59, 130, 246, 0.05);
-  border-left: 4px solid #3b82f6;
-  border-radius: 8px;
+  border-left: 4px solid var(--info-color);
+  border-radius: var(--radius-lg);
   transition: all 0.2s;
 }
 
@@ -414,7 +414,7 @@
 
 .upcoming-bill-item.due-soon {
   background: rgba(245, 158, 11, 0.1);
-  border-left-color: #f59e0b;
+  border-left-color: var(--warning-color);
 }
 
 .upcoming-bill-item.due-soon:hover {
@@ -433,7 +433,7 @@
 
 .upcoming-bill-item.overdue {
   background: rgba(239, 68, 68, 0.12);
-  border-left-color: #ef4444;
+  border-left-color: var(--danger-color);
   border-left-width: 5px;
 }
 
@@ -479,12 +479,12 @@
 
 .mark-paid-btn {
   padding: 0.6rem 1rem;
-  background: #10b981;
+  background: var(--success-color);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   font-size: 1.05rem;
-  font-weight: 700;
+  font-weight: var(--font-bold);
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
@@ -492,7 +492,7 @@
 }
 
 .mark-paid-btn:hover {
-  background: #059669;
+  background: var(--success-hover);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
 }
@@ -502,8 +502,8 @@
 }
 
 .upcoming-bill-item .bill-name {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
   color: var(--text-primary);
   margin-bottom: 0.5rem;
   line-height: 1.3;
@@ -514,20 +514,20 @@
   align-items: center;
   gap: 0.6rem;
   flex-wrap: wrap;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   line-height: 1.4;
 }
 
 .upcoming-bill-item .bill-due {
-  font-weight: 700;
+  font-weight: var(--font-bold);
   color: var(--text-primary);
   padding: 0.15rem 0.5rem;
   background: rgba(59, 130, 246, 0.1);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .upcoming-bill-item.due-soon .bill-due {
-  color: #d97706;
+  color: var(--warning-hover);
   background: rgba(245, 158, 11, 0.15);
 }
 
@@ -537,7 +537,7 @@
 }
 
 .upcoming-bill-item.overdue .bill-due {
-  color: #dc2626;
+  color: var(--danger-hover);
   background: rgba(239, 68, 68, 0.15);
 }
 
@@ -564,18 +564,18 @@
 
 .upcoming-bill-item .bill-category {
   color: var(--text-secondary);
-  font-weight: 600;
+  font-weight: var(--font-semibold);
 }
 
 .upcoming-bill-item .bill-frequency {
   color: var(--text-secondary);
-  font-weight: 500;
+  font-weight: var(--font-medium);
   text-transform: capitalize;
 }
 
 .upcoming-bill-item .bill-amount {
-  font-size: 1.35rem;
-  font-weight: 800;
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
   color: var(--text-primary);
   white-space: nowrap;
   letter-spacing: -0.02em;
@@ -584,7 +584,7 @@
 .categories-section {
   background: var(--card-bg);
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 2.5rem;
 }
@@ -614,22 +614,22 @@
   background: var(--card-bg);
   color: var(--text-primary);
   border: 2px solid var(--border-color);
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .filter-btn:hover {
-  border-color: #3b82f6;
+  border-color: var(--info-color);
   background: rgba(59, 130, 246, 0.1);
 }
 
 .filter-btn.active {
-  background: #3b82f6;
+  background: var(--info-color);
   color: white;
-  border-color: #3b82f6;
+  border-color: var(--info-color);
 }
 
 .categories-list {
@@ -640,7 +640,7 @@
 .category-card {
   padding: 1.25rem;
   background: var(--card-bg);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -659,8 +659,8 @@
 }
 
 .category-name {
-  font-weight: 700;
-  font-size: 1.1rem;
+  font-weight: var(--font-bold);
+  font-size: var(--text-xl);
   color: var(--text-primary);
 }
 
@@ -684,14 +684,14 @@
 
 .stat-label {
   color: var(--text-secondary);
-  font-weight: 500;
-  font-size: 0.85rem;
+  font-weight: var(--font-medium);
+  font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.025em;
 }
 
 .stat-value {
-  font-weight: 700;
+  font-weight: var(--font-bold);
   font-size: 1rem;
   color: var(--text-primary);
 }
@@ -701,11 +701,11 @@
 }
 
 .stat-value.over-budget {
-  color: #ef4444;
+  color: var(--danger-color);
 }
 
 .stat-value.under-budget {
-  color: #10b981;
+  color: var(--success-color);
 }
 
 .category-progress {
@@ -725,7 +725,7 @@
 .progress-bar {
   height: 12px;
   background: var(--progress-bar-bg, #f3f4f6);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   overflow: visible;
   position: relative;
   border: 1px solid var(--border-color);
@@ -738,24 +738,24 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(90deg, var(--success-color) 0%, var(--success-hover) 100%);
   transition: width 0.3s ease;
-  border-radius: 5px;
+  border-radius: var(--radius-md);
   position: relative;
 }
 
 .progress-fill.approaching-budget {
-  background: linear-gradient(90deg, #f59e0b 0%, #f59e0b 100%);
+  background: linear-gradient(90deg, var(--warning-color) 0%, var(--warning-color) 100%);
 }
 
 .progress-fill.over-budget {
-  background: linear-gradient(90deg, #f59e0b 0%, #f59e0b 100%, #ef4444 100%);
+  background: linear-gradient(90deg, var(--warning-color) 0%, var(--warning-color) 100%, var(--danger-color) 100%);
   background: repeating-linear-gradient(
     45deg,
-    #ef4444,
-    #ef4444 10px,
-    #dc2626 10px,
-    #dc2626 20px
+    var(--danger-color),
+    var(--danger-color) 10px,
+    var(--danger-hover) 10px,
+    var(--danger-hover) 20px
   );
 }
 
@@ -780,18 +780,18 @@
 .progress-label {
   font-size: 0.7rem;
   color: var(--text-secondary);
-  font-weight: 500;
+  font-weight: var(--font-medium);
 }
 
 .progress-label.budget-marker {
   color: var(--text-primary);
-  font-weight: 600;
+  font-weight: var(--font-semibold);
 }
 
 .progress-text {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-primary);
-  font-weight: 700;
+  font-weight: var(--font-bold);
   white-space: nowrap;
   min-width: 50px;
   width: 50px;
@@ -800,7 +800,7 @@
 }
 
 .progress-text.over-budget-text {
-  color: #ef4444;
+  color: var(--danger-color);
 }
 
 @media (max-width: 768px) {
@@ -810,11 +810,11 @@
   }
 
   .stat-label {
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
   }
 
   .stat-value {
-    font-size: 0.9rem;
+    font-size: var(--text-base);
   }
 
   .category-name {
@@ -865,9 +865,9 @@
 .categories-table th {
   text-align: left;
   padding: 0.75rem 1rem;
-  font-weight: 600;
+  font-weight: var(--font-semibold);
   color: var(--text-primary);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.025em;
 }
@@ -904,24 +904,24 @@
 
 .spent-cell {
   color: var(--text-primary);
-  font-weight: 500;
+  font-weight: var(--font-medium);
 }
 
 .budget-cell {
   color: var(--text-secondary);
-  font-weight: 500;
+  font-weight: var(--font-medium);
 }
 
 .remaining-cell {
-  font-weight: 600;
+  font-weight: var(--font-semibold);
 }
 
 .remaining-cell.over-budget {
-  color: #ef4444;
+  color: var(--danger-color);
 }
 
 .remaining-cell.under-budget {
-  color: #10b981;
+  color: var(--success-color);
 }
 
 .progress-cell {
@@ -936,7 +936,7 @@
 .cash-flow-section {
   background: var(--card-bg);
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 2.5rem;
 }
@@ -957,14 +957,14 @@
 }
 
 .section-header-collapsible:hover h2 {
-  color: #3b82f6;
+  color: var(--info-color);
 }
 
 .collapse-btn {
   background: none;
   border: none;
   color: var(--text-primary);
-  font-size: 1.2rem;
+  font-size: var(--text-xl);
   cursor: pointer;
   padding: 0.5rem;
   transition: transform 0.2s;
@@ -978,7 +978,7 @@
 .calendar-section {
   background: var(--card-bg);
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 2.5rem;
 }
@@ -1004,8 +1004,8 @@
 
 .calendar-day-header {
   text-align: center;
-  font-weight: 600;
-  font-size: 0.85rem;
+  font-weight: var(--font-semibold);
+  font-size: var(--text-sm);
   color: var(--text-secondary);
   padding: 0.5rem;
   text-transform: uppercase;
@@ -1022,7 +1022,7 @@
   aspect-ratio: 1;
   min-height: 100px;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 0.5rem;
   display: flex;
   flex-direction: column;
@@ -1038,13 +1038,13 @@
 
 .calendar-day.has-activity {
   cursor: pointer;
-  border-color: #3b82f6;
+  border-color: var(--info-color);
 }
 
 .calendar-day.has-activity:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-  border-color: #2563eb;
+  border-color: var(--info-hover);
   background: rgba(59, 130, 246, 0.05);
 }
 
@@ -1053,7 +1053,7 @@
 }
 
 .calendar-day.today {
-  border: 2px solid #f59e0b;
+  border: 2px solid var(--warning-color);
   background: rgba(245, 158, 11, 0.05);
 }
 
@@ -1062,8 +1062,8 @@
 }
 
 .calendar-day-number {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
   color: var(--text-primary);
   margin-bottom: 0.25rem;
 }
@@ -1081,40 +1081,40 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.15rem 0.3rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: 0.7rem;
-  font-weight: 500;
+  font-weight: var(--font-medium);
   white-space: nowrap;
 }
 
 .calendar-indicator.income {
   background: rgba(16, 185, 129, 0.1);
-  color: #059669;
+  color: var(--success-hover);
 }
 
 [data-theme="dark"] .calendar-indicator.income {
   background: rgba(16, 185, 129, 0.15);
-  color: #10b981;
+  color: var(--success-color);
 }
 
 .calendar-indicator.transaction {
   background: rgba(239, 68, 68, 0.1);
-  color: #dc2626;
+  color: var(--danger-hover);
 }
 
 [data-theme="dark"] .calendar-indicator.transaction {
   background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  color: var(--danger-color);
 }
 
 .calendar-indicator.bill {
   background: rgba(245, 158, 11, 0.1);
-  color: #d97706;
+  color: var(--warning-hover);
 }
 
 [data-theme="dark"] .calendar-indicator.bill {
   background: rgba(245, 158, 11, 0.15);
-  color: #f59e0b;
+  color: var(--warning-color);
 }
 
 .calendar-indicator .count {
@@ -1134,29 +1134,29 @@
 
 .calendar-day-total {
   margin-top: auto;
-  font-weight: 700;
-  font-size: 0.75rem;
+  font-weight: var(--font-bold);
+  font-size: var(--text-xs);
   text-align: center;
   padding: 0.25rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .calendar-day-total.positive {
-  color: #10b981;
+  color: var(--success-color);
   background: rgba(16, 185, 129, 0.1);
 }
 
 .calendar-day-total.negative {
-  color: #ef4444;
+  color: var(--danger-color);
   background: rgba(239, 68, 68, 0.1);
 }
 
 .calendar-day-balance {
-  font-weight: 600;
+  font-weight: var(--font-semibold);
   font-size: 0.7rem;
   text-align: center;
   padding: 0.25rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   margin-top: 0.25rem;
   color: var(--text-secondary);
   background: rgba(59, 130, 246, 0.08);
@@ -1183,7 +1183,7 @@
 
 .modal-content {
   background: var(--card-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   max-width: 600px;
   width: 100%;
   max-height: 90vh;
@@ -1206,18 +1206,18 @@
 .modal-header h3 {
   margin: 0;
   color: var(--text-primary);
-  font-size: 1.25rem;
+  font-size: var(--text-2xl);
 }
 
 .modal-close {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: var(--text-3xl);
   color: var(--text-secondary);
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   transition: all 0.2s;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .modal-close:hover {
@@ -1242,21 +1242,21 @@
 
 .modal-section-title {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: var(--font-semibold);
   margin: 0 0 0.75rem 0;
   color: var(--text-primary);
 }
 
 .modal-section-title.income {
-  color: #10b981;
+  color: var(--success-color);
 }
 
 .modal-section-title.expense {
-  color: #ef4444;
+  color: var(--danger-color);
 }
 
 .modal-section-title.bill {
-  color: #f59e0b;
+  color: var(--warning-color);
 }
 
 .modal-item {
@@ -1265,7 +1265,7 @@
   align-items: center;
   padding: 0.75rem;
   background: var(--card-bg);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   margin-bottom: 0.5rem;
   border: 1px solid var(--border-color);
 }
@@ -1285,17 +1285,17 @@
 }
 
 .modal-amount {
-  font-weight: 600;
+  font-weight: var(--font-semibold);
   white-space: nowrap;
   margin-left: 1rem;
 }
 
 .modal-amount.positive {
-  color: #10b981;
+  color: var(--success-color);
 }
 
 .modal-amount.negative {
-  color: #ef4444;
+  color: var(--danger-color);
 }
 
 .modal-balance-row {
@@ -1308,7 +1308,7 @@
 
 .modal-total {
   background: rgba(59, 130, 246, 0.05);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 1rem;
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
@@ -1318,9 +1318,9 @@
 }
 
 .modal-total-label {
-  font-weight: 700;
+  font-weight: var(--font-bold);
   color: var(--text-primary);
-  font-size: 1.1rem;
+  font-size: var(--text-xl);
 }
 
 @media (max-width: 768px) {
@@ -1339,7 +1339,7 @@
   }
 
   .calendar-day-total {
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
   }
 }
 
@@ -1350,7 +1350,7 @@
   }
 
   .calendar-day-number {
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
   }
 
   .calendar-indicator {

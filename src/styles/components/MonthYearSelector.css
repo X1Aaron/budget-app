@@ -10,20 +10,20 @@
   gap: 12px;
   padding: 8px 16px;
   background: var(--bg-secondary);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .calendar-today-btn {
   background: var(--bg-secondary);
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   height: 32px;
   width: 32px;
 }
 
 .month-year-display {
-  font-size: 16px;
-  font-weight: 500;
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
   color: var(--text-primary);
   min-width: 160px;
   text-align: center;
@@ -35,9 +35,9 @@
   color: var(--text-primary);
   width: 32px;
   height: 32px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: 18px;
+  font-size: var(--text-xl);
   display: flex;
   align-items: center;
   justify-content: center;
