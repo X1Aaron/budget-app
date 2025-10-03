@@ -39,6 +39,7 @@ function Transactions({
   const [smartLinkConfirmation, setSmartLinkConfirmation] = useState(null)
   const [toastMessage, setToastMessage] = useState(null)
   const [undoAction, setUndoAction] = useState(null)
+  const [ruleInfoModal, setRuleInfoModal] = useState(null)
 
   const handleSort = (key) => {
     let direction = 'asc'
@@ -304,6 +305,7 @@ function Transactions({
             category: result.category,
             memo: row.memo || row.notes || '',
             autoCategorized: result.wasAutoCategorized,
+            categorizationRule: result.ruleDetails,
             isBill: false
           }
         }).filter(t => t !== null)
@@ -645,6 +647,70 @@ function Transactions({
         </div>
       )}
 
+      {/* Rule Info Modal */}
+      {ruleInfoModal && (
+        <div className="bill-modal-backdrop" onClick={() => setRuleInfoModal(null)}>
+          <div className="bill-modal rule-info-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Auto-Categorization Rule</h3>
+            <div className="rule-info-content">
+              <div className="rule-info-section">
+                <label>Categorized as:</label>
+                <div className="rule-info-value category-badge">{ruleInfoModal.category}</div>
+              </div>
+
+              {ruleInfoModal.ruleDetails?.type === 'exact' && (
+                <>
+                  <div className="rule-info-section">
+                    <label>Rule Type:</label>
+                    <div className="rule-info-value">Exact Match Rule</div>
+                  </div>
+                  <div className="rule-info-section">
+                    <label>Matched Description:</label>
+                    <div className="rule-info-value description-match">"{ruleInfoModal.ruleDetails.description}"</div>
+                  </div>
+                  <div className="rule-info-explanation">
+                    This transaction was automatically categorized because you previously assigned this category to a transaction with the exact same description.
+                  </div>
+                </>
+              )}
+
+              {ruleInfoModal.ruleDetails?.type === 'keyword' && (
+                <>
+                  <div className="rule-info-section">
+                    <label>Rule Type:</label>
+                    <div className="rule-info-value">Keyword Rule</div>
+                  </div>
+                  <div className="rule-info-section">
+                    <label>Matched Keyword:</label>
+                    <div className="rule-info-value keyword-match">"{ruleInfoModal.ruleDetails.keyword}"</div>
+                  </div>
+                  <div className="rule-info-explanation">
+                    This transaction was automatically categorized because its description contains the keyword "{ruleInfoModal.ruleDetails.keyword}".
+                  </div>
+                </>
+              )}
+
+              {ruleInfoModal.ruleDetails?.type === 'default' && (
+                <>
+                  <div className="rule-info-section">
+                    <label>Rule Type:</label>
+                    <div className="rule-info-value">Default Rule</div>
+                  </div>
+                  <div className="rule-info-explanation">
+                    This transaction was automatically categorized as income because the amount is positive.
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="bill-modal-actions">
+              <button className="save-btn" onClick={() => setRuleInfoModal(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Smart Link Confirmation Modal */}
       {smartLinkConfirmation && (
         <div className="bill-modal-backdrop" onClick={() => setSmartLinkConfirmation(null)}>
@@ -772,7 +838,21 @@ function Transactions({
                                   <option key={cat.id} value={cat.name}>{cat.name}</option>
                                 ))}
                               </select>
-                              {trans.autoCategorized && <span className="auto-icon" title="Auto-categorized">🤖</span>}
+                              {trans.autoCategorized && (
+                                <span
+                                  className="auto-icon clickable-icon"
+                                  title="Auto-categorized - Click for details"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setRuleInfoModal({
+                                      category: trans.category,
+                                      ruleDetails: trans.categorizationRule
+                                    })
+                                  }}
+                                >
+                                  🤖
+                                </span>
+                              )}
                               {isUncategorized && <span className="warning-icon">⚠️</span>}
                             </div>
                           </td>
@@ -1163,7 +1243,21 @@ function Transactions({
                             <option key={cat.id} value={cat.name}>{cat.name}</option>
                           ))}
                         </select>
-                        {item.autoCategorized && <span className="auto-icon" title="Auto-categorized"> 🤖</span>}
+                        {item.autoCategorized && (
+                          <span
+                            className="auto-icon clickable-icon"
+                            title="Auto-categorized - Click for details"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setRuleInfoModal({
+                                category: item.category,
+                                ruleDetails: item.categorizationRule
+                              })
+                            }}
+                          >
+                            🤖
+                          </span>
+                        )}
                         {isUncategorized && <span className="warning-icon"> ⚠️</span>}
                       </td>
 

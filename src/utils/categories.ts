@@ -116,11 +116,17 @@ export const DEFAULT_CATEGORIES: CategoryWithKeywords[] = [
   { id: 'uncategorized', name: 'Uncategorized', color: '#6b7280', type: 'both', keywords: [], budgeted: 0, needWant: null }
 ];
 
-interface AutoCategorizeResult {
+export interface AutoCategorizeResult {
   category: string;
   wasAutoCategorized: boolean;
   matchType?: 'exact' | 'keyword' | 'default' | 'manual';
   matchedKeyword?: string;
+  ruleDetails?: {
+    type: 'exact' | 'keyword' | 'default';
+    description?: string;
+    keyword?: string;
+    createdDate?: string;
+  };
 }
 
 export const autoCategorize = (
@@ -141,7 +147,11 @@ export const autoCategorize = (
     return {
       category: categoryMappings[description],
       wasAutoCategorized: true,
-      matchType: 'exact'
+      matchType: 'exact',
+      ruleDetails: {
+        type: 'exact',
+        description: description
+      }
     };
   }
 
@@ -156,19 +166,46 @@ export const autoCategorize = (
     if (category.type === 'income' && amount > 0) {
       for (const keyword of category.keywords || []) {
         if (!disabledCategoryKeywords.includes(keyword) && desc.includes(keyword.toLowerCase())) {
-          return { category: category.name, wasAutoCategorized: true, matchType: 'keyword', matchedKeyword: keyword };
+          return {
+            category: category.name,
+            wasAutoCategorized: true,
+            matchType: 'keyword',
+            matchedKeyword: keyword,
+            ruleDetails: {
+              type: 'keyword',
+              keyword: keyword
+            }
+          };
         }
       }
     } else if (category.type === 'expense' && amount < 0) {
       for (const keyword of category.keywords || []) {
         if (!disabledCategoryKeywords.includes(keyword) && desc.includes(keyword.toLowerCase())) {
-          return { category: category.name, wasAutoCategorized: true, matchType: 'keyword', matchedKeyword: keyword };
+          return {
+            category: category.name,
+            wasAutoCategorized: true,
+            matchType: 'keyword',
+            matchedKeyword: keyword,
+            ruleDetails: {
+              type: 'keyword',
+              keyword: keyword
+            }
+          };
         }
       }
     } else if (category.type === 'both') {
       for (const keyword of category.keywords || []) {
         if (!disabledCategoryKeywords.includes(keyword) && desc.includes(keyword.toLowerCase())) {
-          return { category: category.name, wasAutoCategorized: true, matchType: 'keyword', matchedKeyword: keyword };
+          return {
+            category: category.name,
+            wasAutoCategorized: true,
+            matchType: 'keyword',
+            matchedKeyword: keyword,
+            ruleDetails: {
+              type: 'keyword',
+              keyword: keyword
+            }
+          };
         }
       }
     }
@@ -176,7 +213,14 @@ export const autoCategorize = (
 
   // Priority 3: Default fallback
   if (amount > 0) {
-    return { category: 'Income', wasAutoCategorized: true, matchType: 'default' };
+    return {
+      category: 'Income',
+      wasAutoCategorized: true,
+      matchType: 'default',
+      ruleDetails: {
+        type: 'default'
+      }
+    };
   }
 
   return { category: 'Uncategorized', wasAutoCategorized: false, matchType: 'default' };

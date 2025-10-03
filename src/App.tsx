@@ -180,6 +180,12 @@ function App() {
           ...prev,
           [description]: updatedTransaction.category
         }));
+
+        // Store rule details on the transaction
+        updatedTransaction.categorizationRule = {
+          type: 'exact',
+          description: description
+        };
       }
 
       newTransactions[index] = updatedTransaction;
