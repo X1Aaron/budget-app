@@ -5,6 +5,7 @@ import { Bills } from './components/features/bills';
 import { Income } from './components/features/income';
 import { Transactions } from './components/features/transactions';
 import { Categories } from './components/features/categories';
+import { CreditCards } from './components/features/credit-cards';
 import { MonthYearSelector } from './components/ui/forms';
 import { DEFAULT_CATEGORIES, generateMerchantName } from './utils/categories';
 import { generateDemoData } from './utils/demoData';
@@ -17,7 +18,8 @@ import type {
   CategoryMapping,
   ActiveSection,
   BillMatchingSettings,
-  RecurringIncome
+  RecurringIncome,
+  CreditCard
 } from './types';
 
 function App() {
@@ -67,6 +69,10 @@ function App() {
     const saved = localStorage.getItem('recurringIncomes');
     return saved ? JSON.parse(saved) : [];
   });
+  const [creditCards, setCreditCards] = useState<CreditCard[]>(() => {
+    const saved = localStorage.getItem('creditCards');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [billConversionData, setBillConversionData] = useState<Transaction | null>(null);
 
   useEffect(() => {
@@ -100,6 +106,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('recurringIncomes', JSON.stringify(recurringIncomes));
   }, [recurringIncomes]);
+
+  useEffect(() => {
+    localStorage.setItem('creditCards', JSON.stringify(creditCards));
+  }, [creditCards]);
 
   useEffect(() => {
     const saved = localStorage.getItem('transactions');
@@ -534,6 +544,12 @@ function App() {
             Categories
           </button>
           <button
+            className={'nav-btn' + (activeSection === 'credit-cards' ? ' active' : '')}
+            onClick={() => setActiveSection('credit-cards')}
+          >
+            Credit Cards
+          </button>
+          <button
             className={'nav-btn' + (activeSection === 'settings' ? ' active' : '')}
             onClick={() => setActiveSection('settings')}
           >
@@ -628,6 +644,11 @@ function App() {
               onAddKeywordToCategory={handleAddKeywordToCategory}
             />
           </div>
+        ) : activeSection === 'credit-cards' ? (
+          <CreditCards
+            creditCards={creditCards}
+            onUpdateCreditCards={setCreditCards}
+          />
         ) : (
           <div className="settings-section">
             <h2>Settings</h2>
@@ -770,7 +791,8 @@ function App() {
                       categoryMappings,
                       disabledKeywords,
                       billMatchingSettings,
-                      recurringIncomes
+                      recurringIncomes,
+                      creditCards
                     }
                   };
 
@@ -819,6 +841,7 @@ function App() {
                           if (data.disabledKeywords) setDisabledKeywords(data.disabledKeywords);
                           if (data.billMatchingSettings) setBillMatchingSettings(data.billMatchingSettings);
                           if (data.recurringIncomes) setRecurringIncomes(data.recurringIncomes);
+                          if (data.creditCards) setCreditCards(data.creditCards);
 
                           alert(`Successfully imported data from backup created on ${new Date(importedData.exportDate).toLocaleDateString()}`);
                         } catch (error) {
@@ -883,6 +906,7 @@ function App() {
                     requireDateWindow: true
                   });
                   setRecurringIncomes([]);
+                  setCreditCards([]);
 
                   // Clear localStorage
                   localStorage.removeItem('transactions');
@@ -894,6 +918,7 @@ function App() {
                   localStorage.removeItem('disabledKeywords');
                   localStorage.removeItem('billMatchingSettings');
                   localStorage.removeItem('recurringIncomes');
+                  localStorage.removeItem('creditCards');
 
                   alert('All data has been cleared successfully.');
                 }}>

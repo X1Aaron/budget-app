@@ -1424,3 +1424,210 @@
     width: 95%;
   }
 }
+
+/* Bill Modal (Add Transaction Modal) */
+.bill-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.bill-modal {
+  background: var(--card-bg);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2), 0 8px 16px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease-out;
+  border: 2px solid var(--border-color);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bill-modal h3 {
+  margin: 0;
+  padding: 1.5rem 1.75rem;
+  font-size: var(--text-2xl);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-color);
+  background: var(--table-header-bg);
+}
+
+.bill-modal-form {
+  padding: 1.75rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.bill-modal-form .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.bill-modal-form .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.bill-modal-form .form-group label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.bill-modal-form .form-group input[type="text"],
+.bill-modal-form .form-group input[type="number"],
+.bill-modal-form .form-group input[type="date"],
+.bill-modal-form .form-group select,
+.bill-modal-form .form-group textarea {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  transition: all 0.2s;
+  font-family: inherit;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.bill-modal-form .form-group input[type="text"]:focus,
+.bill-modal-form .form-group input[type="number"]:focus,
+.bill-modal-form .form-group input[type="date"]:focus,
+.bill-modal-form .form-group select:focus,
+.bill-modal-form .form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.bill-modal-form .form-group select {
+  cursor: pointer;
+  font-weight: var(--font-medium);
+}
+
+.bill-modal-form .form-group textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.bill-modal-form .form-group input::placeholder,
+.bill-modal-form .form-group textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.bill-modal-actions {
+  padding: 1.25rem 1.75rem;
+  border-top: 2px solid var(--border-color);
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  background: var(--table-header-bg);
+}
+
+.bill-modal-actions button {
+  padding: 0.625rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.bill-modal-actions .cancel-btn {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+}
+
+.bill-modal-actions .cancel-btn:hover {
+  background: var(--table-row-hover-bg);
+  border-color: var(--text-secondary);
+}
+
+.bill-modal-actions .save-btn {
+  background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.bill-modal-actions .save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.bill-modal-actions .save-btn:active {
+  transform: translateY(0);
+}
+
+/* Dark mode adjustments for modals */
+[data-theme="dark"] .bill-modal {
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5), 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .bill-modal-form .form-group input:focus,
+[data-theme="dark"] .bill-modal-form .form-group select:focus,
+[data-theme="dark"] .bill-modal-form .form-group textarea:focus {
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+/* Responsive modal */
+@media (max-width: 640px) {
+  .bill-modal {
+    width: 95%;
+    max-width: 95%;
+  }
+
+  .bill-modal h3 {
+    padding: 1.25rem;
+    font-size: var(--text-xl);
+  }
+
+  .bill-modal-form {
+    padding: 1.25rem;
+  }
+
+  .bill-modal-actions {
+    padding: 1rem 1.25rem;
+    flex-direction: column;
+  }
+
+  .bill-modal-actions button {
+    width: 100%;
+  }
+}

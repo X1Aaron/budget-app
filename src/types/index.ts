@@ -81,6 +81,7 @@ export type ActiveSection =
   | 'reconciliation'
   | 'categories'
   | 'auto-categorization'
+  | 'credit-cards'
   | 'settings';
 
 export interface BillMatchingSettings {
@@ -99,5 +100,16 @@ export interface RecurringIncome {
   startDate: string; // YYYY-MM-DD format (first occurrence date)
   frequency: 'weekly' | 'bi-weekly' | 'monthly' | 'quarterly' | 'yearly';
   category?: string; // Optional category (defaults to "Income")
+  memo?: string; // Optional notes
+}
+
+export interface CreditCard {
+  id: string;
+  name: string; // e.g., "Chase Sapphire", "Capital One Venture"
+  balance: number; // Current balance (positive number)
+  interestRate: number; // APR as percentage (e.g., 18.99 for 18.99%)
+  minimumPayment: number; // Minimum payment amount
+  dueDate: string; // Day of month (1-31) when payment is due
+  creditLimit?: number; // Optional credit limit
   memo?: string; // Optional notes
 }
