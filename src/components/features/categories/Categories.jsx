@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react'
 import '../../../styles/components/Categories.css'
-import { autoCategorize } from '../../../utils/categories'
 
 function Categories({ categories, onUpdateCategories, transactions, onUpdateTransactions, selectedYear, selectedMonth, categoryMappings = {}, disabledKeywords = {} }) {
   const [isAdding, setIsAdding] = useState(false)
@@ -8,7 +7,6 @@ function Categories({ categories, onUpdateCategories, transactions, onUpdateTran
     name: '',
     color: '#6b7280',
     type: 'expense',
-    keywords: '',
     budgeted: 0,
     needWant: 'need'
   })
@@ -19,12 +17,9 @@ function Categories({ categories, onUpdateCategories, transactions, onUpdateTran
     name: '',
     color: '#6b7280',
     type: 'expense',
-    keywords: '',
     budgeted: 0,
     needWant: 'need'
   })
-  const [keywordInput, setKeywordInput] = useState('')
-  const [editKeywordInput, setEditKeywordInput] = useState('')
   const [inlineEditingId, setInlineEditingId] = useState(null)
   const [inlineEditField, setInlineEditField] = useState(null)
   const [inlineEditValue, setInlineEditValue] = useState('')
@@ -82,51 +77,6 @@ function Categories({ categories, onUpdateCategories, transactions, onUpdateTran
     }).format(amount)
   }
 
-  const handleAddKeyword = (e, isEdit = false) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault()
-      const input = isEdit ? editKeywordInput : keywordInput
-      const keyword = input.trim().replace(/,/g, '')
-
-      if (keyword) {
-        if (isEdit) {
-          const currentKeywords = editCategoryForm.keywords ? editCategoryForm.keywords.split(',').map(k => k.trim()).filter(k => k) : []
-          if (!currentKeywords.includes(keyword)) {
-            setEditCategoryForm({
-              ...editCategoryForm,
-              keywords: [...currentKeywords, keyword].join(', ')
-            })
-          }
-          setEditKeywordInput('')
-        } else {
-          const currentKeywords = newCategory.keywords ? newCategory.keywords.split(',').map(k => k.trim()).filter(k => k) : []
-          if (!currentKeywords.includes(keyword)) {
-            setNewCategory({
-              ...newCategory,
-              keywords: [...currentKeywords, keyword].join(', ')
-            })
-          }
-          setKeywordInput('')
-        }
-      }
-    }
-  }
-
-  const handleRemoveKeyword = (keywordToRemove, isEdit = false) => {
-    if (isEdit) {
-      const keywords = editCategoryForm.keywords.split(',').map(k => k.trim()).filter(k => k !== keywordToRemove)
-      setEditCategoryForm({
-        ...editCategoryForm,
-        keywords: keywords.join(', ')
-      })
-    } else {
-      const keywords = newCategory.keywords.split(',').map(k => k.trim()).filter(k => k !== keywordToRemove)
-      setNewCategory({
-        ...newCategory,
-        keywords: keywords.join(', ')
-      })
-    }
-  }
 
   const handleAddCategory = () => {
     if (!newCategory.name.trim()) return
@@ -136,7 +86,7 @@ function Categories({ categories, onUpdateCategories, transactions, onUpdateTran
       name: newCategory.name,
       color: newCategory.color,
       type: newCategory.type,
-      keywords: newCategory.keywords.split(',').map(k => k.trim()).filter(k => k),
+      keywords: [],
       budgeted: parseFloat(newCategory.budgeted) || 0,
       needWant: newCategory.needWant
     }
@@ -144,24 +94,7 @@ function Categories({ categories, onUpdateCategories, transactions, onUpdateTran
     const updatedCategories = [...categories, category]
     onUpdateCategories(updatedCategories)
 
-    // Automatically recategorize transactions with the new category
-    if (transactions && onUpdateTransactions && category.keywords.length > 0) {
-      const updatedTransactions = transactions.map(t => {
-        if (t.autoCategorized || !t.category || t.category === 'Uncategorized') {
-          const result = autoCategorize(t.description, t.amount, 'Uncategorized', updatedCategories, categoryMappings, disabledKeywords)
-          return {
-            ...t,
-            category: result.category,
-            autoCategorized: result.wasAutoCategorized
-          }
-        }
-        return t
-      })
-      onUpdateTransactions(updatedTransactions)
-    }
-
-    setNewCategory({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0, needWant: 'need' })
-    setKeywordInput('')
+    setNewCategory({ name: '', color: '#6b7280', type: 'expense', budgeted: 0, needWant: 'need' })
     setIsAdding(false)
   }
 
@@ -176,7 +109,6 @@ function Categories({ categories, onUpdateCategories, transactions, onUpdateTran
       name: category.name,
       color: category.color,
       type: category.type,
-      keywords: (category.keywords || []).join(', '),
       budgeted: category.budgeted || 0,
       needWant: category.needWant || 'need'
     })
@@ -192,7 +124,7 @@ function Categories({ categories, onUpdateCategories, transactions, onUpdateTran
           name: editCategoryForm.name,
           color: editCategoryForm.color,
           type: editCategoryForm.type,
-          keywords: editCategoryForm.keywords.split(',').map(k => k.trim()).filter(k => k),
+          keywords: [],
           budgeted: parseFloat(editCategoryForm.budgeted) || 0,
           needWant: editCategoryForm.needWant
         }
@@ -202,14 +134,12 @@ function Categories({ categories, onUpdateCategories, transactions, onUpdateTran
 
     onUpdateCategories(updatedCategories)
     setEditingCategory(null)
-    setEditCategoryForm({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0, needWant: 'need' })
-    setEditKeywordInput('')
+    setEditCategoryForm({ name: '', color: '#6b7280', type: 'expense', budgeted: 0, needWant: 'need' })
   }
 
   const handleCancelCategoryEdit = () => {
     setEditingCategory(null)
-    setEditCategoryForm({ name: '', color: '#6b7280', type: 'expense', keywords: '', budgeted: 0, needWant: 'need' })
-    setEditKeywordInput('')
+    setEditCategoryForm({ name: '', color: '#6b7280', type: 'expense', budgeted: 0, needWant: 'need' })
   }
 
   const handleUpdateBudget = (categoryId) => {
@@ -254,32 +184,6 @@ function Categories({ categories, onUpdateCategories, transactions, onUpdateTran
     cancelInlineEdit()
   }
 
-  const handleReapplyKeywords = () => {
-    if (!transactions || !onUpdateTransactions) {
-      alert('Unable to reapply keywords. Transactions data not available.')
-      return
-    }
-
-    if (!confirm(`This will reapply keyword-based categorization to ${transactions.length} transactions. Manually categorized transactions will not be changed. Continue?`)) {
-      return
-    }
-
-    const updatedTransactions = transactions.map(t => {
-      // Only reapply if the transaction was auto-categorized or uncategorized
-      if (t.autoCategorized || !t.category || t.category === 'Uncategorized') {
-        const result = autoCategorize(t.description, t.amount, 'Uncategorized', categories, categoryMappings, disabledKeywords)
-        return {
-          ...t,
-          category: result.category,
-          autoCategorized: result.wasAutoCategorized
-        }
-      }
-      return t
-    })
-
-    onUpdateTransactions(updatedTransactions)
-    alert('Keywords reapplied successfully!')
-  }
 
   return (
     <div className="category-settings">
@@ -321,31 +225,6 @@ function Categories({ categories, onUpdateCategories, transactions, onUpdateTran
                               className="input-color"
                             />
                           </div>
-                          <div className="keywords-input-container">
-                            <label>Keywords for auto-categorization</label>
-                            <div className="keywords-tags">
-                              {newCategory.keywords && newCategory.keywords.split(',').map(k => k.trim()).filter(k => k).map((keyword, idx) => (
-                                <span key={idx} className="keyword-tag">
-                                  {keyword}
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveKeyword(keyword, false)}
-                                    className="keyword-remove"
-                                  >
-                                    ×
-                                  </button>
-                                </span>
-                              ))}
-                              <input
-                                type="text"
-                                placeholder="Type keyword and press Enter or comma"
-                                value={keywordInput}
-                                onChange={(e) => setKeywordInput(e.target.value)}
-                                onKeyDown={(e) => handleAddKeyword(e, false)}
-                                className="keyword-input"
-                              />
-                            </div>
-                          </div>
                           <div className="form-group">
                             <label htmlFor="new-budget">Budget Amount (optional)</label>
                             <input
@@ -386,9 +265,6 @@ function Categories({ categories, onUpdateCategories, transactions, onUpdateTran
                             <button className="add-btn" onClick={handleAddCategory}>Add Category</button>
                           </div>
                         </div>
-                        <p className="help-text">
-                          💡 Add keywords to automatically categorize transactions that contain those words
-                        </p>
                       </div>
                     )}
 
@@ -419,31 +295,6 @@ function Categories({ categories, onUpdateCategories, transactions, onUpdateTran
                               onChange={(e) => setEditCategoryForm({ ...editCategoryForm, color: e.target.value })}
                               className="input-color"
                             />
-                          </div>
-                          <div className="keywords-input-container">
-                            <label>Keywords</label>
-                            <div className="keywords-tags">
-                              {editCategoryForm.keywords && editCategoryForm.keywords.split(',').map(k => k.trim()).filter(k => k).map((keyword, idx) => (
-                                <span key={idx} className="keyword-tag">
-                                  {keyword}
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveKeyword(keyword, true)}
-                                    className="keyword-remove"
-                                  >
-                                    ×
-                                  </button>
-                                </span>
-                              ))}
-                              <input
-                                type="text"
-                                placeholder="Type keyword and press Enter or comma"
-                                value={editKeywordInput}
-                                onChange={(e) => setEditKeywordInput(e.target.value)}
-                                onKeyDown={(e) => handleAddKeyword(e, true)}
-                                className="keyword-input"
-                              />
-                            </div>
                           </div>
                           <div className="form-group">
                             <label htmlFor="edit-budget">Budget Amount</label>

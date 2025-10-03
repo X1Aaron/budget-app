@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import '../../../styles/components/Transactions.css'
-import { getCategoryColor, autoCategorize, generateMerchantName } from '../../../utils/categories'
+import { getCategoryColor, generateMerchantName } from '../../../utils/categories'
 import { calculateMonthStartingBalance } from '../../../utils/balanceCalculations'
 import CategoryModal from '../categories/CategoryModal'
 
@@ -286,9 +286,7 @@ function Transactions({
             return null
           }
 
-          // Apply auto-categorization
           const merchantName = generateMerchantName(description)
-          const result = autoCategorize(description, amount, row.category, categories, categoryMappings, disabledKeywords)
 
           return {
             id: `import-${Date.now()}-${index}`,
@@ -296,10 +294,9 @@ function Transactions({
             description: description,
             merchantName: merchantName,
             amount: amount,
-            category: result.category,
+            category: row.category || 'Uncategorized',
             memo: row.memo || row.notes || '',
-            autoCategorized: result.wasAutoCategorized,
-            categorizationRule: result.ruleDetails,
+            autoCategorized: false,
             isBill: false
           }
         }).filter(t => t !== null)
@@ -408,22 +405,6 @@ function Transactions({
 
     // Add the category
     onUpdateCategories([...categories, newCategory])
-
-    // Automatically recategorize transactions with the new category
-    if (transactions && onUpdateTransactions && newCategory.keywords.length > 0) {
-      const updatedTransactions = transactions.map(t => {
-        if (t.autoCategorized || !t.category || t.category === 'Uncategorized') {
-          const result = autoCategorize(t.description, t.amount, 'Uncategorized', [...categories, newCategory], {}, {})
-          return {
-            ...t,
-            category: result.category,
-            autoCategorized: result.wasAutoCategorized
-          }
-        }
-        return t
-      })
-      onUpdateTransactions(updatedTransactions)
-    }
 
     // Apply the category to the pending transaction
     if (pendingTransactionUpdate) {

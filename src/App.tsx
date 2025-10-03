@@ -4,9 +4,9 @@ import { Dashboard } from './components/features/dashboard';
 import { Bills } from './components/features/bills';
 import { Income } from './components/features/income';
 import { Transactions } from './components/features/transactions';
-import { Categories, AutoCategorization } from './components/features/categories';
+import { Categories } from './components/features/categories';
 import { MonthYearSelector } from './components/ui/forms';
-import { DEFAULT_CATEGORIES, autoCategorize, generateMerchantName } from './utils/categories';
+import { DEFAULT_CATEGORIES, generateMerchantName } from './utils/categories';
 import { generateDemoData } from './utils/demoData';
 import { useTheme } from './contexts/ThemeContext';
 import type {
@@ -139,11 +139,10 @@ function App() {
     }
 
     const categorizedTransactions = newTransactions.map(t => {
-      const result = autoCategorize(t.description, t.amount, t.category, categories, categoryMappings, disabledKeywords);
       return {
         ...t,
-        category: result.category,
-        autoCategorized: result.wasAutoCategorized,
+        category: t.category || 'Uncategorized',
+        autoCategorized: false,
         merchantName: t.merchantName || t.friendlyName || generateMerchantName(t.description),
         memo: t.memo || ''
       };
@@ -535,12 +534,6 @@ function App() {
             Categories
           </button>
           <button
-            className={'nav-btn' + (activeSection === 'auto-categorization' ? ' active' : '')}
-            onClick={() => setActiveSection('auto-categorization')}
-          >
-            Rules
-          </button>
-          <button
             className={'nav-btn' + (activeSection === 'settings' ? ' active' : '')}
             onClick={() => setActiveSection('settings')}
           >
@@ -629,18 +622,6 @@ function App() {
               disabledKeywords={disabledKeywords}
             />
           </div>
-        ) : activeSection === 'auto-categorization' ? (
-          <AutoCategorization
-            merchantMappings={merchantMappings}
-            categoryMappings={categoryMappings}
-            onDeleteMerchantMapping={handleDeleteMerchantMapping}
-            onDeleteCategoryMapping={handleDeleteCategoryMapping}
-            categories={categories}
-            disabledKeywords={disabledKeywords}
-            onToggleKeyword={handleToggleKeyword}
-            onAddExactRule={handleAddExactRule}
-            onAddKeywordToCategory={handleAddKeywordToCategory}
-          />
         ) : (
           <div className="settings-section">
             <h2>Settings</h2>

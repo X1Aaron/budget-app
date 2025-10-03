@@ -6,42 +6,9 @@ function CategoryModal({ onClose, onSave, existingCategory = null }) {
     name: existingCategory?.name || '',
     color: existingCategory?.color || '#6b7280',
     type: existingCategory?.type || 'expense',
-    keywords: existingCategory?.keywords?.join(', ') || '',
     budgeted: existingCategory?.budgeted || 0,
     needWant: existingCategory?.needWant || 'need'
   })
-  const [keywordInput, setKeywordInput] = useState('')
-
-  const handleAddKeyword = (e) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault()
-      const keyword = keywordInput.trim().replace(/,/g, '')
-
-      if (keyword) {
-        const currentKeywords = categoryForm.keywords
-          ? categoryForm.keywords.split(',').map(k => k.trim()).filter(k => k)
-          : []
-        if (!currentKeywords.includes(keyword)) {
-          setCategoryForm({
-            ...categoryForm,
-            keywords: [...currentKeywords, keyword].join(', ')
-          })
-        }
-        setKeywordInput('')
-      }
-    }
-  }
-
-  const handleRemoveKeyword = (keywordToRemove) => {
-    const keywords = categoryForm.keywords
-      .split(',')
-      .map(k => k.trim())
-      .filter(k => k !== keywordToRemove)
-    setCategoryForm({
-      ...categoryForm,
-      keywords: keywords.join(', ')
-    })
-  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -52,7 +19,7 @@ function CategoryModal({ onClose, onSave, existingCategory = null }) {
       name: categoryForm.name,
       color: categoryForm.color,
       type: categoryForm.type,
-      keywords: categoryForm.keywords.split(',').map(k => k.trim()).filter(k => k),
+      keywords: [],
       budgeted: parseFloat(categoryForm.budgeted) || 0,
       needWant: categoryForm.needWant
     }
@@ -113,45 +80,6 @@ function CategoryModal({ onClose, onSave, existingCategory = null }) {
                   ></div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Keywords */}
-          <div className="form-section">
-            <div className="form-group">
-              <label htmlFor="category-keywords">
-                Keywords for Auto-Categorization
-                <span className="label-hint">Press Enter or comma to add</span>
-              </label>
-              <div className="keywords-input-container">
-                <div className="keywords-tags">
-                  {categoryForm.keywords && categoryForm.keywords.split(',').map(k => k.trim()).filter(k => k).map((keyword, idx) => (
-                    <span key={idx} className="keyword-tag">
-                      {keyword}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveKeyword(keyword)}
-                        className="keyword-remove"
-                        aria-label={`Remove ${keyword}`}
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                  <input
-                    id="category-keywords"
-                    type="text"
-                    placeholder="Type keyword and press Enter"
-                    value={keywordInput}
-                    onChange={(e) => setKeywordInput(e.target.value)}
-                    onKeyDown={handleAddKeyword}
-                    className="keyword-input"
-                  />
-                </div>
-              </div>
-              <p className="help-text">
-                Add keywords to automatically categorize transactions containing these words
-              </p>
             </div>
           </div>
 
