@@ -648,6 +648,7 @@ function App() {
           <CreditCards
             creditCards={creditCards}
             onUpdateCreditCards={setCreditCards}
+            selectedYear={selectedYear}
           />
         ) : (
           <div className="settings-section">

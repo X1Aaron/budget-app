@@ -5,9 +5,10 @@ import type { CreditCard, MonthlyPayment } from '../../../types'
 interface CreditCardsProps {
   creditCards: CreditCard[]
   onUpdateCreditCards: (cards: CreditCard[]) => void
+  selectedYear?: number
 }
 
-function CreditCards({ creditCards, onUpdateCreditCards }: CreditCardsProps) {
+function CreditCards({ creditCards, onUpdateCreditCards, selectedYear }: CreditCardsProps) {
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [editingCard, setEditingCard] = useState<CreditCard | null>(null)
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null)
@@ -35,103 +36,53 @@ function CreditCards({ creditCards, onUpdateCreditCards }: CreditCardsProps) {
 
     const scenarios = []
 
-    // Scenario 1: Minimum payment only
-    if (minPayment > 0) {
+    const calculateScenario = (payment: number) => {
       let remainingBalance = balance
       let months = 0
       let totalInterest = 0
-      const maxMonths = 600 // 50 years max to prevent infinite loops
+      const maxMonths = 600
 
       while (remainingBalance > 0.01 && months < maxMonths) {
         const interest = remainingBalance * monthlyRate
         totalInterest += interest
-        const principal = Math.min(minPayment - interest, remainingBalance)
+        const principal = Math.min(payment - interest, remainingBalance)
 
         if (principal <= 0) {
-          // Payment doesn't cover interest - will never pay off
-          months = -1
-          break
+          return { months: -1, totalInterest: -1, totalPaid: -1 }
         }
 
         remainingBalance -= principal
         months++
       }
 
-      scenarios.push({
-        payment: minPayment,
-        months: months === -1 ? -1 : months,
-        totalInterest: months === -1 ? -1 : totalInterest,
-        totalPaid: months === -1 ? -1 : balance + totalInterest
-      })
+      return { months, totalInterest, totalPaid: balance + totalInterest }
     }
 
-    // Scenario 2: 2x minimum payment
+    // Scenario 1: Minimum payment only
     if (minPayment > 0) {
-      const payment = minPayment * 2
-      let remainingBalance = balance
-      let months = 0
-      let totalInterest = 0
-
-      while (remainingBalance > 0.01 && months < 600) {
-        const interest = remainingBalance * monthlyRate
-        totalInterest += interest
-        const principal = Math.min(payment - interest, remainingBalance)
-        remainingBalance -= principal
-        months++
-      }
-
-      scenarios.push({
-        payment,
-        months,
-        totalInterest,
-        totalPaid: balance + totalInterest
-      })
+      const result = calculateScenario(minPayment)
+      scenarios.push({ payment: minPayment, ...result })
     }
 
-    // Scenario 3: 3x minimum payment
-    if (minPayment > 0) {
-      const payment = minPayment * 3
-      let remainingBalance = balance
-      let months = 0
-      let totalInterest = 0
-
-      while (remainingBalance > 0.01 && months < 600) {
-        const interest = remainingBalance * monthlyRate
-        totalInterest += interest
-        const principal = Math.min(payment - interest, remainingBalance)
-        remainingBalance -= principal
-        months++
-      }
-
-      scenarios.push({
-        payment,
-        months,
-        totalInterest,
-        totalPaid: balance + totalInterest
-      })
+    // Scenario 2: Pay off in 3 years (36 months)
+    const payment36Months = balance * (monthlyRate * Math.pow(1 + monthlyRate, 36)) / (Math.pow(1 + monthlyRate, 36) - 1)
+    if (payment36Months > minPayment && payment36Months < balance) {
+      const result = calculateScenario(payment36Months)
+      scenarios.push({ payment: payment36Months, ...result })
     }
 
-    // Scenario 4: Fixed aggressive payment (5% of balance or $100, whichever is higher)
-    const aggressivePayment = Math.max(balance * 0.05, 100)
-    if (aggressivePayment > minPayment && aggressivePayment < balance) {
-      let remainingBalance = balance
-      let months = 0
-      let totalInterest = 0
+    // Scenario 3: Pay off in 2 years (24 months)
+    const payment24Months = balance * (monthlyRate * Math.pow(1 + monthlyRate, 24)) / (Math.pow(1 + monthlyRate, 24) - 1)
+    if (payment24Months > minPayment && payment24Months < balance) {
+      const result = calculateScenario(payment24Months)
+      scenarios.push({ payment: payment24Months, ...result })
+    }
 
-      while (remainingBalance > 0.01 && months < 600) {
-        const interest = remainingBalance * monthlyRate
-        totalInterest += interest
-        const principal = Math.min(aggressivePayment - interest, remainingBalance)
-        remainingBalance -= principal
-        months++
-      }
-
-      scenarios.push({
-        payment: aggressivePayment,
-        months,
-        totalInterest,
-        totalPaid: balance + totalInterest
-      })
+    // Scenario 4: Pay off in 1 year (12 months)
+    const payment12Months = balance * (monthlyRate * Math.pow(1 + monthlyRate, 12)) / (Math.pow(1 + monthlyRate, 12) - 1)
+    if (payment12Months > minPayment && payment12Months < balance) {
+      const result = calculateScenario(payment12Months)
+      scenarios.push({ payment: payment12Months, ...result })
     }
 
     return scenarios
@@ -238,12 +189,13 @@ function CreditCards({ creditCards, onUpdateCreditCards }: CreditCardsProps) {
 
   const getLast12Months = () => {
     const months = []
-    const now = new Date()
-    for (let i = 11; i >= 0; i--) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const currentYear = selectedYear ?? new Date().getFullYear()
+
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(currentYear, i, 1)
       months.push({
-        year: date.getFullYear(),
-        month: date.getMonth() + 1, // 1-12
+        year: currentYear,
+        month: i + 1, // 1-12
         label: date.toLocaleDateString('en-US', { month: 'short' })
       })
     }
@@ -528,9 +480,9 @@ function CreditCards({ creditCards, onUpdateCreditCards }: CreditCardsProps) {
                                 <div className="scenario-header">
                                   <div className="scenario-title">
                                     {index === 0 && 'Minimum Payment'}
-                                    {index === 1 && '2x Min Payment'}
-                                    {index === 2 && '3x Min Payment'}
-                                    {index === 3 && 'Aggressive Payoff'}
+                                    {index === 1 && '3-Year Payoff'}
+                                    {index === 2 && '2-Year Payoff'}
+                                    {index === 3 && '1-Year Payoff'}
                                   </div>
                                   <div className="scenario-payment">{formatCurrency(scenario.payment)}/mo</div>
                                 </div>
