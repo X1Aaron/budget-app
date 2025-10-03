@@ -584,6 +584,7 @@ function App() {
             categoryMappings={categoryMappings}
             disabledKeywords={disabledKeywords}
             onConvertToBill={handleConvertTransactionToBill}
+            onUpdateCategories={setCategories}
           />
         ) : activeSection === 'bills' ? (
           <Bills

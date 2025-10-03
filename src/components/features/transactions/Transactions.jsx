@@ -12,7 +12,8 @@ function Transactions({
   accountStartingBalance,
   onUpdateTransactions,
   categoryMappings = {},
-  disabledKeywords = {}
+  disabledKeywords = {},
+  onUpdateCategories
 }) {
   const [expandedIndex, setExpandedIndex] = useState(null)
   const [editingMerchantIndex, setEditingMerchantIndex] = useState(null)
@@ -33,6 +34,10 @@ function Transactions({
   const [importCurrentPage, setImportCurrentPage] = useState(1)
   const [importItemsPerPage, setImportItemsPerPage] = useState(25)
   const [ruleInfoModal, setRuleInfoModal] = useState(null)
+  const [addCategoryModal, setAddCategoryModal] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [newCategoryColor, setNewCategoryColor] = useState('#6b7280')
+  const [pendingTransactionUpdate, setPendingTransactionUpdate] = useState(null)
 
   const handleSort = (key) => {
     let direction = 'asc'
@@ -373,6 +378,12 @@ function Transactions({
   }
 
   const handleImportCategoryChange = (transactionId, newCategory) => {
+    if (newCategory === '__ADD_NEW__') {
+      setPendingTransactionUpdate({ type: 'import', id: transactionId })
+      setAddCategoryModal(true)
+      return
+    }
+
     setImportPreview(prevPreview =>
       prevPreview.map(trans =>
         trans.id === transactionId
@@ -380,6 +391,74 @@ function Transactions({
           : trans
       )
     )
+  }
+
+  const handleSaveNewCategory = () => {
+    if (!newCategoryName.trim()) {
+      alert('Please enter a category name')
+      return
+    }
+
+    // Check if category already exists
+    if (categories.some(cat => cat.name.toLowerCase() === newCategoryName.trim().toLowerCase())) {
+      alert('A category with this name already exists')
+      return
+    }
+
+    const newCategory = {
+      id: newCategoryName.toLowerCase().replace(/\s+/g, '-'),
+      name: newCategoryName.trim(),
+      color: newCategoryColor,
+      type: 'expense',
+      keywords: [],
+      budgeted: 0,
+      needWant: 'need'
+    }
+
+    // Add the category
+    onUpdateCategories([...categories, newCategory])
+
+    // Apply the category to the pending transaction
+    if (pendingTransactionUpdate) {
+      if (pendingTransactionUpdate.type === 'import') {
+        setImportPreview(prevPreview =>
+          prevPreview.map(trans =>
+            trans.id === pendingTransactionUpdate.id
+              ? { ...trans, category: newCategory.name, autoCategorized: false }
+              : trans
+          )
+        )
+      } else if (pendingTransactionUpdate.type === 'transaction') {
+        const item = pendingTransactionUpdate.item
+        onUpdateTransaction(item.originalIndex, {
+          ...item,
+          category: newCategory.name,
+          autoCategorized: false
+        })
+      } else if (pendingTransactionUpdate.type === 'form') {
+        setFormData({ ...formData, category: newCategory.name })
+      } else if (pendingTransactionUpdate.type === 'expanded') {
+        const item = pendingTransactionUpdate.item
+        onUpdateTransaction(item.originalIndex, {
+          ...item,
+          category: newCategory.name,
+          autoCategorized: false
+        })
+      }
+    }
+
+    // Reset modal
+    setAddCategoryModal(false)
+    setNewCategoryName('')
+    setNewCategoryColor('#6b7280')
+    setPendingTransactionUpdate(null)
+  }
+
+  const handleCancelNewCategory = () => {
+    setAddCategoryModal(false)
+    setNewCategoryName('')
+    setNewCategoryColor('#6b7280')
+    setPendingTransactionUpdate(null)
   }
 
   // Summary stats
@@ -396,6 +475,43 @@ function Transactions({
 
   return (
     <div className="transactions-page">
+      {/* Add Category Modal */}
+      {addCategoryModal && (
+        <div className="bill-modal-backdrop" onClick={handleCancelNewCategory}>
+          <div className="bill-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Add New Category</h3>
+            <div className="bill-modal-form">
+              <div className="form-group">
+                <label>Category Name *</label>
+                <input
+                  type="text"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  placeholder="e.g., Groceries, Entertainment"
+                  autoFocus
+                />
+              </div>
+              <div className="form-group">
+                <label>Color</label>
+                <input
+                  type="color"
+                  value={newCategoryColor}
+                  onChange={(e) => setNewCategoryColor(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="bill-modal-actions">
+              <button className="cancel-btn" onClick={handleCancelNewCategory}>
+                Cancel
+              </button>
+              <button className="save-btn" onClick={handleSaveNewCategory}>
+                Add Category
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Rule Info Modal */}
       {ruleInfoModal && (
         <div className="bill-modal-backdrop" onClick={() => setRuleInfoModal(null)}>
@@ -514,10 +630,10 @@ function Transactions({
                                 onChange={(e) => handleImportCategoryChange(trans.id, e.target.value)}
                                 style={{ flex: 1 }}
                               >
-                                <option value="Uncategorized">Uncategorized</option>
                                 {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
                                   <option key={cat.id} value={cat.name}>{cat.name}</option>
                                 ))}
+                                <option value="__ADD_NEW__">+ Add New Category</option>
                               </select>
                               {trans.autoCategorized && (
                                 <span
@@ -652,7 +768,14 @@ function Transactions({
                 <label>Category</label>
                 <select
                   value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  onChange={(e) => {
+                    if (e.target.value === '__ADD_NEW__') {
+                      setPendingTransactionUpdate({ type: 'form' })
+                      setAddCategoryModal(true)
+                    } else {
+                      setFormData({ ...formData, category: e.target.value })
+                    }
+                  }}
                 >
                   <option value="">Select a category</option>
                   {categories && [...categories]
@@ -662,6 +785,7 @@ function Transactions({
                         {cat.name}
                       </option>
                     ))}
+                  <option value="__ADD_NEW__">+ Add New Category</option>
                 </select>
               </div>
               <div className="form-group">
@@ -837,17 +961,22 @@ function Transactions({
                           className={`transaction-category-select${isUncategorized ? ' uncategorized-label' : ''}`}
                           value={item.category || 'Uncategorized'}
                           onChange={(e) => {
-                            onUpdateTransaction(item.originalIndex, {
-                              ...item,
-                              category: e.target.value,
-                              autoCategorized: false
-                            })
+                            if (e.target.value === '__ADD_NEW__') {
+                              setPendingTransactionUpdate({ type: 'transaction', item })
+                              setAddCategoryModal(true)
+                            } else {
+                              onUpdateTransaction(item.originalIndex, {
+                                ...item,
+                                category: e.target.value,
+                                autoCategorized: false
+                              })
+                            }
                           }}
                         >
-                          <option value="Uncategorized">Uncategorized</option>
                           {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
                             <option key={cat.id} value={cat.name}>{cat.name}</option>
                           ))}
+                          <option value="__ADD_NEW__">+ Add New Category</option>
                         </select>
                         {item.autoCategorized && (
                           <span
@@ -887,17 +1016,22 @@ function Transactions({
                                 className="category-select-expanded"
                                 value={item.category || 'Uncategorized'}
                                 onChange={(e) => {
-                                  onUpdateTransaction(item.originalIndex, {
-                                    ...item,
-                                    category: e.target.value,
-                                    autoCategorized: false
-                                  })
+                                  if (e.target.value === '__ADD_NEW__') {
+                                    setPendingTransactionUpdate({ type: 'expanded', item })
+                                    setAddCategoryModal(true)
+                                  } else {
+                                    onUpdateTransaction(item.originalIndex, {
+                                      ...item,
+                                      category: e.target.value,
+                                      autoCategorized: false
+                                    })
+                                  }
                                 }}
                               >
-                                <option value="Uncategorized">Uncategorized</option>
                                 {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
                                   <option key={cat.id} value={cat.name}>{cat.name}</option>
                                 ))}
+                                <option value="__ADD_NEW__">+ Add New Category</option>
                               </select>
                             </div>
 
