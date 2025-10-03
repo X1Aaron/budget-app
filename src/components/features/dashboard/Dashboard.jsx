@@ -21,6 +21,7 @@ function Dashboard({
   const { theme } = useTheme()
   const [categoryFilter, setCategoryFilter] = useState('all') // 'all', 'over-budget', 'approaching'
   const [selectedCalendarDay, setSelectedCalendarDay] = useState(null)
+  const [compactCalendar, setCompactCalendar] = useState(false)
 
   const monthlyTransactions = useMemo(() => {
     return transactions.filter(t => {
@@ -787,7 +788,16 @@ function Dashboard({
 
       {/* Calendar Section */}
       <div className="calendar-section">
-        <h2>Monthly Calendar</h2>
+        <div className="calendar-header-row">
+          <h2>Monthly Calendar</h2>
+          <button
+            className="compact-toggle-btn"
+            onClick={() => setCompactCalendar(!compactCalendar)}
+            title={compactCalendar ? "Show detailed view" : "Show compact view"}
+          >
+            {compactCalendar ? '📋 Detailed' : '📊 Compact'}
+          </button>
+        </div>
         <div className="calendar-grid">
           {/* Day headers */}
           <div className="calendar-header">
@@ -820,49 +830,65 @@ function Dashboard({
                                today.getMonth() === selectedMonth &&
                                today.getFullYear() === selectedYear
 
+                // Determine color coding based on net cash flow
+                let flowClass = ''
+                if (hasActivity) {
+                  if (netChange > 0) {
+                    flowClass = 'positive-flow'
+                  } else if (netChange < 0) {
+                    flowClass = 'negative-flow'
+                  } else {
+                    flowClass = 'neutral-flow'
+                  }
+                }
+
                 days.push(
                   <div
                     key={day}
-                    className={`calendar-day ${hasActivity ? 'has-activity' : ''} ${isToday ? 'today' : ''}`}
+                    className={`calendar-day ${hasActivity ? 'has-activity' : ''} ${isToday ? 'today' : ''} ${flowClass} ${compactCalendar ? 'compact' : ''}`}
                     onClick={() => hasActivity && handleDayClick(dayData)}
                   >
                     <div className="calendar-day-number">{day}</div>
                     {hasActivity && (
-                      <div className="calendar-day-content">
-                        {dayData.incomes.length > 0 && (
-                          <div className="calendar-indicator income">
-                            💰 {formatCurrency(dayData.incomeAmount)}
-                            {dayData.incomes.length > 1 && <span className="count">({dayData.incomes.length})</span>}
-                            {dayData.incomes.length === 1 && (
-                              <div className="calendar-item-name">{dayData.incomes[0].name}</div>
-                            )}
+                      compactCalendar ? (
+                        <div className="calendar-day-content compact-content">
+                          <div className="compact-indicators">
+                            {dayData.incomes.length > 0 && <span className="compact-dot income" title={`Income: ${formatCurrency(dayData.incomeAmount)}`}>↑</span>}
+                            {dayData.transactions.length > 0 && <span className="compact-dot transaction" title={`Expenses: ${formatCurrency(Math.abs(dayData.expensesAmount))}`}>↓</span>}
+                            {dayData.bills.length > 0 && <span className="compact-dot bill" title={`Bills: ${formatCurrency(dayData.billsAmount)}`}>!</span>}
                           </div>
-                        )}
-                        {dayData.transactions.length > 0 && (
-                          <div className="calendar-indicator transaction">
-                            🛒 {formatCurrency(Math.abs(dayData.expensesAmount))}
-                            {dayData.transactions.length > 1 && <span className="count">({dayData.transactions.length})</span>}
-                            {dayData.transactions.length === 1 && (
-                              <div className="calendar-item-name">{dayData.transactions[0].category}</div>
-                            )}
+                          <div className={`calendar-day-total compact ${netChange >= 0 ? 'positive' : 'negative'}`}>
+                            {netChange >= 0 ? '+' : ''}{formatCurrency(netChange)}
                           </div>
-                        )}
-                        {dayData.bills.length > 0 && (
-                          <div className="calendar-indicator bill">
-                            📄 {formatCurrency(dayData.billsAmount)}
-                            {dayData.bills.length > 1 && <span className="count">({dayData.bills.length})</span>}
-                            {dayData.bills.length === 1 && (
-                              <div className="calendar-item-name">{dayData.bills[0].name}</div>
-                            )}
-                          </div>
-                        )}
-                        <div className={`calendar-day-total ${netChange >= 0 ? 'positive' : 'negative'}`}>
-                          Net: {netChange >= 0 ? '+' : ''}{formatCurrency(netChange)}
                         </div>
-                        <div className="calendar-day-balance">
-                          Balance: {formatCurrency(dayData.endingBalance)}
+                      ) : (
+                        <div className="calendar-day-content">
+                          {dayData.incomes.length > 0 && (
+                            <div className="calendar-indicator income">
+                              <span className="indicator-icon">↑</span>
+                              <span className="indicator-amount">{formatCurrency(dayData.incomeAmount)}</span>
+                              {dayData.incomes.length > 1 && <span className="count">×{dayData.incomes.length}</span>}
+                            </div>
+                          )}
+                          {dayData.transactions.length > 0 && (
+                            <div className="calendar-indicator transaction">
+                              <span className="indicator-icon">↓</span>
+                              <span className="indicator-amount">{formatCurrency(Math.abs(dayData.expensesAmount))}</span>
+                              {dayData.transactions.length > 1 && <span className="count">×{dayData.transactions.length}</span>}
+                            </div>
+                          )}
+                          {dayData.bills.length > 0 && (
+                            <div className="calendar-indicator bill">
+                              <span className="indicator-icon">!</span>
+                              <span className="indicator-amount">{formatCurrency(dayData.billsAmount)}</span>
+                              {dayData.bills.length > 1 && <span className="count">×{dayData.bills.length}</span>}
+                            </div>
+                          )}
+                          <div className={`calendar-day-total ${netChange >= 0 ? 'positive' : 'negative'}`}>
+                            {netChange >= 0 ? '+' : ''}{formatCurrency(netChange)}
+                          </div>
                         </div>
-                      </div>
+                      )
                     )}
                   </div>
                 )
@@ -881,6 +907,42 @@ function Dashboard({
             <div className="modal-header">
               <h3>Details for {monthNames[selectedMonth]} {selectedCalendarDay.day}, {selectedYear}</h3>
               <button className="modal-close" onClick={handleCloseModal}>✕</button>
+            </div>
+            <div className="modal-quick-actions">
+              <button
+                className="quick-action-btn"
+                onClick={() => {
+                  handleCloseModal()
+                  onNavigate?.('transactions')
+                }}
+                title="View all transactions"
+              >
+                📊 Transactions
+              </button>
+              {selectedCalendarDay.bills.length > 0 && (
+                <button
+                  className="quick-action-btn"
+                  onClick={() => {
+                    handleCloseModal()
+                    onNavigate?.('bills')
+                  }}
+                  title="Manage bills"
+                >
+                  💳 Bills
+                </button>
+              )}
+              {selectedCalendarDay.incomes.length > 0 && (
+                <button
+                  className="quick-action-btn"
+                  onClick={() => {
+                    handleCloseModal()
+                    onNavigate?.('income')
+                  }}
+                  title="Manage income"
+                >
+                  💰 Income
+                </button>
+              )}
             </div>
             <div className="modal-body">
               <div className="modal-section">
