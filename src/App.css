@@ -169,6 +169,25 @@
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
+.clear-data-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-size: 0.9375rem;
+  align-self: flex-start;
+}
+
+.clear-data-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
 .settings-warning {
   color: #f59e0b;
   font-size: 0.875rem;
@@ -181,6 +200,24 @@
 
 [data-theme="dark"] .settings-warning {
   color: #fbbf24;
+}
+
+.settings-group.danger-zone {
+  border: 2px solid #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.settings-group.danger-zone h3 {
+  color: #ef4444;
+}
+
+[data-theme="dark"] .settings-group.danger-zone {
+  border-color: #dc2626;
+  background: rgba(220, 38, 38, 0.1);
+}
+
+[data-theme="dark"] .settings-group.danger-zone h3 {
+  color: #f87171;
 }
 
 .settings-section {

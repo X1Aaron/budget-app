@@ -853,6 +853,61 @@ function App() {
                 </p>
               </div>
             </div>
+
+            <div className="settings-group danger-zone">
+              <h3>Danger Zone</h3>
+              <p className="settings-description">
+                Permanently delete all your data. This action cannot be undone!
+              </p>
+              <div className="settings-buttons">
+                <button className="clear-data-btn" onClick={() => {
+                  if (!confirm('⚠️ WARNING: This will permanently delete ALL your data including transactions, bills, categories, and settings. This action CANNOT be undone!\n\nAre you absolutely sure you want to continue?')) {
+                    return;
+                  }
+
+                  // Double confirmation
+                  if (!confirm('This is your last chance! Click OK to permanently delete everything, or Cancel to go back.')) {
+                    return;
+                  }
+
+                  // Clear all state
+                  setTransactions([]);
+                  setBills([]);
+                  setCategories(DEFAULT_CATEGORIES);
+                  setAccountStartingBalance(0);
+                  setMerchantMappings({});
+                  setCategoryMappings({});
+                  setDisabledKeywords({});
+                  setBillMatchingSettings({
+                    amountTolerance: 5,
+                    dateWindowDays: 7,
+                    minimumScore: 60,
+                    requireDescriptionMatch: true,
+                    requireAmountMatch: true,
+                    requireDateWindow: true
+                  });
+                  setRecurringIncomes([]);
+
+                  // Clear localStorage
+                  localStorage.removeItem('transactions');
+                  localStorage.removeItem('bills');
+                  localStorage.removeItem('categories');
+                  localStorage.removeItem('accountStartingBalance');
+                  localStorage.removeItem('merchantMappings');
+                  localStorage.removeItem('categoryMappings');
+                  localStorage.removeItem('disabledKeywords');
+                  localStorage.removeItem('billMatchingSettings');
+                  localStorage.removeItem('recurringIncomes');
+
+                  alert('All data has been cleared successfully.');
+                }}>
+                  Clear All Data
+                </button>
+              </div>
+              <p className="settings-warning">
+                ⚠️ This will permanently delete everything. Export a backup first if you want to keep your data!
+              </p>
+            </div>
           </div>
         )}
       </main>
