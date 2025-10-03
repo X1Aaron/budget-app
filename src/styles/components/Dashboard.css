@@ -973,3 +973,371 @@
 .collapse-btn:hover {
   transform: scale(1.1);
 }
+
+/* Calendar Section */
+.calendar-section {
+  background: var(--card-bg);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2.5rem;
+}
+
+.calendar-section h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.calendar-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.calendar-day-header {
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  min-height: 100px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  background: var(--card-bg);
+  position: relative;
+  transition: all 0.2s;
+}
+
+.calendar-day.empty {
+  background: transparent;
+  border: none;
+}
+
+.calendar-day.has-activity {
+  cursor: pointer;
+  border-color: #3b82f6;
+}
+
+.calendar-day.has-activity:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  border-color: #2563eb;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+[data-theme="dark"] .calendar-day.has-activity:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.calendar-day.today {
+  border: 2px solid #f59e0b;
+  background: rgba(245, 158, 11, 0.05);
+}
+
+[data-theme="dark"] .calendar-day.today {
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.calendar-day-number {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.calendar-day-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  flex: 1;
+}
+
+.calendar-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.calendar-indicator.income {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+[data-theme="dark"] .calendar-indicator.income {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.calendar-indicator.transaction {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+[data-theme="dark"] .calendar-indicator.transaction {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.calendar-indicator.bill {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+[data-theme="dark"] .calendar-indicator.bill {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.calendar-day-total {
+  margin-top: auto;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0.25rem;
+  border-radius: 4px;
+}
+
+.calendar-day-total.positive {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.calendar-day-total.negative {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  background: var(--card-bg);
+  z-index: 10;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  transition: all 0.2s;
+  border-radius: 4px;
+}
+
+.modal-close:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.modal-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  color: var(--text-primary);
+}
+
+.modal-section-title.income {
+  color: #10b981;
+}
+
+.modal-section-title.expense {
+  color: #ef4444;
+}
+
+.modal-section-title.bill {
+  color: #f59e0b;
+}
+
+.modal-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: var(--card-bg);
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .modal-item {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.modal-item:last-child {
+  margin-bottom: 0;
+}
+
+.modal-item-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.modal-amount {
+  font-weight: 600;
+  white-space: nowrap;
+  margin-left: 1rem;
+}
+
+.modal-amount.positive {
+  color: #10b981;
+}
+
+.modal-amount.negative {
+  color: #ef4444;
+}
+
+.modal-balance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  font-size: 1rem;
+}
+
+.modal-total {
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+[data-theme="dark"] .modal-total {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.modal-total-label {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .calendar-day {
+    min-height: 80px;
+    padding: 0.35rem;
+  }
+
+  .calendar-day-number {
+    font-size: 0.8rem;
+  }
+
+  .calendar-indicator {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.25rem;
+  }
+
+  .calendar-day-total {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-day {
+    min-height: 70px;
+    padding: 0.25rem;
+  }
+
+  .calendar-day-number {
+    font-size: 0.75rem;
+  }
+
+  .calendar-indicator {
+    font-size: 0.6rem;
+    padding: 0.05rem 0.2rem;
+  }
+
+  .calendar-day-total {
+    font-size: 0.7rem;
+  }
+
+  .modal-content {
+    max-height: 95vh;
+  }
+
+  .modal-header,
+  .modal-body {
+    padding: 1rem;
+  }
+}

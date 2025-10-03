@@ -20,6 +20,7 @@ function Dashboard({
 }) {
   const { theme } = useTheme()
   const [categoryFilter, setCategoryFilter] = useState('all') // 'all', 'over-budget', 'approaching'
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState(null)
 
   const monthlyTransactions = useMemo(() => {
     return transactions.filter(t => {
@@ -171,7 +172,8 @@ function Dashboard({
           if (currentDate >= monthStart && currentDate >= startDate) {
             monthlyIncomes.push({
               day: currentDate.getDate(),
-              amount: income.amount
+              amount: income.amount,
+              name: income.name
             })
           }
           currentDate = new Date(currentDate.getTime() + weekMs)
@@ -186,7 +188,8 @@ function Dashboard({
           if (currentDate >= monthStart && currentDate >= startDate) {
             monthlyIncomes.push({
               day: currentDate.getDate(),
-              amount: income.amount
+              amount: income.amount,
+              name: income.name
             })
           }
           currentDate = new Date(currentDate.getTime() + biWeekMs)
@@ -195,7 +198,8 @@ function Dashboard({
         if (new Date(selectedYear, selectedMonth, startDay) >= startDate) {
           monthlyIncomes.push({
             day: startDay <= daysInMonth ? startDay : daysInMonth,
-            amount: income.amount
+            amount: income.amount,
+            name: income.name
           })
         }
       } else if (income.frequency === 'quarterly') {
@@ -205,7 +209,8 @@ function Dashboard({
             if (new Date(selectedYear, selectedMonth, startDay) >= startDate) {
               monthlyIncomes.push({
                 day: startDay <= daysInMonth ? startDay : daysInMonth,
-                amount: income.amount
+                amount: income.amount,
+                name: income.name
               })
             }
           }
@@ -215,7 +220,8 @@ function Dashboard({
           if (new Date(selectedYear, selectedMonth, startDay) >= startDate) {
             monthlyIncomes.push({
               day: startDay <= daysInMonth ? startDay : daysInMonth,
-              amount: income.amount
+              amount: income.amount,
+              name: income.name
             })
           }
         }
@@ -238,7 +244,8 @@ function Dashboard({
           if (!isPaid) {
             monthlyBills.push({
               day: billDate.getDate(),
-              amount: bill.amount
+              amount: bill.amount,
+              name: bill.name
             })
           }
         }
@@ -250,7 +257,8 @@ function Dashboard({
           if (!isPaid) {
             monthlyBills.push({
               day: billDay <= daysInMonth ? billDay : daysInMonth,
-              amount: bill.amount
+              amount: bill.amount,
+              name: bill.name
             })
           }
         }
@@ -262,7 +270,8 @@ function Dashboard({
             if (!isPaid) {
               monthlyBills.push({
                 day: billDay <= daysInMonth ? billDay : daysInMonth,
-                amount: bill.amount
+                amount: bill.amount,
+                name: bill.name
               })
             }
           }
@@ -277,7 +286,8 @@ function Dashboard({
               if (!isPaid) {
                 monthlyBills.push({
                   day: billDay <= daysInMonth ? billDay : daysInMonth,
-                  amount: bill.amount
+                  amount: bill.amount,
+                  name: bill.name
                 })
               }
             }
@@ -296,7 +306,8 @@ function Dashboard({
             if (!isPaid) {
               monthlyBills.push({
                 day: currentDate.getDate(),
-                amount: bill.amount
+                amount: bill.amount,
+                name: bill.name
               })
             }
           }
@@ -307,6 +318,7 @@ function Dashboard({
 
     // Group EXPENSE transactions by day (exclude income to avoid double-counting with recurring income)
     const dailyExpenses = {}
+    const dailyExpenseDetails = {}
 
     monthlyTransactions.forEach(t => {
       // Only include expenses (negative amounts), skip income transactions
@@ -314,13 +326,20 @@ function Dashboard({
         const day = new Date(t.date).getDate()
         if (!dailyExpenses[day]) {
           dailyExpenses[day] = 0
+          dailyExpenseDetails[day] = []
         }
         dailyExpenses[day] += t.amount // This is negative, so it reduces balance
+        dailyExpenseDetails[day].push({
+          description: t.description,
+          amount: t.amount,
+          category: t.category
+        })
       }
     })
 
     // Calculate cumulative cash flow for each day, starting with the starting balance
     let balance = startingBalance
+    let previousDayBalance = startingBalance
     for (let day = 1; day <= daysInMonth; day++) {
       // Add projected recurring income for this day
       const incomesToday = monthlyIncomes.filter(i => i.day === day)
@@ -341,8 +360,18 @@ function Dashboard({
       data.push({
         day,
         balance: Math.round(balance * 100) / 100,
-        date: `${selectedMonth + 1}/${day}`
+        date: `${selectedMonth + 1}/${day}`,
+        // Breakdown data for tooltip
+        startingBalance: Math.round(previousDayBalance * 100) / 100,
+        incomes: incomesToday,
+        transactions: dailyExpenseDetails[day] || [],
+        bills: billsToday,
+        incomeAmount: Math.round(incomeAmount * 100) / 100,
+        expensesAmount: Math.round(expensesAmount * 100) / 100,
+        billsAmount: Math.round(billsAmount * 100) / 100
       })
+
+      previousDayBalance = balance
     }
 
     return data
@@ -408,6 +437,116 @@ function Dashboard({
     line: theme === 'dark' ? '#60a5fa' : '#8884d8',
     tooltipBg: theme === 'dark' ? '#1f2937' : '#ffffff',
     tooltipBorder: theme === 'dark' ? '#374151' : '#e5e7eb'
+  }
+
+  // Custom tooltip component for cash flow chart
+  const CustomCashFlowTooltip = ({ active, payload }) => {
+    if (!active || !payload || !payload[0]) return null
+
+    const data = payload[0].payload
+    const hasActivity = data.incomeAmount > 0 || data.expensesAmount < 0 || data.billsAmount > 0
+
+    return (
+      <div
+        style={{
+          backgroundColor: chartColors.tooltipBg,
+          border: `1px solid ${chartColors.tooltipBorder}`,
+          borderRadius: '6px',
+          padding: '12px',
+          color: chartColors.text,
+          fontSize: '13px',
+          minWidth: '220px',
+          maxWidth: '350px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+        }}
+      >
+        <div style={{ fontWeight: 'bold', marginBottom: '8px', fontSize: '14px' }}>
+          {data.date}
+        </div>
+
+        <div style={{ marginBottom: '8px', paddingBottom: '8px', borderBottom: `1px solid ${chartColors.tooltipBorder}` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+            <span style={{ color: '#9ca3af' }}>Starting Balance:</span>
+            <span style={{ fontWeight: '500' }}>{formatCurrency(data.startingBalance)}</span>
+          </div>
+        </div>
+
+        {hasActivity ? (
+          <>
+            {data.incomes.length > 0 && (
+              <div style={{ marginBottom: '8px' }}>
+                <div style={{ color: '#10b981', fontWeight: '500', marginBottom: '4px' }}>
+                  Income: {formatCurrency(data.incomeAmount)}
+                </div>
+                {data.incomes.map((income, idx) => (
+                  <div key={idx} style={{ fontSize: '12px', paddingLeft: '8px', color: '#9ca3af', marginBottom: '2px' }}>
+                    • {income.name}: {formatCurrency(income.amount)}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {data.transactions.length > 0 && (
+              <div style={{ marginBottom: '8px' }}>
+                <div style={{ color: '#ef4444', fontWeight: '500', marginBottom: '4px' }}>
+                  Transactions: {formatCurrency(data.expensesAmount)}
+                </div>
+                {data.transactions.slice(0, 5).map((txn, idx) => (
+                  <div key={idx} style={{ fontSize: '12px', paddingLeft: '8px', color: '#9ca3af', marginBottom: '2px' }}>
+                    • {txn.description}: {formatCurrency(txn.amount)}
+                  </div>
+                ))}
+                {data.transactions.length > 5 && (
+                  <div style={{ fontSize: '12px', paddingLeft: '8px', color: '#9ca3af', fontStyle: 'italic' }}>
+                    ... and {data.transactions.length - 5} more
+                  </div>
+                )}
+              </div>
+            )}
+
+            {data.bills.length > 0 && (
+              <div style={{ marginBottom: '8px' }}>
+                <div style={{ color: '#f59e0b', fontWeight: '500', marginBottom: '4px' }}>
+                  Bills Due: -{formatCurrency(data.billsAmount)}
+                </div>
+                {data.bills.map((bill, idx) => (
+                  <div key={idx} style={{ fontSize: '12px', paddingLeft: '8px', color: '#9ca3af', marginBottom: '2px' }}>
+                    • {bill.name}: {formatCurrency(bill.amount)}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <div style={{ color: '#9ca3af', fontSize: '12px', fontStyle: 'italic', marginBottom: '8px' }}>
+            No activity on this day
+          </div>
+        )}
+
+        <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: `1px solid ${chartColors.tooltipBorder}` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+            <span>Ending Balance:</span>
+            <span style={{ color: data.balance >= 0 ? '#10b981' : '#ef4444' }}>
+              {formatCurrency(data.balance)}
+            </span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Prepare calendar data - use the same cashFlowData
+  const calendarData = useMemo(() => {
+    // cashFlowData already has all the information we need
+    return cashFlowData
+  }, [cashFlowData])
+
+  const handleDayClick = (dayData) => {
+    setSelectedCalendarDay(dayData)
+  }
+
+  const handleCloseModal = () => {
+    setSelectedCalendarDay(null)
   }
 
   return (
@@ -632,26 +771,161 @@ function Dashboard({
               tickFormatter={(value) => `$${value.toLocaleString()}`}
               tick={{ fill: chartColors.text }}
             />
-            <Tooltip
-              formatter={(value) => [`$${value.toLocaleString()}`, 'Balance']}
-              labelFormatter={(label) => `Date: ${label}`}
-              contentStyle={{
-                backgroundColor: chartColors.tooltipBg,
-                border: `1px solid ${chartColors.tooltipBorder}`,
-                color: chartColors.text
-              }}
-            />
+            <Tooltip content={<CustomCashFlowTooltip />} />
             <ReferenceLine y={0} stroke="#e74c3c" strokeWidth={2} strokeDasharray="3 3" />
             <Line
               type="monotone"
               dataKey="balance"
               stroke={chartColors.line}
               strokeWidth={2}
-              dot={false}
+              dot={{ fill: chartColors.line, r: 3 }}
+              activeDot={{ r: 5 }}
             />
           </LineChart>
         </ResponsiveContainer>
       </div>
+
+      {/* Calendar Section */}
+      <div className="calendar-section">
+        <h2>Monthly Calendar</h2>
+        <div className="calendar-grid">
+          {/* Day headers */}
+          <div className="calendar-header">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              <div key={day} className="calendar-day-header">{day}</div>
+            ))}
+          </div>
+
+          {/* Calendar days */}
+          <div className="calendar-days">
+            {(() => {
+              const firstDay = new Date(selectedYear, selectedMonth, 1).getDay()
+              const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate()
+              const days = []
+
+              // Empty cells for days before month starts
+              for (let i = 0; i < firstDay; i++) {
+                days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>)
+              }
+
+              // Actual days of the month
+              for (let day = 1; day <= daysInMonth; day++) {
+                const dayData = calendarData.find(d => d.day === day)
+                const netChange = (dayData?.incomeAmount || 0) + (dayData?.expensesAmount || 0) - (dayData?.billsAmount || 0)
+                const hasActivity = (dayData?.incomes.length > 0) || (dayData?.transactions.length > 0) || (dayData?.bills.length > 0)
+
+                // Determine if this is today
+                const today = new Date()
+                const isToday = today.getDate() === day &&
+                               today.getMonth() === selectedMonth &&
+                               today.getFullYear() === selectedYear
+
+                days.push(
+                  <div
+                    key={day}
+                    className={`calendar-day ${hasActivity ? 'has-activity' : ''} ${isToday ? 'today' : ''}`}
+                    onClick={() => hasActivity && handleDayClick(dayData)}
+                  >
+                    <div className="calendar-day-number">{day}</div>
+                    {hasActivity && (
+                      <div className="calendar-day-content">
+                        {dayData.incomes.length > 0 && (
+                          <div className="calendar-indicator income">
+                            💰 {dayData.incomes.length}
+                          </div>
+                        )}
+                        {dayData.transactions.length > 0 && (
+                          <div className="calendar-indicator transaction">
+                            🛒 {dayData.transactions.length}
+                          </div>
+                        )}
+                        {dayData.bills.length > 0 && (
+                          <div className="calendar-indicator bill">
+                            📄 {dayData.bills.length}
+                          </div>
+                        )}
+                        <div className={`calendar-day-total ${netChange >= 0 ? 'positive' : 'negative'}`}>
+                          {netChange >= 0 ? '+' : ''}{formatCurrency(netChange)}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              }
+
+              return days
+            })()}
+          </div>
+        </div>
+      </div>
+
+      {/* Day Detail Modal */}
+      {selectedCalendarDay && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Details for {monthNames[selectedMonth]} {selectedCalendarDay.day}, {selectedYear}</h3>
+              <button className="modal-close" onClick={handleCloseModal}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="modal-section">
+                <div className="modal-balance-row">
+                  <span>Starting Balance:</span>
+                  <span className="modal-amount">{formatCurrency(selectedCalendarDay.startingBalance)}</span>
+                </div>
+              </div>
+
+              {selectedCalendarDay.incomes.length > 0 && (
+                <div className="modal-section">
+                  <h4 className="modal-section-title income">Income ({formatCurrency(selectedCalendarDay.incomeAmount)})</h4>
+                  {selectedCalendarDay.incomes.map((income, idx) => (
+                    <div key={idx} className="modal-item">
+                      <span>{income.name}</span>
+                      <span className="modal-amount positive">{formatCurrency(income.amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {selectedCalendarDay.transactions.length > 0 && (
+                <div className="modal-section">
+                  <h4 className="modal-section-title expense">Transactions ({formatCurrency(selectedCalendarDay.expensesAmount)})</h4>
+                  {selectedCalendarDay.transactions.map((txn, idx) => (
+                    <div key={idx} className="modal-item">
+                      <div>
+                        <div>{txn.description}</div>
+                        {txn.category && <div className="modal-item-subtitle">{txn.category}</div>}
+                      </div>
+                      <span className="modal-amount negative">{formatCurrency(txn.amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {selectedCalendarDay.bills.length > 0 && (
+                <div className="modal-section">
+                  <h4 className="modal-section-title bill">Bills Due (-{formatCurrency(selectedCalendarDay.billsAmount)})</h4>
+                  {selectedCalendarDay.bills.map((bill, idx) => (
+                    <div key={idx} className="modal-item">
+                      <span>{bill.name}</span>
+                      <span className="modal-amount negative">-{formatCurrency(bill.amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="modal-section modal-total">
+                <div className="modal-balance-row">
+                  <span className="modal-total-label">Ending Balance:</span>
+                  <span className={`modal-amount ${selectedCalendarDay.balance >= 0 ? 'positive' : 'negative'}`}>
+                    {formatCurrency(selectedCalendarDay.balance)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="categories-section">
         <div className="categories-header">
