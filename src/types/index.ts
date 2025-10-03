@@ -108,6 +108,36 @@ export interface MonthlyPayment {
   month: number; // 1-12
   paid: boolean;
   datePaid?: string; // ISO date string when the payment was marked
+  amountPaid?: number; // Actual amount paid for this month
+}
+
+export interface BalanceSnapshot {
+  date: string; // ISO date string
+  balance: number; // Balance at this point in time
+}
+
+export interface Reward {
+  id: string;
+  type: 'points' | 'cashback' | 'miles';
+  amount: number;
+  earnedDate: string; // ISO date string
+  description?: string;
+  redeemed?: boolean;
+  redeemedDate?: string;
+  redeemedValue?: number;
+}
+
+export interface CardBenefit {
+  id: string;
+  name: string; // e.g., "Airport Lounge Access", "Purchase Protection"
+  description?: string;
+  category?: 'insurance' | 'travel' | 'shopping' | 'dining' | 'entertainment' | 'other';
+}
+
+export interface CustomPayoffPlan {
+  monthlyPayment: number;
+  startDate: string; // ISO date string
+  active: boolean;
 }
 
 export interface CreditCard {
@@ -119,5 +149,30 @@ export interface CreditCard {
   dueDate: string; // Day of month (1-31) when payment is due
   creditLimit?: number; // Optional credit limit
   memo?: string; // Optional notes
+
+  // Payment tracking
   paymentHistory?: MonthlyPayment[]; // Track monthly payment status
+  autopay?: boolean; // Is autopay enabled?
+  autopayAmount?: 'minimum' | 'statement' | 'full' | number; // What amount is autopaid
+
+  // Balance tracking
+  balanceHistory?: BalanceSnapshot[]; // Track balance over time
+
+  // Rewards tracking
+  rewardsType?: 'points' | 'cashback' | 'miles'; // Type of rewards earned
+  rewardsBalance?: number; // Current rewards balance
+  rewardsHistory?: Reward[]; // Detailed rewards history
+
+  // Fees and benefits
+  annualFee?: number; // Annual fee amount
+  annualFeeDate?: string; // Month-day format (MM-DD) when fee is charged
+  lastAnnualFeeDate?: string; // ISO date of last annual fee charge
+  benefits?: CardBenefit[]; // List of card benefits/perks
+
+  // Payoff planning
+  customPayoffPlan?: CustomPayoffPlan; // User's custom payoff plan
+
+  // Visual customization
+  color?: string; // Hex color for card theme
+  icon?: string; // Icon identifier for card
 }
