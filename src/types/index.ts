@@ -103,6 +103,13 @@ export interface RecurringIncome {
   memo?: string; // Optional notes
 }
 
+export interface MonthlyPayment {
+  year: number;
+  month: number; // 1-12
+  paid: boolean;
+  datePaid?: string; // ISO date string when the payment was marked
+}
+
 export interface CreditCard {
   id: string;
   name: string; // e.g., "Chase Sapphire", "Capital One Venture"
@@ -112,4 +119,5 @@ export interface CreditCard {
   dueDate: string; // Day of month (1-31) when payment is due
   creditLimit?: number; // Optional credit limit
   memo?: string; // Optional notes
+  paymentHistory?: MonthlyPayment[]; // Track monthly payment status
 }

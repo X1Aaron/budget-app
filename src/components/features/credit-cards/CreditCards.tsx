@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import '../../../styles/components/CreditCards.css'
-import type { CreditCard } from '../../../types'
+import type { CreditCard, MonthlyPayment } from '../../../types'
 
 interface CreditCardsProps {
   creditCards: CreditCard[]
@@ -201,6 +201,65 @@ function CreditCards({ creditCards, onUpdateCreditCards }: CreditCardsProps) {
         setExpandedCardId(null)
       }
     }
+  }
+
+  const handleTogglePayment = (cardId: string, year: number, month: number) => {
+    const card = creditCards.find(c => c.id === cardId)
+    if (!card) return
+
+    const paymentHistory = card.paymentHistory || []
+    const existingPayment = paymentHistory.find(p => p.year === year && p.month === month)
+
+    let updatedHistory: MonthlyPayment[]
+    if (existingPayment) {
+      // Toggle existing payment
+      updatedHistory = paymentHistory.map(p =>
+        p.year === year && p.month === month
+          ? { ...p, paid: !p.paid, datePaid: !p.paid ? new Date().toISOString() : undefined }
+          : p
+      )
+    } else {
+      // Add new payment
+      updatedHistory = [
+        ...paymentHistory,
+        {
+          year,
+          month,
+          paid: true,
+          datePaid: new Date().toISOString()
+        }
+      ]
+    }
+
+    onUpdateCreditCards(
+      creditCards.map(c => c.id === cardId ? { ...c, paymentHistory: updatedHistory } : c)
+    )
+  }
+
+  const getLast12Months = () => {
+    const months = []
+    const now = new Date()
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      months.push({
+        year: date.getFullYear(),
+        month: date.getMonth() + 1, // 1-12
+        label: date.toLocaleDateString('en-US', { month: 'short' })
+      })
+    }
+    return months
+  }
+
+  const isMonthPaid = (card: CreditCard, year: number, month: number) => {
+    if (!card.paymentHistory) return false
+    const payment = card.paymentHistory.find(p => p.year === year && p.month === month)
+    return payment?.paid || false
+  }
+
+  const getPaymentDate = (card: CreditCard, year: number, month: number) => {
+    if (!card.paymentHistory) return null
+    const payment = card.paymentHistory.find(p => p.year === year && p.month === month)
+    return payment?.datePaid || null
   }
 
   const totalBalance = creditCards.reduce((sum, card) => sum + card.balance, 0)
@@ -416,6 +475,38 @@ function CreditCards({ creditCards, onUpdateCreditCards }: CreditCardsProps) {
                           </div>
                         </div>
                       )}
+
+                      {/* Monthly Payment Tracker */}
+                      <div className="detail-section payment-tracker-section">
+                        <div className="detail-label">Monthly Payment Tracker</div>
+                        <div className="payment-tracker">
+                          {getLast12Months().map(({ year, month, label }) => {
+                            const isPaid = isMonthPaid(card, year, month)
+                            const paymentDate = getPaymentDate(card, year, month)
+                            return (
+                              <div
+                                key={`${year}-${month}`}
+                                className="payment-month"
+                                title={
+                                  isPaid && paymentDate
+                                    ? `Paid on ${new Date(paymentDate).toLocaleDateString()}`
+                                    : `Mark as paid for ${label} ${year}`
+                                }
+                              >
+                                <div className="month-label">{label}</div>
+                                <label className="payment-checkbox">
+                                  <input
+                                    type="checkbox"
+                                    checked={isPaid}
+                                    onChange={() => handleTogglePayment(card.id, year, month)}
+                                  />
+                                  <span className="checkmark"></span>
+                                </label>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
 
                       {card.memo && (
                         <div className="detail-section">
