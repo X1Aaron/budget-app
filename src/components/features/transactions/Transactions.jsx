@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import '../../../styles/components/Transactions.css'
 import { getCategoryColor, autoCategorize, generateMerchantName } from '../../../utils/categories'
 import { calculateMonthStartingBalance } from '../../../utils/balanceCalculations'
+import CategoryModal from '../categories/CategoryModal'
 
 function Transactions({
   transactions,
@@ -35,8 +36,6 @@ function Transactions({
   const [importItemsPerPage, setImportItemsPerPage] = useState(25)
   const [ruleInfoModal, setRuleInfoModal] = useState(null)
   const [addCategoryModal, setAddCategoryModal] = useState(false)
-  const [newCategoryName, setNewCategoryName] = useState('')
-  const [newCategoryColor, setNewCategoryColor] = useState('#6b7280')
   const [pendingTransactionUpdate, setPendingTransactionUpdate] = useState(null)
 
   const handleSort = (key) => {
@@ -393,30 +392,31 @@ function Transactions({
     )
   }
 
-  const handleSaveNewCategory = () => {
-    if (!newCategoryName.trim()) {
-      alert('Please enter a category name')
-      return
-    }
-
+  const handleSaveNewCategory = (newCategory) => {
     // Check if category already exists
-    if (categories.some(cat => cat.name.toLowerCase() === newCategoryName.trim().toLowerCase())) {
+    if (categories.some(cat => cat.name.toLowerCase() === newCategory.name.toLowerCase())) {
       alert('A category with this name already exists')
       return
     }
 
-    const newCategory = {
-      id: newCategoryName.toLowerCase().replace(/\s+/g, '-'),
-      name: newCategoryName.trim(),
-      color: newCategoryColor,
-      type: 'expense',
-      keywords: [],
-      budgeted: 0,
-      needWant: 'need'
-    }
-
     // Add the category
     onUpdateCategories([...categories, newCategory])
+
+    // Automatically recategorize transactions with the new category
+    if (transactions && onUpdateTransactions && newCategory.keywords.length > 0) {
+      const updatedTransactions = transactions.map(t => {
+        if (t.autoCategorized || !t.category || t.category === 'Uncategorized') {
+          const result = autoCategorize(t.description, t.amount, 'Uncategorized', [...categories, newCategory], {}, {})
+          return {
+            ...t,
+            category: result.category,
+            autoCategorized: result.wasAutoCategorized
+          }
+        }
+        return t
+      })
+      onUpdateTransactions(updatedTransactions)
+    }
 
     // Apply the category to the pending transaction
     if (pendingTransactionUpdate) {
@@ -449,15 +449,11 @@ function Transactions({
 
     // Reset modal
     setAddCategoryModal(false)
-    setNewCategoryName('')
-    setNewCategoryColor('#6b7280')
     setPendingTransactionUpdate(null)
   }
 
   const handleCancelNewCategory = () => {
     setAddCategoryModal(false)
-    setNewCategoryName('')
-    setNewCategoryColor('#6b7280')
     setPendingTransactionUpdate(null)
   }
 
@@ -477,39 +473,10 @@ function Transactions({
     <div className="transactions-page">
       {/* Add Category Modal */}
       {addCategoryModal && (
-        <div className="bill-modal-backdrop" onClick={handleCancelNewCategory}>
-          <div className="bill-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Add New Category</h3>
-            <div className="bill-modal-form">
-              <div className="form-group">
-                <label>Category Name *</label>
-                <input
-                  type="text"
-                  value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
-                  placeholder="e.g., Groceries, Entertainment"
-                  autoFocus
-                />
-              </div>
-              <div className="form-group">
-                <label>Color</label>
-                <input
-                  type="color"
-                  value={newCategoryColor}
-                  onChange={(e) => setNewCategoryColor(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="bill-modal-actions">
-              <button className="cancel-btn" onClick={handleCancelNewCategory}>
-                Cancel
-              </button>
-              <button className="save-btn" onClick={handleSaveNewCategory}>
-                Add Category
-              </button>
-            </div>
-          </div>
-        </div>
+        <CategoryModal
+          onClose={handleCancelNewCategory}
+          onSave={handleSaveNewCategory}
+        />
       )}
 
       {/* Rule Info Modal */}
