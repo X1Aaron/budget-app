@@ -1117,10 +1117,25 @@
   color: #f59e0b;
 }
 
+.calendar-indicator .count {
+  font-size: 0.65rem;
+  opacity: 0.8;
+  margin-left: 0.15rem;
+}
+
+.calendar-item-name {
+  font-size: 0.65rem;
+  opacity: 0.85;
+  margin-top: 0.1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .calendar-day-total {
   margin-top: auto;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   text-align: center;
   padding: 0.25rem;
   border-radius: 4px;
@@ -1134,6 +1149,21 @@
 .calendar-day-total.negative {
   color: #ef4444;
   background: rgba(239, 68, 68, 0.1);
+}
+
+.calendar-day-balance {
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-align: center;
+  padding: 0.25rem;
+  border-radius: 4px;
+  margin-top: 0.25rem;
+  color: var(--text-secondary);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+[data-theme="dark"] .calendar-day-balance {
+  background: rgba(59, 130, 246, 0.12);
 }
 
 /* Modal Styles */

@@ -831,21 +831,36 @@ function Dashboard({
                       <div className="calendar-day-content">
                         {dayData.incomes.length > 0 && (
                           <div className="calendar-indicator income">
-                            💰 {dayData.incomes.length}
+                            💰 {formatCurrency(dayData.incomeAmount)}
+                            {dayData.incomes.length > 1 && <span className="count">({dayData.incomes.length})</span>}
+                            {dayData.incomes.length === 1 && (
+                              <div className="calendar-item-name">{dayData.incomes[0].name}</div>
+                            )}
                           </div>
                         )}
                         {dayData.transactions.length > 0 && (
                           <div className="calendar-indicator transaction">
-                            🛒 {dayData.transactions.length}
+                            🛒 {formatCurrency(Math.abs(dayData.expensesAmount))}
+                            {dayData.transactions.length > 1 && <span className="count">({dayData.transactions.length})</span>}
+                            {dayData.transactions.length === 1 && (
+                              <div className="calendar-item-name">{dayData.transactions[0].category}</div>
+                            )}
                           </div>
                         )}
                         {dayData.bills.length > 0 && (
                           <div className="calendar-indicator bill">
-                            📄 {dayData.bills.length}
+                            📄 {formatCurrency(dayData.billsAmount)}
+                            {dayData.bills.length > 1 && <span className="count">({dayData.bills.length})</span>}
+                            {dayData.bills.length === 1 && (
+                              <div className="calendar-item-name">{dayData.bills[0].name}</div>
+                            )}
                           </div>
                         )}
                         <div className={`calendar-day-total ${netChange >= 0 ? 'positive' : 'negative'}`}>
-                          {netChange >= 0 ? '+' : ''}{formatCurrency(netChange)}
+                          Net: {netChange >= 0 ? '+' : ''}{formatCurrency(netChange)}
+                        </div>
+                        <div className="calendar-day-balance">
+                          Balance: {formatCurrency(dayData.endingBalance)}
                         </div>
                       </div>
                     )}
