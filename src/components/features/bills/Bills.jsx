@@ -1,17 +1,13 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import '../../../styles/components/Bills.css'
 import { getCategoryColor } from '../../../utils/categories'
-import { generateBillOccurrences, findSuggestedTransactionsForBill } from '../../../utils/billMatching'
 
 function Bills({
-  transactions,
   bills,
   categories,
   selectedYear,
   selectedMonth,
-  onUpdateTransactions,
   onUpdateBills,
-  billMatchingSettings,
   conversionData,
   onConversionComplete
 }) {
@@ -26,9 +22,6 @@ function Bills({
     category: '',
     memo: ''
   })
-  const [suggestedTransactions, setSuggestedTransactions] = useState([])
-  const [selectedSuggestion, setSelectedSuggestion] = useState(null)
-  const [confirmLinkTransaction, setConfirmLinkTransaction] = useState(false)
   const [editingInlineId, setEditingInlineId] = useState(null)
   const [inlineFormData, setInlineFormData] = useState({})
 
@@ -37,9 +30,12 @@ function Bills({
     'July', 'August', 'September', 'October', 'November', 'December'
   ]
 
-  // Generate bill occurrences for the current month
-  const billOccurrences = useMemo(() => {
-    return generateBillOccurrences(bills, selectedYear, selectedMonth)
+  // Get bills for the current month
+  const monthlyBills = useMemo(() => {
+    return bills.filter(bill => {
+      const [year, month] = bill.dueDate.split('-').map(Number)
+      return year === selectedYear && month - 1 === selectedMonth
+    })
   }, [bills, selectedYear, selectedMonth])
 
   const formatCurrency = (amount) => {
@@ -62,9 +58,6 @@ function Bills({
       memo: ''
     })
     setEditingBill(null)
-    setSuggestedTransactions([])
-    setSelectedSuggestion(null)
-    setConfirmLinkTransaction(false)
     setAddModalOpen(true)
   }
 
@@ -80,32 +73,9 @@ function Bills({
         memo: conversionData.memo || ''
       })
       setEditingBill(null)
-      setSuggestedTransactions([])
-      setSelectedSuggestion(null)
-      setConfirmLinkTransaction(false)
       setAddModalOpen(true)
     }
   }, [conversionData])
-
-  // Update suggestions when bill name or amount changes
-  useEffect(() => {
-    if (addModalOpen && !editingBill && formData.billName && formData.amount) {
-      const amount = parseFloat(formData.amount)
-      if (!isNaN(amount) && amount > 0) {
-        const suggestions = findSuggestedTransactionsForBill(
-          transactions,
-          formData.billName,
-          amount,
-          billMatchingSettings?.amountTolerance || 5
-        )
-        setSuggestedTransactions(suggestions.slice(0, 5)) // Show top 5
-      } else {
-        setSuggestedTransactions([])
-      }
-    } else {
-      setSuggestedTransactions([])
-    }
-  }, [formData.billName, formData.amount, addModalOpen, editingBill, transactions, billMatchingSettings])
 
   const handleEditBill = (bill) => {
     setFormData({
@@ -122,20 +92,6 @@ function Bills({
 
   const handleDeleteBill = (billId) => {
     if (confirm('Are you sure you want to delete this bill?')) {
-      // Unlink any transactions from this bill
-      onUpdateTransactions(prevTransactions =>
-        prevTransactions.map(t => {
-          if (t.matchedToBillId === billId) {
-            return {
-              ...t,
-              matchedToBillId: undefined,
-              hiddenAsBillPayment: false
-            }
-          }
-          return t
-        })
-      )
-      // Remove the bill
       onUpdateBills(prevBills => prevBills.filter(b => b.id !== billId))
     }
   }
@@ -180,50 +136,10 @@ function Bills({
         billAmount: parseFloat(formData.amount),
         dueDate: formData.dueDate,
         frequency: formData.frequency,
-        paidDates: [],
-        payments: []
+        isPaid: false
       }
 
-      // If a transaction was selected AND user confirmed the link, match it to the bill
-      if (selectedSuggestion && confirmLinkTransaction) {
-        const selectedTransaction = selectedSuggestion.transaction
-
-        // Verify the transaction isn't already matched (shouldn't happen, but safety check)
-        if (selectedTransaction.matchedToBillId) {
-          alert('This transaction is already matched to another bill. Please refresh and try again.')
-          return
-        }
-
-        const occurrenceDate = formData.dueDate
-
-        // Add payment to the new bill
-        newBill.payments = [{
-          occurrenceDate: occurrenceDate,
-          transactionDate: selectedTransaction.date,
-          transactionAmount: selectedTransaction.amount,
-          transactionDescription: selectedTransaction.description,
-          manuallyMarked: true
-        }]
-
-        // Mark selected transaction as matched
-        onUpdateTransactions(prevTransactions => {
-          return prevTransactions.map(t => {
-            if (t.id === selectedTransaction.id) {
-              return {
-                ...t,
-                matchedToBillId: billId,
-                hiddenAsBillPayment: true
-              }
-            }
-            return t
-          })
-        })
-        // Add the new bill
-        onUpdateBills(prevBills => [...prevBills, newBill])
-      } else {
-        // No transaction selected, just add the bill
-        onUpdateBills(prevBills => [...prevBills, newBill])
-      }
+      onUpdateBills(prevBills => [...prevBills, newBill])
     }
 
     setFormData({
@@ -235,63 +151,33 @@ function Bills({
       memo: ''
     })
     setEditingBill(null)
-    setSuggestedTransactions([])
-    setSelectedSuggestion(null)
-    setConfirmLinkTransaction(false)
     setAddModalOpen(false)
     if (onConversionComplete) {
       onConversionComplete()
     }
   }
 
-  const handleUnlinkTransaction = (transactionId) => {
-    if (confirm('Unlink this transaction from the bill?')) {
-      onUpdateTransactions(prevTransactions =>
-        prevTransactions.map(t =>
-          t.id === transactionId
-            ? { ...t, matchedToBillId: undefined, hiddenAsBillPayment: false }
-            : t
-        )
-      )
-    }
-  }
-
-  const handleTogglePaid = (billOccurrence) => {
-    onUpdateBills(prevBills => prevBills.map(bill => {
-      if (bill.id === billOccurrence.billId) {
-        const payments = bill.payments || []
-        const existingPayment = payments.find(p => p.occurrenceDate === billOccurrence.occurrenceDate)
-
-        if (existingPayment) {
-          // Remove payment
-          return {
-            ...bill,
-            payments: payments.filter(p => p.occurrenceDate !== billOccurrence.occurrenceDate)
-          }
-        } else {
-          // Add manual payment
-          return {
-            ...bill,
-            payments: [...payments, {
-              occurrenceDate: billOccurrence.occurrenceDate,
-              manuallyMarked: true
-            }]
-          }
+  const handleTogglePaid = (bill) => {
+    onUpdateBills(prevBills => prevBills.map(b => {
+      if (b.id === bill.id) {
+        return {
+          ...b,
+          isPaid: !b.isPaid
         }
       }
-      return bill
+      return b
     }))
   }
 
-  const handleStartInlineEdit = (occ) => {
-    setEditingInlineId(occ.billId)
+  const handleStartInlineEdit = (bill) => {
+    setEditingInlineId(bill.id)
     setInlineFormData({
-      billName: occ.billName,
-      amount: occ.billAmount,
-      dueDate: occ.billTransaction.dueDate,
-      frequency: occ.frequency,
-      category: occ.category,
-      memo: occ.billTransaction.memo || ''
+      billName: bill.billName,
+      amount: bill.billAmount,
+      dueDate: bill.dueDate,
+      frequency: bill.frequency,
+      category: bill.category,
+      memo: bill.memo || ''
     })
   }
 
@@ -328,29 +214,13 @@ function Bills({
     setInlineFormData({})
   }
 
-  const handleConvertTransaction = (transactionId) => {
-    const transaction = transactions.find(t => t.id === transactionId)
-    if (transaction) {
-      handleEditBill({
-        id: null, // New bill
-        billName: transaction.merchantName || transaction.description,
-        billAmount: Math.abs(transaction.amount),
-        dueDate: transaction.date,
-        frequency: 'monthly',
-        category: transaction.category,
-        memo: transaction.memo,
-        sourceDescription: transaction.description
-      })
-    }
-  }
-
   // Summary stats
   const summary = useMemo(() => {
-    const totalBills = billOccurrences.length
-    const paidBills = billOccurrences.filter(b => b.payment).length
+    const totalBills = monthlyBills.length
+    const paidBills = monthlyBills.filter(b => b.isPaid).length
     const unpaidBills = totalBills - paidBills
-    const totalAmount = billOccurrences.reduce((sum, b) => sum + b.billAmount, 0)
-    const paidAmount = billOccurrences.filter(b => b.payment).reduce((sum, b) => sum + b.billAmount, 0)
+    const totalAmount = monthlyBills.reduce((sum, b) => sum + b.billAmount, 0)
+    const paidAmount = monthlyBills.filter(b => b.isPaid).reduce((sum, b) => sum + b.billAmount, 0)
     const unpaidAmount = totalAmount - paidAmount
 
     return {
@@ -361,7 +231,7 @@ function Bills({
       paidAmount,
       unpaidAmount
     }
-  }, [billOccurrences])
+  }, [monthlyBills])
 
   return (
     <div className="bills-page">
@@ -439,55 +309,6 @@ function Bills({
                   />
                 </div>
               </div>
-
-              {/* Transaction Suggestions */}
-              {!editingBill && suggestedTransactions.length > 0 && (
-                <div className="suggestions-panel">
-                  <h4>Suggested Matches</h4>
-                  <p className="field-help">These transactions might correspond to this bill based on the name and amount.</p>
-                  <div className="suggestions-list">
-                    {suggestedTransactions.map((suggestion, idx) => {
-                      const isSelected = selectedSuggestion?.transaction.id === suggestion.transaction.id
-                      return (
-                        <div
-                          key={suggestion.transaction.id || idx}
-                          className={`suggestion-item ${isSelected ? 'selected' : ''}`}
-                          onClick={() => {
-                            setSelectedSuggestion(isSelected ? null : suggestion)
-                            setConfirmLinkTransaction(false) // Reset confirmation when changing selection
-                          }}
-                        >
-                          <div className="suggestion-header">
-                            <span className="suggestion-date">{suggestion.transaction.date}</span>
-                            <span className="suggestion-amount">{formatCurrency(suggestion.transaction.amount)}</span>
-                          </div>
-                          <div className="suggestion-description">
-                            {suggestion.transaction.merchantName || suggestion.transaction.description}
-                          </div>
-                          <div className="suggestion-match-reason">
-                            {suggestion.matchReason} (score: {suggestion.matchScore})
-                          </div>
-                          {isSelected && (
-                            <div className="suggestion-selected-indicator">
-                              <label className="link-checkbox-label">
-                                <input
-                                  type="checkbox"
-                                  checked={confirmLinkTransaction}
-                                  onChange={(e) => {
-                                    e.stopPropagation()
-                                    setConfirmLinkTransaction(e.target.checked)
-                                  }}
-                                />
-                                Link this transaction to the bill
-                              </label>
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
             </div>
             <div className="bill-modal-actions">
               <button className="cancel-btn" onClick={() => { setAddModalOpen(false); if (onConversionComplete) onConversionComplete(); }}>
@@ -532,19 +353,19 @@ function Bills({
 
         {/* Bills List */}
         <div className="bills-list">
-          {billOccurrences.length === 0 ? (
+          {monthlyBills.length === 0 ? (
             <div className="empty-state">
               <p>No bills for this month.</p>
               <p>Click "Add Bill" to create your first bill.</p>
             </div>
           ) : (
-            billOccurrences.map((occ, index) => {
-              const isExpanded = expandedBillId === occ.billId
-              const isEditing = editingInlineId === occ.billId
-              const color = getCategoryColor(occ.category, categories)
+            monthlyBills.map((bill, index) => {
+              const isExpanded = expandedBillId === bill.id
+              const isEditing = editingInlineId === bill.id
+              const color = getCategoryColor(bill.category, categories)
 
               return (
-                <div key={`${occ.billId}-${occ.occurrenceDate}`} className={`bill-card ${occ.payment ? 'paid' : 'unpaid'} ${isEditing ? 'editing' : ''}`}>
+                <div key={bill.id} className={`bill-card ${bill.isPaid ? 'paid' : 'unpaid'} ${isEditing ? 'editing' : ''}`}>
                   {isEditing ? (
                     <div className="bill-card-inline-edit">
                       <input
@@ -595,7 +416,7 @@ function Bills({
                       <div className="inline-edit-actions">
                         <button
                           className="save-inline-btn"
-                          onClick={() => handleSaveInlineEdit(occ.billId)}
+                          onClick={() => handleSaveInlineEdit(bill.id)}
                           title="Save"
                         >
                           ✓ Save
@@ -610,14 +431,14 @@ function Bills({
                       </div>
                     </div>
                   ) : (
-                    <div className="bill-card-header" onClick={() => setExpandedBillId(isExpanded ? null : occ.billId)}>
-                      <div className="bill-name">{occ.billName}</div>
-                      <div className="bill-amount">{formatCurrency(occ.billAmount)}</div>
-                      <div className="bill-date">Due: {occ.occurrenceDate}</div>
-                      <div className="bill-frequency">{occ.frequency}</div>
-                      <div className="bill-category" style={{ color }}>{occ.category}</div>
+                    <div className="bill-card-header" onClick={() => setExpandedBillId(isExpanded ? null : bill.id)}>
+                      <div className="bill-name">{bill.billName}</div>
+                      <div className="bill-amount">{formatCurrency(bill.billAmount)}</div>
+                      <div className="bill-date">Due: {bill.dueDate}</div>
+                      <div className="bill-frequency">{bill.frequency}</div>
+                      <div className="bill-category" style={{ color }}>{bill.category}</div>
                       <div className="bill-status">
-                        {occ.payment ? (
+                        {bill.isPaid ? (
                           <span className="status-badge paid">✓ Paid</span>
                         ) : (
                           <span className="status-badge unpaid">⏳ Unpaid</span>
@@ -626,21 +447,21 @@ function Bills({
                       <div className="bill-actions" onClick={(e) => e.stopPropagation()}>
                         <button
                           className="toggle-paid-btn"
-                          onClick={() => handleTogglePaid(occ)}
-                          title={occ.payment ? 'Mark as Unpaid' : 'Mark as Paid'}
+                          onClick={() => handleTogglePaid(bill)}
+                          title={bill.isPaid ? 'Mark as Unpaid' : 'Mark as Paid'}
                         >
-                          {occ.payment ? '↶ Unpay' : '✓ Pay'}
+                          {bill.isPaid ? '↶ Unpay' : '✓ Pay'}
                         </button>
                         <button
                           className="edit-btn"
-                          onClick={() => handleStartInlineEdit(occ)}
+                          onClick={() => handleStartInlineEdit(bill)}
                           title="Edit Bill"
                         >
                           ✎ Edit
                         </button>
                         <button
                           className="delete-btn"
-                          onClick={() => handleDeleteBill(occ.billId)}
+                          onClick={() => handleDeleteBill(bill.id)}
                           title="Delete Bill"
                         >
                           🗑 Delete
@@ -651,55 +472,14 @@ function Bills({
 
                   {isExpanded && !isEditing && (
                     <div className="bill-card-details">
-                      {occ.billTransaction.memo && (
+                      {bill.memo && (
                         <div className="detail-row">
-                          <strong>Memo:</strong> {occ.billTransaction.memo}
+                          <strong>Memo:</strong> {bill.memo}
                         </div>
                       )}
-                      {occ.payment && (
-                        <div className="detail-row payment-info">
-                          <strong>Payment:</strong>
-                          {occ.payment.manuallyMarked ? (
-                            <span> Manually marked as paid</span>
-                          ) : (
-                            <div>
-                              <div>Auto-matched to transaction</div>
-                              {occ.payment.transactionDate && <div>Date: {occ.payment.transactionDate}</div>}
-                              {occ.payment.transactionAmount && <div>Amount: {formatCurrency(occ.payment.transactionAmount)}</div>}
-                              {occ.payment.transactionDescription && <div>Description: {occ.payment.transactionDescription}</div>}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      {(() => {
-                        const linkedTransactions = transactions.filter(t => !t.isBill && t.matchedToBillId === occ.billId)
-                        if (linkedTransactions.length > 0) {
-                          return (
-                            <div className="detail-row linked-transactions">
-                              <strong>Linked Transactions:</strong>
-                              <div className="linked-transactions-list">
-                                {linkedTransactions.map(trans => (
-                                  <div key={trans.id} className="linked-transaction-item">
-                                    <div className="linked-transaction-info">
-                                      <span className="linked-transaction-date">{trans.date}</span>
-                                      <span className="linked-transaction-description">{trans.description}</span>
-                                      <span className="linked-transaction-amount">{formatCurrency(trans.amount)}</span>
-                                    </div>
-                                    <button
-                                      className="unlink-transaction-btn"
-                                      onClick={() => handleUnlinkTransaction(trans.id)}
-                                      title="Unlink transaction"
-                                    >
-                                      ✕
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )
-                        }
-                        return null
-                      })()}
+                      <div className="detail-row">
+                        <strong>Status:</strong> {bill.isPaid ? 'Paid' : 'Unpaid'}
+                      </div>
                     </div>
                   )}
                 </div>
