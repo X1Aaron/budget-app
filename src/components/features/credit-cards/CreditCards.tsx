@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react'
 import '../../../styles/components/CreditCards.css'
-import type { CreditCard, MonthlyPayment, Reward, CardBenefit, BalanceSnapshot } from '../../../types'
+import type { CreditCard, MonthlyPayment, Reward, CardBenefit, BalanceSnapshot, CreditCardBrand } from '../../../types'
+import CreditCardLogo from '../../ui/CreditCardLogo'
+import { detectCardBrand, COMMON_CARD_ISSUERS, getIssuerBrand } from '../../../utils/creditCardBrands'
 
 interface CreditCardsProps {
   creditCards: CreditCard[]
@@ -31,6 +33,9 @@ function CreditCards({ creditCards, onUpdateCreditCards, selectedYear }: CreditC
   const [paymentModalData, setPaymentModalData] = useState<{cardId: string, year: number, month: number} | null>(null)
 
   const [formData, setFormData] = useState({
+    issuerType: 'predefined' as 'predefined' | 'custom',
+    issuerName: '',
+    customName: '',
     name: '',
     balance: '',
     interestRate: '',
@@ -45,7 +50,8 @@ function CreditCards({ creditCards, onUpdateCreditCards, selectedYear }: CreditC
     annualFee: '',
     annualFeeDate: '',
     color: '#667eea',
-    icon: 'credit-card'
+    icon: 'credit-card',
+    brand: 'other' as CreditCardBrand
   })
 
   const formatCurrency = (amount: number) => {
@@ -203,6 +209,9 @@ function CreditCards({ creditCards, onUpdateCreditCards, selectedYear }: CreditC
 
   const handleOpenAddModal = () => {
     setFormData({
+      issuerType: 'predefined',
+      issuerName: '',
+      customName: '',
       name: '',
       balance: '',
       interestRate: '',
@@ -217,14 +226,21 @@ function CreditCards({ creditCards, onUpdateCreditCards, selectedYear }: CreditC
       annualFee: '',
       annualFeeDate: '',
       color: '#667eea',
-      icon: 'credit-card'
+      icon: 'credit-card',
+      brand: 'other'
     })
     setEditingCard(null)
     setAddModalOpen(true)
   }
 
   const handleOpenEditModal = (card: CreditCard) => {
+    // Check if card name matches a predefined issuer
+    const matchingIssuer = COMMON_CARD_ISSUERS.find(issuer => card.name === issuer.name)
+
     setFormData({
+      issuerType: matchingIssuer ? 'predefined' : 'custom',
+      issuerName: matchingIssuer?.name || '',
+      customName: matchingIssuer ? '' : card.name,
       name: card.name,
       balance: card.balance.toString(),
       interestRate: card.interestRate.toString(),
@@ -239,21 +255,34 @@ function CreditCards({ creditCards, onUpdateCreditCards, selectedYear }: CreditC
       annualFee: card.annualFee?.toString() || '',
       annualFeeDate: card.annualFeeDate || '',
       color: card.color || '#667eea',
-      icon: card.icon || 'credit-card'
+      icon: card.icon || 'credit-card',
+      brand: card.brand || detectCardBrand(card.name)
     })
     setEditingCard(card)
     setAddModalOpen(true)
   }
 
+  const handleIssuerChange = (issuerName: string) => {
+    const brand = getIssuerBrand(issuerName)
+    setFormData({ ...formData, issuerName, brand })
+  }
+
+  const handleCustomNameChange = (customName: string) => {
+    const brand = detectCardBrand(customName)
+    setFormData({ ...formData, customName, brand })
+  }
+
   const handleSaveCard = () => {
-    if (!formData.name || !formData.balance || !formData.interestRate || !formData.minimumPayment || !formData.dueDate) {
+    const cardName = formData.issuerType === 'predefined' ? formData.issuerName : formData.customName
+
+    if (!cardName || !formData.balance || !formData.interestRate || !formData.minimumPayment || !formData.dueDate) {
       alert('Please fill in all required fields')
       return
     }
 
     const cardData: CreditCard = {
       id: editingCard?.id || crypto.randomUUID(),
-      name: formData.name,
+      name: cardName,
       balance: parseFloat(formData.balance),
       interestRate: parseFloat(formData.interestRate),
       minimumPayment: parseFloat(formData.minimumPayment),
@@ -268,6 +297,7 @@ function CreditCards({ creditCards, onUpdateCreditCards, selectedYear }: CreditC
       annualFeeDate: formData.annualFeeDate || undefined,
       color: formData.color,
       icon: formData.icon,
+      brand: formData.brand,
       balanceHistory: editingCard?.balanceHistory || [{ date: new Date().toISOString(), balance: parseFloat(formData.balance) }],
       paymentHistory: editingCard?.paymentHistory,
       rewardsHistory: editingCard?.rewardsHistory,
@@ -460,13 +490,47 @@ function CreditCards({ creditCards, onUpdateCreditCards, selectedYear }: CreditC
             <h3>{editingCard ? 'Edit Credit Card' : 'Add Credit Card'}</h3>
             <div className="credit-card-modal-form">
               <div className="form-group">
-                <label>Card Name *</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g., Chase Sapphire Preferred"
-                />
+                <label>Card Issuer *</label>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <input
+                      type="radio"
+                      value="predefined"
+                      checked={formData.issuerType === 'predefined'}
+                      onChange={(e) => setFormData({ ...formData, issuerType: 'predefined' })}
+                    />
+                    <span>Select from list</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <input
+                      type="radio"
+                      value="custom"
+                      checked={formData.issuerType === 'custom'}
+                      onChange={(e) => setFormData({ ...formData, issuerType: 'custom' })}
+                    />
+                    <span>Enter custom name</span>
+                  </label>
+                </div>
+                {formData.issuerType === 'predefined' ? (
+                  <select
+                    value={formData.issuerName}
+                    onChange={(e) => handleIssuerChange(e.target.value)}
+                  >
+                    <option value="">-- Select Card Issuer --</option>
+                    {COMMON_CARD_ISSUERS.map((issuer) => (
+                      <option key={issuer.name} value={issuer.name}>
+                        {issuer.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    value={formData.customName}
+                    onChange={(e) => handleCustomNameChange(e.target.value)}
+                    placeholder="e.g., My Custom Card"
+                  />
+                )}
               </div>
               <div className="form-row">
                 <div className="form-group">
@@ -614,6 +678,22 @@ function CreditCards({ creditCards, onUpdateCreditCards, selectedYear }: CreditC
               {/* Customization Section */}
               <div className="form-section">
                 <h4>Customization</h4>
+                <div className="form-group">
+                  <label>Card Brand</label>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <select
+                      value={formData.brand}
+                      onChange={(e) => setFormData({ ...formData, brand: e.target.value as CreditCardBrand })}
+                    >
+                      <option value="visa">Visa</option>
+                      <option value="mastercard">Mastercard</option>
+                      <option value="amex">American Express</option>
+                      <option value="discover">Discover</option>
+                      <option value="other">Other</option>
+                    </select>
+                    <CreditCardLogo brand={formData.brand} width={48} height={32} />
+                  </div>
+                </div>
                 <div className="form-row">
                   <div className="form-group">
                     <label>Card Color</label>
@@ -872,8 +952,9 @@ function CreditCards({ creditCards, onUpdateCreditCards, selectedYear }: CreditC
                   return (
                     <tr key={card.id}>
                       <td>
-                        <div className="card-name-cell" style={{ borderLeft: `4px solid ${card.color}` }}>
-                          {card.name}
+                        <div className="card-name-cell" style={{ borderLeft: `4px solid ${card.color}`, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <CreditCardLogo brand={card.brand || detectCardBrand(card.name)} width={40} height={26} />
+                          <span>{card.name}</span>
                         </div>
                       </td>
                       <td>{formatCurrency(card.balance)}</td>
@@ -934,8 +1015,9 @@ function CreditCards({ creditCards, onUpdateCreditCards, selectedYear }: CreditC
                       />
                     </div>
                     <div className="card-info">
-                      <div className="card-name">
-                        {card.name}
+                      <div className="card-name" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <CreditCardLogo brand={card.brand || detectCardBrand(card.name)} width={40} height={26} />
+                        <span>{card.name}</span>
                         {card.autopay && <span className="autopay-badge">Autopay</span>}
                         {isUpcoming && <span className="due-soon-badge">Due Soon</span>}
                       </div>

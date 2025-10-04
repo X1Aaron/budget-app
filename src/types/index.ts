@@ -140,6 +140,8 @@ export interface CustomPayoffPlan {
   active: boolean;
 }
 
+export type CreditCardBrand = 'visa' | 'mastercard' | 'amex' | 'discover' | 'other';
+
 export interface CreditCard {
   id: string;
   name: string; // e.g., "Chase Sapphire", "Capital One Venture"
@@ -175,4 +177,5 @@ export interface CreditCard {
   // Visual customization
   color?: string; // Hex color for card theme
   icon?: string; // Icon identifier for card
+  brand?: CreditCardBrand; // Credit card network brand
 }
